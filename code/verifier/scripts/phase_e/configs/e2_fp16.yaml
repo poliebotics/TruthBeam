@@ -1,0 +1,36 @@
+# E2-fp16: native resolution + fp16, DDP=2 to match E1-bf16 layout
+# Companion to E2-bf16 (succeeded at ep 10). Tests whether fp16 changes
+# convergence behavior at native res (E2-bf16 had faster per-epoch climb than E1-bf16
+# despite higher resolution — interesting; fp16 should match or exceed).
+experiment_id: phase_e_e2_fp16
+out_dir: /path/to/poliebotics_phase_b/experiments/phase_e/e2_fp16
+seed: 11
+
+data:
+  d2_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/d2
+  v10_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/v10
+  d2_train_start: 0
+  d2_train_end: 4194
+  d2_val_start: 5394
+  d2_val_end: 5992
+  capture_h: 2300
+  capture_w: 2660
+  emission_h: 1080
+  emission_w: 1920
+
+model:
+  arch: EmissionPredictor
+  pretrained: true
+
+train:
+  batch_size: 2
+  val_batch_size: 2
+  num_workers: 4
+  lr: 1.0e-4
+  weight_decay: 0.05
+  warmup_steps: 200
+  grad_clip: 1.0
+  max_epochs: 30
+
+stop:
+  hard_cap_epochs: 30

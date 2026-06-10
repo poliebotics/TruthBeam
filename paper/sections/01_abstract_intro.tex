@@ -1,0 +1,51 @@
+\section{Introduction}\label{sec:intro}
+
+\subsection{Motivation: tamper-evident recording}
+
+The provenance of a video recording is increasingly difficult to establish. As generative models lower the cost of synthesizing or editing imagery, a recording's pixels alone no longer testify to the physical event they purport to depict. Conventional post-hoc forensics ask whether an image \emph{looks} synthetic; this is an adversarial arms race in which the detector is perpetually one model generation behind the forger. The PolieBotics Truth Beam takes a different stance: rather than searching captured frames for the fingerprints of manipulation, it actively structures the act of recording so that authenticity is a \emph{physical} property of the capture, cryptographically bound to the scene at the moment of exposure. This document is the technical companion to patent WO~2025/046153~A2, ``Methods and Apparatus for Projector Camera Systems''~\cite{patent2025}, and reports the measured behavior of a working two-session implementation.
+
+The threat model is concrete. An adversary wishes to have a recording accepted as authentic. They may pursue one of two avenues: \emph{(a)} forge a capture $C$ under a known real target emission $E_{\text{target}}$, or \emph{(b)} tamper with a real recording after the fact. A genuine recording exhibits a learnable physical coupling between the captured frame $C_t$ and the emission $E_t$ that illuminated the scene; a verifier should accept only captures that exhibit this chain-coupling and that are consistent with the statistics of a real raw capture.
+
+\subsection{The emit / detect / transform loop}
+
+The system is a projector--camera feedback loop operated as a deterministic, hash-chained protocol. At chain step $t$:
+
+\begin{enumerate}
+  \item \textbf{Emit.} A 32-byte chain state $S_t$ is expanded by a domain-separated, per-channel BLAKE3-XOF~\cite{blake3} into raw \SI{8}{bit} bytes (\num{43110} bytes per channel), which are decomposed into four fBm octaves and rendered by a bit-exact integer pipeline into a $1080 \times 1920$ RGB emission tile $E_t$. This tile is projected onto the scene.
+  \item \textbf{Detect.} A Sony IMX540 sensor (12-bit ADC, configured to deliver \SI{8}{bit} BayerRG8) captures the illuminated scene as a raw frame $C_t$ of exactly \num{24472000} bytes (shape $4600 \times 5320$, RGGB CFA, no header).
+  \item \textbf{Transform.} The raw capture bytes are hashed (\texttt{bayer\_hash} = BLAKE3$(C_t)$) and folded, together with a 28-byte capture-meta struct and the drand quicknet beacon~\cite{drandbeacon} (round number plus 32-byte randomness), into the next chain state $S_{t+1}$, closing the loop.
+\end{enumerate}
+
+Because $C_t$ enters $S_{t+1}$, substituting a forged capture for the real one yields a different \texttt{bayer\_hash}, hence a different $S_{t+1}$, hence a different emission $E_{t+1}$ --- a divergence detectable by any verifier holding a sample of the chain. The protocol is \SI{8}{bit} end-to-end (XOF bytes, emission PNGs, and BayerRG8 capture all unsigned 8-bit), and the chain commits at \SI{2.5}{\hertz}: each chain step corresponds to exactly one physical exposure. (The aravis \texttt{capture\_frame\_id} advancing in strides of four is a GenICam hardware-tick artifact and not a frame-production rate.)
+
+Two same-rig sessions of a single human performer anchor every measurement in this report. Session D2 (\num{5992} chain rows) was recorded under the v9 chain (domain tag \texttt{TB:ROW:v9}); session V10 (\num{3743} chain rows) under the v10 chain (\texttt{TB:ROW:v10}), which additionally folds a 32-byte \texttt{ai\_payload\_root} committing AI-agent response frames. The two protocol versions let us probe same-rig cross-protocol behavior in addition to cross-session behavior.
+
+\subsection{Verification by diffusion residual}
+
+The closed loop makes tampering \emph{detectable in principle}; the verifier makes it detectable \emph{in practice} from a single captured frame, without re-deriving the chain. We train a custom \num{39.77}~million-parameter $\epsilon$-prediction U-Net (explicitly not a DiT or Stable Diffusion model) on real same-rig $(C_t, E_t)$ pairs. The emission $E_t$ is \emph{not} concatenated to the camera input; instead it passes through a strided hint encoder and is added into the U-Net down-path features at each scale via zero-initialized ControlNet-style adapters~\cite{zhang2023controlnet}, following a cosine noise schedule~\cite{nicholdhariwal2021} over a standard DDPM forward process~\cite{ho2020ddpm}. Crucially, the verifier never denoises: it reports the noise-prediction residual $\lVert \hat{\epsilon}-\epsilon\rVert^2$, averaged over five fixed evaluation timesteps and four noise samples per pair, as an anomaly score. A correct $(C_t, E_t)$ pair yields a low residual; a substrate-altered or mispaired emission yields a high one.
+
+On held-out blocks of both D2 and V10, this score separates correct-$E$ from wrong/offset-$E$ at AUROC = 1.000, with a mean residual gap $\Delta_{\text{wrong}} \approx +4 \times 10^{-3}$. An architecture- and data-matched \emph{shuffled} control --- identical model and data, differing only in the real-vs-shuffled pairing --- sits at chance (AUROC $\approx$ 0.5006, $\Delta_{\text{wrong}} \approx 10^{-7}$), ruling out both generic emission statistics and an architecture artifact as the source of separation.
+
+\subsection{Scope and honest limitations}
+
+We state our scope guards plainly, because they bound every quantitative claim that follows. \emph{First}, all generalization demonstrated here is \textbf{same-rig cross-session} (and same-rig cross-protocol, across the v9 and v10 chains). A verifier trained on D2 alone reaches AUROC = 1.000 on held-out V10 and vice versa, but this does \textbf{not} establish cross-rig, cross-camera, cross-projector, or cross-subject generalization, none of which we test. \emph{Second}, the learned attacker evaluated here is F-A v1, a \num{42.3}~million-parameter ControlNet-style editor; it is caught by the verifier at AUROC = 1.000 across all four evaluated checkpoints. The stronger adaptive attacker F-A v2 is \textbf{design-only and not trained} --- we make no robustness claim against a strong or adaptive forger. \emph{Third}, the verifier's sensitivity to emission perturbations is graded and octave-dependent: gross substitutions are perfectly separable, but fine XOF bit-flips (small-$k$ Type~1 and localized Type~3) fall near chance, consistent with such flips lying below the optical-relevance threshold of the rendered emission. We report these as measured, not as detection guarantees.
+
+\subsection{Contributions}
+
+This report makes the following contributions, each established by measurement on the two same-rig sessions described above:
+
+\begin{itemize}
+  \item \textbf{A closed, hash-chained emit/detect/transform recording protocol.} We specify the deterministic BLAKE3-XOF $\to$ fBm $\to$ projection $\to$ BayerRG8-capture $\to$ hash-feedback loop, including its bit-exact integer emission renderer, its \SI{8}{bit} end-to-end data path, and the v9/v10 chain transitions that fold capture bytes, capture meta, the drand beacon, and (in v10) an AI-agent payload commitment into the next chain state.
+
+  \item \textbf{A non-denoising diffusion-residual verifier.} We describe a \num{39.77}\,M-parameter $\epsilon$-prediction U-Net with ControlNet-style emission conditioning that scores a single $(C_t, E_t)$ pair by its diffusion residual $\lVert \hat{\epsilon}-\epsilon\rVert^2$ and achieves AUROC = 1.000 separating correct from substrate-altered emissions on held-out blocks of both sessions.
+
+  \item \textbf{Controls that isolate the chain-coupling signal.} An architecture- and data-matched shuffled control at chance (AUROC $\approx$ 0.5006, $\Delta_{\text{wrong}} \approx 10^{-7}$) and a synthetic-positive control together rule out generic emission statistics and architecture artifacts, attributing the separation to genuine $C$--$E$ coupling.
+
+  \item \textbf{Same-rig cross-session and cross-protocol generalization.} We show held-out-session AUROC = 1.000 in both directions (D2$\to$V10 and V10$\to$D2) across the v9 and v10 chain protocols, while documenting that harder fake-pair discrimination degrades out-of-distribution, indicating part of the coupling signal is session-specific.
+
+  \item \textbf{A concrete-attacker red-team.} We train a learned ControlNet forger (F-A v1), show it learns some target-emission coupling yet is caught at AUROC = 1.000 across all four evaluated checkpoints, and localize the discriminative signal --- via proper Mask R-CNN~\cite{he2017maskrcnn} segmentation --- to off-body scene regions, framed carefully as likelihood-overspread distribution distance~\cite{nalisnick2019}.
+
+  \item \textbf{A characterized perturbation-sensitivity profile and a supervised baseline.} We map the verifier's graded, octave-dependent response to XOF perturbations and contrast it with a supervised CNN baseline (Phase H) that is emission-aware for coarse contrasts but blind to fine XOF bit-flips, stating the data-augmentation limitation responsible.
+
+  \item \textbf{An honest scope and limitations statement.} We delimit all results to same-rig same-operator data, to the F-A v1 attacker, and to calibrated displays, and identify cross-rig generalization and strong-adaptive-attacker robustness as the principal open problems.
+\end{itemize}

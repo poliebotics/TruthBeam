@@ -1,0 +1,36 @@
+# E1-fp16-sg: exact exp001c replication
+# Single-GPU bs=4 fp16+GradScaler, NO DDP. Runs on the idle GPU 7 to test the
+# bf16 vs fp16 hypothesis without DDP as a confound. If this reaches 26 dB,
+# the E1-bf16 (DDP=2 bs=2) trajectory's slow climb is due to bf16 numerics.
+experiment_id: phase_e_e1_fp16_sg
+out_dir: /path/to/poliebotics_phase_b/experiments/phase_e/e1_fp16_sg
+seed: 7
+
+data:
+  d2_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/d2
+  v10_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/v10
+  d2_train_start: 0
+  d2_train_end: 4194
+  d2_val_start: 5394
+  d2_val_end: 5992
+  capture_h: 1150
+  capture_w: 1330
+  emission_h: 1080
+  emission_w: 1920
+
+model:
+  arch: EmissionPredictor
+  pretrained: true
+
+train:
+  batch_size: 4              # single-GPU bs=4 (= effective batch 4, matches exp001c exactly)
+  val_batch_size: 4
+  num_workers: 4
+  lr: 1.0e-4
+  weight_decay: 0.05
+  warmup_steps: 200
+  grad_clip: 1.0
+  max_epochs: 30
+
+stop:
+  hard_cap_epochs: 30

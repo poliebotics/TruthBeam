@@ -1,0 +1,28 @@
+binder_id: B2
+family: B
+capture_h: 1150
+capture_w: 1330
+seed: 4242
+model_kwargs:
+  emission_h: 1080
+  emission_w: 1920
+  in_channels: 4
+session_dirs:
+  D2: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/d2
+  V10: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/v10
+max_steps: 25000
+bs: 4
+num_workers: 2
+lr: 0.0001
+bf16: true
+augment: true
+loss_l1_w: 0.85
+loss_ssim_w: 0.15
+log_every: 50
+ckpt_steps:
+- 5000
+- 10000
+- 15000
+- 20000
+- 25000
+out_dir: /path/to/poliebotics_phase_b/experiments/fa_v2/fresh_binders/B2

@@ -1,0 +1,75 @@
+\documentclass[11pt]{article}
+
+% ---- geometry / fonts ----
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---- math ----
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+
+% ---- tables / figures ----
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+% ---- units / numbers ----
+\usepackage{siunitx}
+\sisetup{group-separator={,},group-minimum-digits=4,detect-weight=true,detect-family=true}
+\DeclareSIUnit{\byte}{B}
+\DeclareSIUnit{\bit}{bit}
+
+% ---- color / misc ----
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{url}
+
+% ---- refs (hyperref before cleveref) ----
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+% graceful fallback if a section emits an unknown \cite key during drafting
+\providecommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\title{\textbf{The PolieBotics Truth Beam:\\[2pt] A Tamper-Evident Optical Recording Substrate and Its Learned Verifier}}
+\author{Cathal Ryan Hynes\\[2pt]
+  \normalsize PolieBotics\\[1pt]
+  \normalsize \texttt{xathal@protonmail.com}}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent\small
+We present the technical companion to PolieBotics patent WO~2025/046153~A2 (PCT/EP2024/080780), describing a tamper-evident video-recording system built on a closed emit/detect/transform loop. At each chain step $t$, a 32-byte chain state $S_t$ is BLAKE3-XOF-expanded into a deterministic fractional Brownian motion (fBm) emission tile $E_t$, projected onto the scene, and captured as an \SI{8}{bit} BayerRG8 raw frame $C_t$; the raw capture bytes are hashed and folded back into $S_{t+1}$, so any substituted capture deterministically alters all subsequent emissions. The protocol is \SI{8}{bit} end-to-end and commits at \SI{2.5}{\hertz}, one physical exposure per chain step. We train a custom \num{39.77}~million-parameter $\epsilon$-prediction U-Net verifier with ControlNet-style emission conditioning that scores each $(C_t, E_t)$ pair by its diffusion residual $\lVert \hat{\epsilon}-\epsilon\rVert^2$ without ever denoising. On held-out blocks of two same-rig sessions (D2, V10) the verifier separates correct from substrate-altered emissions at AUROC~$=1.000$, while an architecture- and data-matched shuffled control sits at chance (AUROC~$\approx 0.5006$). A learned ControlNet forger (F-A v1) is detected at AUROC~$=1.000$ across all four evaluated checkpoints. All generalization is strictly same-rig cross-session; cross-rig and strong-adaptive-attacker robustness remain future work.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% ---- sections (written by the assembly workflow) ----
+\input{sections/01_abstract_intro.tex}
+\input{sections/02_system_threat.tex}
+\input{sections/03_protocol_chain.tex}
+\input{sections/04_hardware.tex}
+\input{sections/05_verifier_method.tex}
+\input{sections/06_results_main.tex}
+\input{sections/07_results_redteam.tex}
+\input{sections/08_discussion.tex}
+\input{sections/09_related.tex}
+\input{sections/10_availability.tex}
+\input{sections/11_conclusion.tex}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

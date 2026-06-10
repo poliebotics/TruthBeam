@@ -1,0 +1,45 @@
+# TruthBeam
+
+> A tamper-evident optical recording system: a projector–camera loop in which each frame's
+> 32-byte chain state is BLAKE3-XOF-expanded into a projected pattern, the raw 8-bit capture
+> is hashed back into the next state, and the chain is anchored to drand (public time) and
+> Rootstock (public ledger). A 39.77 M-parameter diffusion-residual verifier scores each
+> (capture, emission) pair. Patent pending; all rights reserved — no licence is granted.
+
+Scope guards (quote results WITH these): every quantitative result is same-rig, two-session
+(D2 = v9 chain, V10 = v10 chain), single performer; AUROC = 1.000 figures are finite-sample
+held-out estimates (n=198 / n=200); the only trained attacker is F-A v1; F-A v2 is design-only,
+so no adaptive-attacker robustness is claimed.
+
+## Entry points
+
+- [README.md](README.md): structured, LLM-oriented entry point — read top to bottom first
+- [ARTIFACTS.md](ARTIFACTS.md): claim → artifact map (what is in-repo vs. external, and what each backs)
+- [LICENSE](LICENSE): all rights reserved; no open-source licence, no patent licence
+- [CITATION.cff](CITATION.cff): citation metadata
+
+## Paper
+
+- [paper/main.pdf](paper/main.pdf): the whitepaper (45 pp)
+- [paper/main.tex](paper/main.tex) + [paper/sections/](paper/sections/) + [paper/refs.bib](paper/refs.bib): full LaTeX source — parse the text from here, no OCR needed
+
+## Verify (no GPU)
+
+- [code/recording/verify/verify_generator_hash.py](code/recording/verify/verify_generator_hash.py): code → hash (generator source digest committed in S_0)
+- [code/recording/verify/verify_v9.py](code/recording/verify/verify_v9.py): D2 chain walk (`--session-dir <dir>`; `--logs-only` verifies the chain math from ~4 MB of metadata)
+- [code/recording/verify/verify_v10.py](code/recording/verify/verify_v10.py): V10 chain walk (v10 transition incl. ai_payload_root)
+- [code/recording/verify/README_BUNDLE.md](code/recording/verify/README_BUNDLE.md) / [README_BUNDLE_v10.md](code/recording/verify/README_BUNDLE_v10.md): session-bundle reader's guides
+- [code/recording/verify/CLAIMS.md](code/recording/verify/CLAIMS.md) / [CLAIMS_v10.md](code/recording/verify/CLAIMS_v10.md): tiered claims manifests (DEMONSTRATED / ASSERTED / FUTURE)
+
+## Results (primary artifacts)
+
+- [results/eval/](results/eval/): held-out eval summaries — headline AUROCs, shuffled control, F-A v1 checkpoints, cross-session report
+- [results/csv/visual_metrics_wide.csv](results/csv/visual_metrics_wide.csv): frame-level metric table, 9,735 rows × 33 cols
+- [results/eval/exp6_correct_e_rank/](results/eval/exp6_correct_e_rank/): EXP-6 per-frame ranking raw data (n=120 × 51 candidates)
+- [results/redteam_segmentation_evals/](results/redteam_segmentation_evals/): segmentation ablation, XOF bit-flip tables, excess-red, low-frequency recovery
+
+## Provenance & audit trail
+
+- [docs/verification_ground_truth.json](docs/verification_ground_truth.json) + [docs/whitepaper_claim_check.json](docs/whitepaper_claim_check.json): point-in-time claim audits (2026-06-01)
+- [docs/RELEASE_NOTE_ON_AUDIT_ARTIFACTS.md](docs/RELEASE_NOTE_ON_AUDIT_ARTIFACTS.md) + [docs/AUDIT_FIXES_2026-06-10.md](docs/AUDIT_FIXES_2026-06-10.md): how those audits were resolved
+- [docs/DATA_MODEL_PUBLISHING_PLAN.md](docs/DATA_MODEL_PUBLISHING_PLAN.md): data/model release tiers

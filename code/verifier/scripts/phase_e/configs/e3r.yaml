@@ -1,0 +1,37 @@
+# E3r: FPN ablation at exp001c resolution
+# - Phase D's EmissionPredictorV2 (CoordAware FPN) instead of exp001c's direct U-Net
+# - Same input resolution (1150×1330) as E1 — isolates FPN effect from resolution
+# - Stem still uses full G dup (legacy) per V1 finding + operator decision
+experiment_id: phase_e_e3r
+out_dir: /path/to/poliebotics_phase_b/experiments/phase_e/e3r
+seed: 13
+
+data:
+  d2_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/d2
+  v10_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/v10
+  d2_train_start: 0
+  d2_train_end: 4194
+  d2_val_start: 5394
+  d2_val_end: 5992
+  capture_h: 1150
+  capture_w: 1330
+  emission_h: 1080
+  emission_w: 1920
+
+model:
+  arch: EmissionPredictorV2    # Phase D's FPN-routed architecture
+  pretrained: true
+  fpn_out_channels: 256
+
+train:
+  batch_size: 2                # per-GPU; effective 4 with DDP=2
+  val_batch_size: 4
+  num_workers: 4
+  lr: 1.0e-4
+  weight_decay: 0.05
+  warmup_steps: 200
+  grad_clip: 1.0
+  max_epochs: 30
+
+stop:
+  hard_cap_epochs: 30

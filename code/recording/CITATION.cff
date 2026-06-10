@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you reference this code, please cite the accompanying paper. No licence is granted by this publication."
+title: "Truth Beam: Hardware-Bound Tamper-Evident Optical Recording"
+authors:
+  - family-names: "Hynes"
+    given-names: "Cathal Ryan"
+    email: "xathal@protonmail.com"
+repository-code: "https://github.com/poliebotics/TruthBeam"
+version: "0.1.0"
+date-released: "2026-04-21"
+keywords:
+  - "tamper-evident"
+  - "optical verification"
+  - "projector-camera system"
+  - "cryptographic chain"
+  - "blockchain anchoring"

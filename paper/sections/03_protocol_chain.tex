@@ -1,0 +1,141 @@
+\section{The Truth Beam Protocol \& Cryptographic Chain}
+\label{sec:protocol_chain}
+
+The Truth Beam protocol is a tamper-evident video-recording chain. It records a scene not as a passive sequence of frames but as a coupled sequence of \emph{emit--capture--commit} steps, in which each captured frame is cryptographically bound to a deterministic, unpredictable illumination pattern derived from the recording's own history. The construction follows the projector--camera apparatus of the companion patent~\cite{patent2025}, and uses BLAKE3 in its extendable-output (XOF) mode~\cite{blake3} as the deterministic byte source that links the cryptographic and optical layers. This section gives the full method: how a chain state is expanded into a per-channel emission tile, how that tile is rendered and projected, and how the resulting raw capture is folded back into the chain to close a feedback loop that makes any substituted capture detectable. We then describe the two protocol versions exercised in this work (v9 and v10), the binding of an external randomness beacon, the strictly 8-bit data path, and the frame-to-chain offset convention.
+
+\subsection{Overview and notation}
+\label{subsec:pc_overview}
+
+We write the chain state at step $t$ as a \SI{32}{byte} value $S_t$, the deterministic emission tile derived at step $t$ as $E_t$, and the raw camera capture at step $t$ as $C_t$. At each step the apparatus (i) derives the emission $E_t$ from the chain state, (ii) projects $E_t$ onto the scene and captures the raw frame $C_t$, and (iii) advances the chain to $S_{t+1}$ by hashing $C_t$ (together with capture metadata and an external beacon) into the next state. Because $C_t$ enters $S_{t+1}$, and $S_{t+1}$ in turn governs the next emission $E_{t+1}$, any attempt to substitute a forged capture for $C_t$ produces a different state and hence a different downstream emission, which a verifier holding a reference sample of the chain can detect. The remainder of the section makes each of these steps precise.
+
+\Cref{fig:overview} shows the per-frame structure that the protocol produces: for each step the raw capture $C$, the projected chain-coupled pattern $E$, and a verification residual answering whether $C$ is consistent with the $E$ that was recorded for that step. The verifier that produces those residuals is described in \Cref{sec:verifier_method}; here we are concerned only with the protocol that generates the $(C_t, E_t, S_t)$ triples.
+
+\subsection{Per-channel BLAKE3-XOF seed derivation}
+\label{subsec:pc_seed}
+
+The chain state is the entropy source for the emission, but it is not used directly. Instead the protocol derives three independent per-channel seeds by domain-separated hashing of a chain state $S_{\mathrm{next}}$ (the per-row alignment of this state to a capture is fixed in \Cref{subsec:pc_offset}):
+\begin{equation}
+\mathrm{seed}_{c} \;=\; \mathrm{BLAKE3}\!\left(\texttt{TB:SEED:}c\texttt{:v8} \,\|\, S_{\mathrm{next}}\right),
+\qquad c \in \{R, G, B\},
+\label{eq:pc_seed}
+\end{equation}
+where each $\mathrm{seed}_c$ is \SI{32}{byte} and the domain tags are the literal byte strings \texttt{b"TB:SEED:R:v8"}, \texttt{b"TB:SEED:G:v8"}, and \texttt{b"TB:SEED:B:v8"}. The domain tags carry the version suffix \texttt{v8} even in sessions recorded under the later v9 and v10 chains: the seed and XOF derivation are unchanged across protocol versions, and only the per-row chain-advance transition (\Cref{subsec:pc_chain}) differs between versions. The seed-tag version should therefore not be conflated with the session's chain version.
+
+\subsection{Per-channel 43{,}110-byte expansion into fBm octaves}
+\label{subsec:pc_octaves}
+
+Each \SI{32}{byte} seed is expanded by BLAKE3-XOF into exactly \num{43110} bytes per channel. These bytes are partitioned into four fractional-Brownian-motion (fBm) octaves, each a small coarse grid whose byte count equals its pixel count:
+\begin{equation}
+\underbrace{17\times 30}_{510}
+\;+\;\underbrace{34\times 60}_{2040}
+\;+\;\underbrace{68\times 120}_{8160}
+\;+\;\underbrace{135\times 240}_{32400}
+\;=\;\num{43110}\ \text{bytes/channel}.
+\label{eq:pc_octaves}
+\end{equation}
+The implementation derives this total as \texttt{TOTAL\_XOF\_BYTES\_PER\_CHANNEL} $= \sum_{\text{octaves}} h\cdot w$ (\texttt{tile\_params.py}), which evaluates to \num{43110}. The four octaves form a coarse-to-fine pyramid, octave~0 being the lowest-frequency $17\times30$ grid and octave~3 the highest-frequency $135\times240$ grid. The raw XOF output is stored verbatim as unsigned bytes in $[0,255]$; the centering required by the renderer is applied internally rather than persisted, so caches and logs hold the \texttt{raw\_unsigned\_byte} representation and the spec-centered grids are never written to disk.
+
+\subsection{Bit-exact emission-tile rendering}
+\label{subsec:pc_render}
+
+The four octave grids are composited into a single full-resolution emission tile of size $\text{TILE\_H}\times\text{TILE\_W} = 1080\times1920$ per channel. The renderer is fully integer and bit-exact, so that the tile a verifier reconstructs from a chain state is byte-identical to the one that was projected. For each octave, the stored bytes are reshaped to $(3, g_h, g_w)$ and centered to signed 16-bit values via $\texttt{byte} - 128$, then upsampled to $(3, 1080, 1920)$ by integer bilinear interpolation with 16-bit fixed-point fractional weights (scale $S = 65536$). The upsampled octaves are accumulated with progressively reduced weight: octave~0 initializes the accumulator at full scale, and each subsequent octave $i$ is added after an arithmetic right shift, $\text{frame} \mathrel{+}= (\text{upsampled} \gg i)$. The final tile is recovered by
+\begin{equation}
+E \;=\; \mathrm{clamp}\!\left(\left(\text{frame} \gg 16\right) + 128,\; 0,\; 255\right)\ \text{as uint8},
+\label{eq:pc_render}
+\end{equation}
+producing an 8-bit RGB image. The shift-by-$i$ accumulation gives the coarse octaves dominant amplitude and the fine octaves diminishing contribution, which is the fBm spectral profile. The rendered tiles are stored at \texttt{\{session\}/derived/Emissions/tile\_\{t:06d\}.png} as $1080\times1920$ RGB 8-bit PNGs; both sessions are complete, with \num{5992} tiles for D2 and \num{3743} for V10. The renderer used for the verification probes is a documented bit-exact reimplementation of the canonical CUDA/CPU tile generator.
+
+\subsection{Chain-state evolution and tamper-evidence}
+\label{subsec:pc_chain}
+
+After $E_t$ is projected and the raw frame $C_t$ is captured, the chain advances by hashing the captured bytes, the capture metadata, and an external beacon into the next state. The capture is bound through its raw hash $\mathit{bayer\_hash}_t = \mathrm{BLAKE3}(C_t)$, a \SI{32}{byte} digest taken over the raw BayerRG8 bytes (the chain log records this as \texttt{bayer\_blake3\_hex}). The capture metadata is a \SI{28}{byte} big-endian struct (format \texttt{>IQQI4s}) comprising the step index $t$ (uint32), the device timestamp and wall-clock time (two uint64 values), the exposure in microseconds (uint32), and a four-byte FourCC pixel-format tag (e.g.\ \texttt{b'RG08'} for BayerRG8).
+
+Under the v9 chain (session D2) the transition is
+\begin{equation}
+\begin{aligned}
+S_{t+1} \;=\; \mathrm{BLAKE3}\big(\,&\texttt{TB:ROW:v9}\,\|\,S_t\\
+&\|\,\ell(\mathit{bayer\_hash})\,\|\,\mathit{bayer\_hash}\\
+&\|\,\ell(\mathit{meta})\,\|\,\mathit{meta}\\
+&\|\,\ell(\mathit{round})\,\|\,\mathit{round}\\
+&\|\,\ell(\mathit{rand})\,\|\,\mathit{rand}\,\big),
+\end{aligned}
+\label{eq:pc_v9}
+\end{equation}
+where $\ell(\cdot)$ denotes a four-byte big-endian length prefix, $\mathit{meta}$ is the \SI{28}{byte} capture struct, and $(\mathit{round}, \mathit{rand})$ are the drand beacon fields of \Cref{subsec:pc_drand}. Note that under v9 the prior state $S_t$ is concatenated without a length prefix; this differs from v10 below. Because $\mathit{bayer\_hash}_t = \mathrm{BLAKE3}(C_t)$ is folded into $S_{t+1}$, substituting any forged capture $C_t' \neq C_t$ yields a different $\mathit{bayer\_hash}$, hence a different $S_{t+1}$, hence a different seed and a different downstream emission $E_{t+1}$. The feedback loop is therefore closed: tampering with any link propagates an inconsistency into the emission of every subsequent step, detectable by a verifier that holds a reference sample of the chain. We emphasize that the chain transition does not itself re-verify the beacon signature; the recording writer must locally verify drand before passing it in, and the verifier treats missing-beacon sentinels as an availability note rather than a PASS/FAIL gate.
+
+\subsection{Protocol versions: v9 and v10}
+\label{subsec:pc_versions}
+
+The two sessions in this work were recorded under different chain versions, and the verifier of \Cref{sec:verifier_method} operates across both, giving a same-rig cross-protocol generalization result (the scope of that claim is discussed in \Cref{sec:results_main_generalization}). Relative to its predecessor, v9 is an attribution-oriented revision whose substantive change is the folding of the drand beacon into the per-row transition; the domain tag bump to \texttt{TB:ROW:v9} reflects that extension.
+
+The v10 chain (session V10) extends v9 with an additional \SI{32}{byte} field, the \emph{ai\_payload\_root}, which commits to AI-agent response frames recorded alongside the capture, and it length-prefixes the prior state $S_t$ in the hash input:
+\begin{equation}
+\begin{aligned}
+S_{t+1} \;=\; \mathrm{BLAKE3}\big(\,&\texttt{TB:ROW:v10}\,\|\,\ell(S_t)\,\|\,S_t\\
+&\|\,\ell(\mathit{bayer\_hash})\,\|\,\mathit{bayer\_hash}\\
+&\|\,\ell(\mathit{meta})\,\|\,\mathit{meta}\\
+&\|\,\ell(\mathit{round})\,\|\,\mathit{round}\\
+&\|\,\ell(\mathit{rand})\,\|\,\mathit{rand}\\
+&\|\,\ell(\mathit{ai\_root})\,\|\,\mathit{ai\_root}\,\big).
+\end{aligned}
+\label{eq:pc_v10}
+\end{equation}
+The distinct domain tag is not cosmetic: it means a v9 chain log cannot be re-walked under v10 (or vice versa), so the two protocols are structurally non-interchangeable.
+
+The ai\_payload\_root is itself a domain-separated commitment. For an empty payload list it takes the sentinel value \texttt{AI\_PAYLOAD\_EMPTY\_ROOT} (32 zero bytes); otherwise it is
+\begin{equation}
+\mathit{ai\_root} \;=\; \mathrm{BLAKE3}\!\left(\texttt{TB:AI\_PAYLOAD\_ROOT:v10}\,\|\,\ell(32)\,\|\,\mathit{count}\,\|\,{\textstyle\bigl\|}_{k}\,\bigl(\ell(32)\,\|\,p_k\bigr)\right),
+\label{eq:pc_airoot}
+\end{equation}
+where $\mathit{count}$ is a four-byte big-endian count and each $p_k$ is a \SI{32}{byte} BLAKE3 digest of one agent's response text. Payload order is significant. In the V10 session, \num{17} of the \num{3743} rows carry payloads --- six rows with a single payload and eleven with three --- while the remaining \num{3726} rows fold in the empty-root sentinel.
+
+\subsection{drand beacon binding}
+\label{subsec:pc_drand}
+
+To bind each step to an external, publicly-verifiable source of unpredictability, the transition folds in the drand quicknet randomness beacon~\cite{drandbeacon}. Two fields are committed: the round number $\mathit{round}$, an 8-byte big-endian \texttt{u64}, and the round value $\mathit{rand}$, the \SI{32}{byte} round randomness (the SHA-256 of the round's BLS signature). The chain log additionally records the observed beacon staleness in milliseconds. As noted above, the writer is responsible for verifying the beacon signature locally before binding it; the transition incorporates the supplied bytes verbatim. When the beacon is unavailable, sentinel values (round number $0$, value all zeros) are folded in and the verifier records a \texttt{PARTIAL}/\texttt{MISSING} availability note without gating the verdict.
+
+\subsection{8-bit end-to-end data path}
+\label{subsec:pc_8bit}
+
+The protocol is 8-bit from end to end. BLAKE3-XOF emits raw \texttt{uint8} bytes; the renderer composites and writes 8-bit RGB PNGs; and the camera --- a Sony IMX540 with a native 12-bit ADC --- is configured to deliver 8-bit BayerRG8, so the captured frames have a sensor maximum of $255$. No stage of the emit--capture--commit loop runs above \SI{8}{bit}. (Any earlier ``12-bit packed Bayer'' description was a misnomer arising from the sensor's native ADC depth, not the configured output.) The hardware data path is detailed further in \Cref{sec:hardware}; here the relevant point is that the cryptographic, rendering, and optical layers all operate on the same 8-bit alphabet.
+
+\subsection{Frame-to-chain offset convention}
+\label{subsec:pc_offset}
+
+The recording loop fixes the alignment between a capture and the emission committed alongside it, and the implementation is unambiguous. The v9 blocking-mode chain writer --- the only supported capture path, used to record both D2 and V10 --- enforces the invariant that chain-log row $t$ commits the emission that was \emph{live on the projector during} capture $C_t$, namely $E_t = \mathrm{gen}(\mathrm{XOF}(S_t))$. The emission for capture row $t$ is therefore seeded from that same row's chain state $S_t$: $\textit{target\_chain\_row} = \textit{capture\_row} = t$ (offset $0$), and Equations~\eqref{eq:pc_seed}--\eqref{eq:pc_render} are to be read with $S_{\mathrm{next}} = S_t$ for the emission committed at row $t$. Accordingly, in each released chain-log row the \texttt{S\_t\_hex} field, the raw-capture hash \texttt{bayer\_blake3\_hex}, and the \texttt{emission\_live\_*} fields all refer to the same step $t$. We note for completeness that certain auxiliary chain-byte probes and training pipelines elsewhere in this work adopt a shifted alignment ($\textit{target\_chain\_row} = \textit{capture\_row} + 1$, i.e.\ seeding from $S_{t+1}$); that is a verification-side diagnostic choice and \emph{not} the recording convention. The empirically optimal frame-to-chain offset for the optical verifier has not been separately measured on the held-out blocks and remains an open diagnostic, but the recording itself is unambiguous and commits $E_t = \mathrm{gen}(\mathrm{XOF}(S_t))$ per the loop invariant above.
+
+\subsection{Chain-log schema}
+\label{subsec:pc_schema}
+
+Each session is accompanied by a single \texttt{chain\_log.csv} recording one row per chain step, preceded by a comment line carrying the session ISO-UTC timestamp and a header row. The D2 (v9) log has 13 columns; the V10 (v10) log has the same 13 columns plus two ai-payload columns, for 15 total. \Cref{tab:pc_chainlog} lists the schema. The D2 log contains \num{5992} records and the V10 log \num{3743}, matching the per-session frame and emission-tile counts.
+
+\begin{table}[t]
+\centering
+\caption{Chain-log schema. The first 13 columns are common to v9 (D2) and v10 (V10); the final two columns (marked v10) are present only in the v10 log. One comment line (\texttt{\# session\_iso\_utc=...}) and one header row precede the records.}
+\label{tab:pc_chainlog}
+\small
+\begin{tabular}{@{}llp{0.46\linewidth}@{}}
+\toprule
+Column & Type / size & Description \\
+\midrule
+\texttt{t} & int & Chain row index; also the capture-file index \\
+\texttt{S\_t\_hex} & 32 B (hex) & Chain state $S_t$ \\
+\texttt{bayer\_blake3\_hex} & 32 B (hex) & $\mathrm{BLAKE3}(C_t)$ over raw Bayer bytes \\
+\texttt{capture\_frame\_id} & int & Aravis/GenICam frame id (metadata only) \\
+\texttt{aravis\_device\_timestamp\_ns} & uint64 & Device timestamp (ns) \\
+\texttt{capture\_wall\_ns} & uint64 & Host wall-clock at capture (ns) \\
+\texttt{emission\_live\_pixel\_blake3\_hex} & 32 B (hex) & Hash of live-queued emission pixels \\
+\texttt{emission\_live\_queued\_wall\_ns} & uint64 & Wall-clock when emission was queued (ns) \\
+\texttt{meta\_hex} & 28 B (hex) & Capture-meta struct \texttt{>IQQI4s} \\
+\texttt{emission\_png\_path} & string & Path to $E_t$ tile PNG \\
+\texttt{drand\_round\_number} & uint64 & drand quicknet round number \\
+\texttt{drand\_round\_value\_hex} & 32 B (hex) & drand round randomness $\mathit{rand}$ \\
+\texttt{drand\_staleness\_ms} & int & Observed beacon staleness (ms) \\
+\midrule
+\texttt{ai\_payload\_count} & int & (v10) Number of agent payloads at this row \\
+\texttt{ai\_payload\_root\_hex} & 32 B (hex) & (v10) ai\_payload\_root commitment \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two indexing details matter for downstream use. First, the capture-file index equals the chain row index $t$, \emph{not} the Aravis \texttt{capture\_frame\_id}; row~0 carries \texttt{capture\_frame\_id} $= 4$, and the id advances in strides of four as a GenICam hardware-tick artifact. The chain commits at approximately \SI{2.5}{\hertz}, one physical exposure per chain step; the stride-of-four id should not be read as a \SI{10}{\hertz} frame rate. Second, the \texttt{bayer\_blake3\_hex} field is the digest of the raw capture and is the value folded into $S_{t+1}$, distinct from \texttt{emission\_live\_pixel\_blake3\_hex}, which records the emission pixels and is not part of the chain transition. Together with the bit-exact renderer of \Cref{subsec:pc_render}, this schema makes the entire $(S_t, E_t, C_t)$ trajectory reconstructible and auditable from the logged state alone.

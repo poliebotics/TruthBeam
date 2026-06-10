@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you reference TruthBeam, please cite the whitepaper (and, once minted, the Zenodo dataset/code DOIs). No licence is granted by this publication."
+title: "TruthBeam: blockchain-anchored projector-camera recording with a diffusion-residual verifier"
+authors:
+  - given-names: "Cathal Ryan"
+    family-names: "Hynes"
+    affiliation: "PolieBotics"
+    email: "xathal@protonmail.com"
+type: software
+license: LicenseRef-All-Rights-Reserved
+license-url: "LICENSE"
+repository-code: "https://github.com/poliebotics/truthbeam"
+keywords:
+  - tamper-evidence
+  - projector-camera
+  - diffusion verifier
+  - optical coupling
+  - provenance
+references:
+  - type: article
+    title: "The PolieBotics Truth Beam: A Tamper-Evident Optical Recording Substrate and Its Learned Verifier"
+    authors:
+      - family-names: "Hynes"
+        given-names: "Cathal Ryan"
+    year: 2026
+    notes: "Companion whitepaper (paper/main.pdf, LaTeX source in paper/). Patent pending; parent application published as WO 2025/046153 A2."

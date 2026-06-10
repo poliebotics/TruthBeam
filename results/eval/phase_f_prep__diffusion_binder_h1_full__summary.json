@@ -1,0 +1,29 @@
+{
+  "max_steps": 5000,
+  "elapsed_sec": 3692.9,
+  "params_m": 48.05,
+  "final_loss": 0.0096435546875,
+  "config": {
+    "capture_hw": [
+      1150,
+      1330
+    ],
+    "em_hw_eff": [
+      540,
+      960
+    ],
+    "em_downsample": 2,
+    "base_ch": 64,
+    "mults": [
+      1,
+      2,
+      4,
+      4,
+      8
+    ],
+    "T": 1000,
+    "lr": 0.0001,
+    "bs": 4,
+    "dtype": "bf16"
+  }
+}

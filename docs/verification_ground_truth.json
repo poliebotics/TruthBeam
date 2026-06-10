@@ -1,0 +1,693 @@
+{
+  "investigations": [
+    {
+      "area": "phase-g-verifier",
+      "facts": [
+        {
+          "claim": "Phase G is a conditional epsilon-prediction (denoising-diffusion) U-Net named DiffusionDiagnosticUNet that predicts noise added to the capture C, conditioned on emission E. It denoises a noised capture; a genuine (C,E) pair yields a low noise-prediction residual (clean denoising), a mismatched E yields a high residual.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "module docstring line 1: 'Phase G - conditional epsilon-prediction U-Net for the diffusion diagnostic'; output 'eps_pred : (B, 4, 768, 1024) - predicted noise'; class DiffusionDiagnosticUNet line 174; training loss is F.mse_loss(eps_pred, noise) (train script line 255)"
+        },
+        {
+          "claim": "Conditioning on E is ControlNet-style spatial hint injection (a 4-stage strided-conv HintEncoder over an 11-channel hint, added to U-Net down features via zero-conv 1x1 adapters), explicitly NOT FiLM-on-E. FiLM is used ONLY for the scalar diffusion timestep t.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "docstring lines 3-6: 'conditioned on E via ControlNet-style spatial hint injection. NOT FiLM on E (per the 2026-04-29 F-A mini failure)... FiLM is used only for the diffusion timestep t'; HintEncoder line 130; ZeroConvAdapter zero-init line 160-166; ResBlock comment line 87-88 'The FiLM here is SCALAR (just t), which is the safe case'"
+        },
+        {
+          "claim": "The 11-channel hint layout is a literal port of the F-A v1 EditorControlNet: ch0-2 = E (RGB at C-res), ch3-5 zeros, ch6-8 zeros, ch9-10 normalized coord_x/coord_y. Hint features injected at each of 4 downsample scales.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "docstring lines 16-22; _build_hint() line 254-260: torch.cat([E, zeros3, zeros3, coord], dim=1); HintEncoder 'Strides 2,2,2,2 -> /16 total (matches the U-Net's 4 downsample levels)' line 131-133"
+        },
+        {
+          "claim": "Architecture as actually trained: 39,769,828 parameters (39.77M), in_ch=4 (packed CFA capture), base_ch=96, channel_mults=(1,2,4,4) -> 4 down/up scales, input 768x1024. Self-attention at the deepest scale only (attn_at=[False,False,False,True]) plus one mid-block attention; 4 heads. Cosine noise schedule, T=1000.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/model_final.pt",
+          "evidence": "checkpoint args: step=25000, base_ch=96, mults=[1,2,4,4], attn_at=[False,False,False,True], cond_drop_prob=0.2, T=1000, mode=main; param count from state_dict = 39769828 = 39.77M. Note: trainer overrides the model file's default attn_at=(F,F,T,T) with a last-scale-only tuple (train script line 168, OOM-avoidance comment lines 163-167); cosine_alphas_cumprod line 317"
+        },
+        {
+          "claim": "Condition dropout (classifier-free-guidance style): with prob cond_drop_prob=0.20 during training E is zeroed, training one model usable conditionally and unconditionally (force_uncond=True at eval zeros E).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "forward() lines 271-279; cond_drop_prob default 0.2 line 193; training_config.json cond_drop_prob=0.2"
+        },
+        {
+          "claim": "Training corpus = within-session same-rig (C,E) pairs from two sessions: D2 (5992 frames) and V10 (3743 frames), same crop (rig_hash 3984699a504fb798 stated identical). Held-out blocks excluded from training: D2 = 3 blocks of 400 at ~25/50/75%; V10 = 2 blocks of 250 at ~33/66%; 60-frame guard bands; training rows stride-3 decimated to reduce temporal autocorrelation.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_dataset.py",
+          "evidence": "docstring lines 22-27; session_total D2=5992 V10=3743 line 67; EVAL_BLOCKS lines 59-62; GUARD=60 line 63; train_rows stride line 78-86"
+        },
+        {
+          "claim": "Main run training: 25,000 steps completed on 8 GPUs (world_size=8), DDP, batch size 2/GPU, AdamW lr=1e-4 weight_decay=0.01, cosine LR schedule with 500-step warmup, bf16 autocast, grad-clip 1.0, seed 42. Loss fell from 0.982 (step 50) to ~0.0006 (step 25000).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/training_config.json",
+          "evidence": "training_config.json: mode=main, max_steps=25000, bs=2, world_size=8, lr=0.0001, T=1000, stride=3, seed=42; history.jsonl first {step:50, loss:0.9818}, last {step:25000, loss:0.000626}; AdamW+wd 0.01 train script line 191; cosine_lr warmup=500 line 71"
+        },
+        {
+          "claim": "Scoring rule (eval harness): for each held-out frame, add fixed noise at timesteps {50,150,300,500,750}, K=4 noise draws per timestep, the SAME noise paired across all conditions; residual = mean MSE(eps_pred - true noise). Conditions: correct E, wrong E at offsets {-2,+2,-15,+15,+30} within block, zero E (uncond), and a lag sweep k in {-30..+30}. AUROC computed pooled (Mann-Whitney, tie-aware) correct vs wrong; Delta_wrong = mean MSE(wrong E) - mean MSE(correct E); block-bootstrap 95% CIs (1000 resamples of whole eval blocks).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/scripts/phase_g/eval_diffusion_diagnostic.py",
+          "evidence": "ALL_TIMESTEPS=(50,150,300,500,750) line 58; K_NOISE=4 line 59; WRONG_OFFSETS=(-2,+2,-15,+15,+30) line 60; LAG_SWEEP_KS line 61; auroc_pooled() line 88; block_bootstrap_ci n_boot=1000 line 64; mse_each = diff.pow(2).mean line 370"
+        },
+        {
+          "claim": "MEASURED main-run result, D2 held-out (198 frames, 3 blocks): mean MSE correct = 0.00348, wrong-avg = 0.00748, uncond = 0.00398; Delta_wrong = +0.00400 [95% CI +0.00397,+0.00403]; Delta_uncond = +0.00049; AUROC correct-vs-wrong = 1.000 (every offset), AUROC correct-vs-uncond = 0.977.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "D2: by_condition.correct.mean=0.003484, wrong_-2=0.007485, uncond=0.003976; deltas.delta_wrong.mean=0.0040004 ci[0.003967,0.004029]; auroc.correct_vs_wrong_avg=1.0; auroc.correct_vs_uncond=0.97681"
+        },
+        {
+          "claim": "MEASURED main-run result, V10 held-out (200 frames, 2 blocks): mean MSE correct = 0.00394, wrong-avg = 0.00804, uncond = 0.00444; Delta_wrong = +0.00411 [95% CI +0.00410,+0.00411]; Delta_uncond = +0.00050; AUROC correct-vs-wrong = 1.000, AUROC correct-vs-uncond = 0.942.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "V10: by_condition.correct.mean=0.003938, wrong_-2=0.008036, uncond=0.004442; deltas.delta_wrong.mean=0.0041065 ci[0.004101,0.004112]; auroc.correct_vs_wrong_avg=1.0; auroc.correct_vs_uncond=0.941975"
+        },
+        {
+          "claim": "MEASURED lag-sweep result: residual is sharply minimized at lag k=0 (correct alignment) and jumps to the wrong-E plateau at every other lag. D2: k=0 MSE=0.00348 vs k=+/-1 MSE~0.00749. V10: k=0 MSE=0.00394 vs k=+/-1 MSE~0.00804. This is the chain-alignment / within-session temporal-coupling signature.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "D2 lag_curve: '0'.mean=0.003484, '1'.mean=0.0074870, '-1'.mean=0.0074875; V10 lag_curve: '0'.mean=0.003938, '2'.mean=0.008049"
+        },
+        {
+          "claim": "MEASURED shuffled negative-control (separate model trained with E shuffled within-session, 25000 steps): collapses to chance. D2 AUROC correct-vs-wrong = 0.5006, Delta_wrong = 6.98e-8 (CI [3.9e-8, 1.2e-7]); V10 AUROC = 0.5006. No detectable signal -> rules out train-set leakage / trivial shortcut.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json",
+          "evidence": "D2: auroc.correct_vs_wrong_avg=0.50064; deltas.delta_wrong.mean=6.98e-08; V10 auroc.correct_vs_wrong_avg=0.500625; shuffled training_config mode=shuffled max_steps=25000; history last loss=0.000629"
+        },
+        {
+          "claim": "MEASURED synthetic-positive control (model trained on real C + E-dependent isotropic blur perturbation, 15000 steps): pipeline detects the injected E-signal. D2 Delta_wrong = +0.00113, AUROC correct-vs-wrong = 1.000, AUROC vs uncond = 0.693; V10 Delta_wrong = +0.00122, AUROC vs wrong = 1.000, vs uncond = 0.654.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/synthetic_positive/eval/summary.json",
+          "evidence": "D2 deltas.delta_wrong.mean=0.0011350; auroc.correct_vs_wrong_avg=1.0; auroc.correct_vs_uncond=0.69314; V10 delta_wrong.mean=0.0012235, auroc vs wrong=1.0, vs uncond=0.653525; synthetic_positive training_config max_steps=15000, history last loss=0.00194"
+        },
+        {
+          "claim": "MEASURED same-rig cross-session generalization (separate Stage-0 verifiers trained on ONE session, 100000 steps each, evaluated on the other): real_correct vs real_shuffled AUROC = 1.0 for D2-only-verifier on V10 and for V10-only-verifier on D2. This is same-rig cross-session, NOT cross-rig/camera/subject.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0_cross_verifier/d2_only_verifier/step_00100000/summary.json",
+          "evidence": "d2_only_verifier summary V10: auroc.real_correct_vs_real_shuffled=1.0; cross_verifier_report.md table 'd2_only 1.0000/... ' for V10; these are step_00100000 verifiers, distinct from the 25k canonical Phase G main run"
+        }
+      ],
+      "trust_flags": [
+        "AUROC = 1.000 (perfect) on correct-vs-wrong is REAL and appears in summary.json eval outputs, but it is so clean because wrong-E residual (~0.0075) is ~2x the correct-E residual (~0.0035) and the two distributions do not overlap. The video may state 'AUROC = 1.0 on held-out frames' but MUST frame it as a within-session same-rig diagnostic, not a fielded fraud detector.",
+        "All results are WITHIN-SESSION / SAME-RIG (D2, V10). Do NOT assert cross-rig, cross-camera, cross-projector, or cross-subject generalization. The report itself (diagnostic_report.md line 77) and SESSION_HANDOFF lines 54-55 explicitly disclaim cross-rig/cross-subject.",
+        "Do NOT call Phase G FiLM-conditioned. FiLM-on-E was the F-A-mini FAILURE; Phase G uses ControlNet zero-conv hint injection for E and FiLM only for the scalar timestep. Asserting 'FiLM conditioning on emission' would be factually wrong per the code.",
+        "The 'binder' that produced these Phase G results is DiffusionDiagnosticUNet (src/phase_g/diffusion_diagnostic_model.py), NOT the CondDDPMUNet in scripts/phase_f/train_diffusion_binder.py (docstring 'trainable, not yet trained') and NOT the ConvNeXt EmissionPredictor. Attribute the numbers to the Phase G diffusion diagnostic.",
+        "The synthetic_positive control uses isotropic photometric injection (blur(E) added to C); per report caveat line 78 a synth-pass does NOT by itself guarantee the main-run signal is real chain coupling. The shuffled control (AUROC~0.5) is the stronger argument against leakage.",
+        "Cross-session AUROC=1.0 comes from Stage-0 verifiers trained to 100k steps (different run, different eval schema) - do not conflate with the canonical 25k-step Phase G main run. Both are same-rig.",
+        "Aspect-ratio caveat (report line 75): cropped 1704x2278 frame (aspect 0.748) resized to 768x1024 (aspect 0.75) - ~0.3% distortion, applied identically to D2 and V10."
+      ],
+      "open_questions": [
+        "The model file default attn_at=(False,False,True,True) (40.95M params) differs from what was actually trained: the trainer forces last-scale-only attn_at=[False,False,False,True] (39.77M params, confirmed in checkpoint). The 39.77M figure is the correct one for the trained model; the 40.95M default was never used.",
+        "synthetic_positive ran 15000 steps vs main/shuffled 25000 steps; main and shuffled are matched (same steps, same data, only pairing differs), but synth is not step-matched to main.",
+        "Whether Phase G detects fine XOF perturbations (Type 1/Type 3 bit-flips) is UNRESOLVED here - SESSION_HANDOFF lines 95-109 note Phase H is blind to fine XOF flips and warns 'do NOT claim Phase G detects Type 1/Type 3 unless the Item 1 table confirms.' The extended-perturbation eval (--extended-perturbations, 35 conditions) is scaffolded in the eval script but no merged Item-1 summary.json with those condition results was found in this tree; the standard summaries only cover correct/wrong/uncond/lag.",
+        "The cross-session Stage-0 summaries use a fake/real F-A-v1 schema (real_correct_vs_real_shuffled etc.); the per-frame Delta_wrong/lag-curve metrics from the canonical eval harness are not present there, so cross-session evidence is the real-pair AUROC=1.0 only."
+      ]
+    },
+    {
+      "area": "binder-recovery",
+      "facts": [
+        {
+          "claim": "\"The binder\" that produced every real verifier result is the EmissionPredictor emission-recovery net: a ConvNeXt-Tiny (or -Large/-V2) encoder with 4-channel CFA stem + U-Net decoder + final F.interpolate, sigmoid output (3,1080,1920). It takes a capture C and predicts the emission E (NOT a diffusion model).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/models/emission_predictor.py",
+          "evidence": "class EmissionPredictor: encoder=ConvNeXt-Tiny features_only; up3..up_extra U-Net decoder; head=Conv2d(dx,3,1); forward(capture)->torch.sigmoid(x). Docstring L1: 'emission-RGB predictor \u2014 ConvNeXt-Tiny encoder + U-Net decoder.'"
+        },
+        {
+          "claim": "Three EmissionPredictor variants exist: emission_predictor.py (ConvNeXt-Tiny, ENC_DIMS 96/192/384/768), emission_predictor_large.py (ConvNeXt-Large, 192/384/768/1536), emission_predictor_v2.py (Tiny encoder + CoordAwareFPN, used by E3r). All output sigmoid(3,H,W) from a 4-ch packed-CFA/capture input.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/models/emission_predictor_v2.py",
+          "evidence": "emission_predictor_large.py ENC_DIMS_LARGE=(192,384,768,1536); emission_predictor_v2.py 'encoder + coord-aware FPN + RGB decoder ... Used by experiment A4 (Tiny + emission)'; binder_novel run.log shows arch=EmissionPredictor for e1/e2/exp001c and arch=EmissionPredictorV2 for e3r*."
+        },
+        {
+          "claim": "14 EmissionPredictor binders (the Phase E family: exp001c, e1 + 7 e1-ablations, e2, e2_fp16, e3r + 2 e3r-ablations) were trained and evaluated. On 100 held-out D2+V10 frames they achieve perfect novel-XOF discrimination: AUROC(target vs novel)=1.0 and AUROC(target vs shuffled)=1.0 for ALL 14 (mean 1.0, std 0.0, min 1.0); interpretation_case='best'.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/binder_novel_eval/aggregate_summary.json",
+          "evidence": "{\"n_binders_loaded\":14,\"n_frames\":100,\"auroc_target_vs_novel\":{\"mean\":1.0,\"std\":0.0,\"min\":1.0},\"auroc_target_vs_shuffled\":{\"mean\":1.0...},\"interpretation_case\":\"best\"}; run.log: '14 binders ... 14 loaded ... case=best'."
+        },
+        {
+          "claim": "Per-binder MSE separation is large: target-emission MSE ~0.006 vs shuffled/novel-emission MSE ~0.093, i.e. shuffled/novel score ~15x worse than the true target. E.g. e1: target MSE 0.00620, shuffled 0.09289, novel 0.09311 (shuffled_over_target=14.99, novel_over_target=15.02).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/binder_novel_eval/per_binder_summary.json",
+          "evidence": "e1: mean_mse target 0.0061969..., shuffled 0.092892..., novel 0.093107...; ratio shuffled_over_target 14.99, novel_over_target 15.02. e3r (V2): target 0.005597, ratio shuffled_over_target 16.62."
+        },
+        {
+          "claim": "Canonical matched-recovery quality (binder(C) vs true E) for the Phase E EmissionPredictor binders is ~25 dB PSNR best-epoch: E1 25.03 dB (ep10), E2 25.44 dB (ep10), E3r 25.76 dB (ep15); all 13 Phase E experiments reached matched >= 25 dB; Window-FMR@5=0.000 and Top-1 retrieval=1.000.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/STATUS.md",
+          "evidence": "STATUS.md L113-128: 'All 13 Phase E experiments succeeded at matched >= 25 dB | E1 25.03 dB (ep10) | E2 25.44 dB (ep10) | E3r (CoordAware FPN) 25.76 dB (ep15) | ... Window-FMR@5 = 0.000 ... Top-1 retrieval = 1.000'."
+        },
+        {
+          "claim": "The diffusion_binder (CondDDPMUNet, epsilon-prediction DDPM, 48M params) WAS actually trained, not just scaffolding: an H1 run reached 5000 steps in 3693s with final_loss 0.0096 (down from ~1.16 init), and H2/H3 runs reached ~11500 steps. It conditions on capture C and predicts noise added to emission E.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_f_prep/diffusion_binder_h1_full/summary.json",
+          "evidence": "summary.json: {\"max_steps\":5000,\"elapsed_sec\":3692.9,\"params_m\":48.05,\"final_loss\":0.0096435...}; run.log tail '[done] elapsed=3693s, params=48.1M, final_loss=0.0096'; h2 run.log tail '[step 11500]', h3 '[step 11330]'. Script train_diffusion_binder.py: pred_noise=model(em_t,cap,t); loss=mse(pred_noise,noise)."
+        },
+        {
+          "claim": "Despite training to low loss, the diffusion_binder FAILS as a verifier in its only verifier eval. The chain-byte sensitivity probe (K=25 DDIM, 100 rows, 5 seeds) gives attack-success 47-54% at every noise level p (essentially a coin flip), margin ~0 dB, threshold-p@5% = None. It cannot discriminate matched vs noised emissions.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_f_prep/diffusion_binder_h1_full/chain_byte_probe/H1_PROBE_FINDING.md",
+          "evidence": "'The H1 diffusion binder fails to discriminate matched-vs-noised emissions at any noise level. Attack-success rate stays at 47-54% ... threshold p @ 5% for H1: None'. chain_byte_threshold_summary.txt: p=0.001 attack=0.530, p=1.0 attack=0.524, all margin ~0.00 dB."
+        },
+        {
+          "claim": "By contrast, the EmissionPredictor binders pass the same chain-byte probe: attack-success ~0.7% at p=0.001 (Phase E), i.e. they ARE working chain-byte verifiers and are 70-150x more discriminating than the diffusion_binder in this probe.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_f_prep/diffusion_binder_h1_full/chain_byte_probe/H1_PROBE_FINDING.md",
+          "evidence": "'EmissionPredictor binders (E1, E3r, E2) all hit attack-success ~0.7% at p=0.001 and stay there ... EmissionPredictors are 70-150x more discriminating than the diffusion verifier in this probe.'"
+        },
+        {
+          "claim": "The F-A v1 held-out binder retrieval eval (step-100k editor) uses the EmissionPredictor family: held-out family target_rank_mean=1.00 and rank_at_1_frac=1.000 (perfect rank-1 retrieval); training-family target_gap ~5 dB vs held-out ~1.1-1.7 dB (modest white-box specialization).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/F_A_V1_FINAL_REPORT.md",
+          "evidence": "Section 5 table: held-out target_rank_mean 1.00, rank_at_1_frac 1.000 at both 10k and 100k; 'Training surrogates score ... ~3 dB better than held-out binders'. binder_score_matrix.json exists at results/f_a_final_evaluation/binder_score_matrix/."
+        },
+        {
+          "claim": "The fa_v2 'fresh binder' system (train_fresh_binder.py / eval_fresh_binder.py + src/models/fresh/ families A,B,C,D) is SCAFFOLDING with model code present but NO local trained checkpoint or eval output. eval_fresh_binder.py defines acceptance thresholds (matched-PSNR>=22 dB, AUROC>=0.95) but no verdict.json/report.md for a fresh binder exists locally.",
+          "tier": "scaffolding",
+          "source_file": "/path/to/poliebotics_phase_b/scripts/fa_v2/eval_fresh_binder.py",
+          "evidence": "No model_final.pt / TRAINING_DONE / checkpoints under any fa_v2 path (find returned nothing). src/models/fresh/ has family_a..d .py + registry __init__.py only. PSNR_THRESHOLD_DB=22.0, AUROC_THRESHOLD=0.95 are target thresholds, not measured."
+        },
+        {
+          "claim": "SESSION_HANDOFF claims '7 fresh binders trained: A1, A2, B1, B2, C1, C2, D1', but no fresh-binder checkpoints or acceptance verdicts are present in the local mirror (HANDOFF notes fa_v2/ is excluded from the g1a mirror). This is a doc-only claim with no local eval-output backing.",
+          "tier": "claimed-unverified",
+          "source_file": "/path/to/poliebotics_phase_b/SESSION_HANDOFF.md",
+          "evidence": "SESSION_HANDOFF.md L188-190: 'Fresh binders trained ... 7 fresh binders trained: A1, A2, B1, B2, C1, C2, D1.' HANDOFF_TO_REMOTE.md L130: mirror excludes fa_v2/. No local *.pt or verdict.json found for them."
+        },
+        {
+          "claim": "The fa_v2 preflight tests (test_b, test_c) that DO have local outputs were run on the EXISTING Phase E EmissionPredictor binders (e1, e1_bf16_sg, ...), not on fresh binders; they measure fake-vs-real target MSE ratios on 50 frames.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/fa_v2_preflight_test_b/summary.json",
+          "evidence": "summary.json keys are 'e1','e1_bf16_sg','e1_fp16_ddp',...; mean_m_fake_target/mean_m_real_target_ref/fake_over_real_ratio per Phase E binder (e1 ratio 0.407, e1_bf16_sg 9.00)."
+        },
+        {
+          "claim": "Conditioning on E in the diffusion path is via concatenating/injecting capture C into the U-Net (CondDDPMUNet from diffusion_verifier_sizing), with the scalar DDPM timestep handled separately \u2014 consistent with hint-style (not FiLM-on-E) conditioning. The probe forward is model(em_t, capture, t).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/scripts/phase_f/train_diffusion_binder.py",
+          "evidence": "model = CondDDPMUNet(base_ch, channel_mults, attn_at=...); pred_noise = model(em_t, cap, t.float()); imported 'from diffusion_verifier_sizing import CondDDPMUNet'. Timestep t passed as separate arg, capture as separate conditioning input."
+        }
+      ],
+      "trust_flags": [
+        "Do NOT call the diffusion_binder (CondDDPMUNet) 'the verifier' or imply it produced the retrieval/PSNR results. It was trained but its ONLY verifier eval (chain-byte probe) FAILED at coin-flip 47-54% attack-success; it is NOT a working verifier in any local result. The working verifier is exclusively the EmissionPredictor (ConvNeXt+U-Net) family.",
+        "Do NOT assert the diffusion_binder achieved any PSNR/recovery/discrimination number. summary.json only reports training MSE-loss 0.0096 (noise-prediction loss), NOT an emission-recovery PSNR or a passing verifier metric.",
+        "Do NOT present the fa_v2 'fresh binders' (A1/A2/B1/B2/C1/C2/D1) as trained-with-results. No local checkpoint or acceptance verdict exists; the '7 fresh binders trained' line is a handoff-doc claim only (fa_v2/ excluded from the local mirror).",
+        "Do NOT present the 22 dB / AUROC>=0.95 in eval_fresh_binder.py as achieved results \u2014 they are pass/fail THRESHOLDS in unrun scaffolding.",
+        "Keep verifier scope within-session/same-rig (D2, V10). The AUROC=1.0 novel-XOF result is on 100 held-out D2+V10 frames on the same rig; no cross-rig/camera/projector claim is supported.",
+        "The H1_PROBE_FINDING itself notes the diffusion failure may be a probe-protocol issue (single K=25 DDIM sample is stochastic) and proposes a score-function reformulation as future work \u2014 so 'diffusion is a bad verifier' should be stated as 'this DDIM point-prediction protocol failed', not as a proven impossibility. A score-function diffusion verifier was NOT run locally."
+      ],
+      "open_questions": [
+        "Were the 7 fa_v2 fresh binders (A1/A2/B1/B2/C1/C2/D1) actually trained and did they pass eval_fresh_binder acceptance (>=22 dB, AUROC>=0.95)? Outputs are not in the local mirror (fa_v2/ excluded); needs Lambda verification.",
+        "Did any score-function (likelihood-based) diffusion verifier get built/run after the H1 chain-byte probe failure? The finding recommends it as 'next' but no such eval output exists locally.",
+        "Were the H2 (D2-only, ~11500 steps) and H3 (V10-only, ~11300 steps) diffusion binders ever probed as verifiers, or only H1? Only H1 has a chain_byte_probe directory locally.",
+        "The binder_score_matrix.json at results/f_a_final_evaluation/ \u2014 confirm its per-family numbers match the F_A_V1_FINAL_REPORT table (held-out target_rank_mean 1.00) directly from the JSON rather than the report prose."
+      ]
+    },
+    {
+      "area": "fake-detection",
+      "facts": [
+        {
+          "claim": "The verifier that rejects fakes is a conditional epsilon-prediction (noise-prediction) diffusion U-Net, DiffusionDiagnosticUNet. E is injected via ControlNet-style spatial hint encoder (11-ch hint stack); FiLM is used ONLY for the scalar diffusion timestep t, NOT on E. This is explicitly contrasted with the F-A-mini FiLM-on-E failure.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "docstring L3-6 'C <- noised C, conditioned on E via ControlNet-style spatial hint injection. NOT FiLM on E ... FiLM is used only for the diffusion timestep t'; class L174 'DiffusionDiagnosticUNet' / L175 'epsilon-prediction U-Net for C, conditioned on E via ControlNet hint injection'; ResBlock L86-87 'DDPM-style ResBlock with t-FiLM'."
+        },
+        {
+          "claim": "The fake-rejection SCORE is the diffusion denoiser's noise-prediction residual: a frame is noised (q_sample at timestep t), the U-Net predicts the added noise, and the score is MSE(eps_pred - true_noise). Low residual = clean denoise = genuine (C,E) pair; high residual = fake/mismatch. The denoiser IS what rejects the fakes.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/scripts/stage_0/eval.py",
+          "evidence": "score_one() L131-135: 'eps_pred = diffusion_model(C_t, E_batch, t_float, force_uncond=...)'; 'diff = (eps_pred.float() - noise[s:e].float())'; 'mse_each = diff.pow(2).mean(dim=(1,2,3))'. C_t built by q_sample (L119). Timesteps=(50,150,300,500,750), K_NOISE=4 (L67-68)."
+        },
+        {
+          "claim": "The forger ('F-A v1') is EditorControlNet \u2014 a ControlNet-style spatial-hint editor over a ConvNeXt-Tiny source encoder, 42.3M params. It takes (C_source, E_source, E_target) at native res and outputs C_fake (a forged capture for E_target). Trained 100,000 steps on 8x A100, 28h18m, on D2+V10 train frames.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/F_A_V1_FINAL_REPORT.md",
+          "evidence": "Table L12 'EditorControlNet ... ConvNeXt-Tiny source encoder; 42.3M params (src/phase_f/editor_controlnet.py)'; L25-26 'Steps completed 100,000 / Wall-clock 28 hr 18 min'. Forger API confirmed in fa_loader.py render_C_fake L129 'C_pred = model(C_s, E_s, E_t)'."
+        },
+        {
+          "claim": "All four forger checkpoints (5k / 25k / 70k / 100k) were actually run through the diffusion verifier: a canary loaded each checkpoint, rendered C_fake at Phase G resolution (4,768,1024) for D2 and V10, and the per-step eval/summary.json outputs exist. Forger ckpt path = experiments/phase_f/f_a_full_v1/checkpoints/step_000NNNNN.pt; verifier ckpt = phase_g_diffusion_diagnostic/main/model_final.pt.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0/canary/canary_summary.json",
+          "evidence": "fa_loader_smoke keys 'step_00100000::D2','step_00070000::D2','step_00025000::D2','step_00005000::D2' (+V10) all 'ok': true; 'any_fa_failed': false. run_shard0.log: 'F-A model loaded from .../f_a_full_v1/checkpoints/step_00100000.pt' and 'diffusion model loaded from .../phase_g_diffusion_diagnostic/main/model_final.pt'. NOTE: the .pt checkpoint files are NOT in the local g1a mirror (checkpoints/ dir is empty locally); they lived on Lambda."
+        },
+        {
+          "claim": "HEADLINE fake-rejection result: the diffusion verifier separates real (C_real,E) from forged (C_fake,E) with AUROC = 1.0000 (real_correct vs fake_correct) at EVERY forger checkpoint 5k/25k/70k/100k, on BOTH sessions D2 and V10. The forger never closes this gap.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00100000/summary.json",
+          "evidence": "D2 auroc.real_correct_vs_fake_correct = 1.0; V10 = 1.0. Identical 1.0 in step_00005000/25000/70000 summary.json (computed across all four). Underlying MSE: real_correct mean D2=0.003475 vs fake_correct D2=0.007152 (100k); V10 0.003945 vs 0.008104."
+        },
+        {
+          "claim": "The forger's noise-prediction residual stays far above real across all training \u2014 fake_correct MSE FALLS as the forger trains (D2: 0.01099 @5k -> 0.00907 @25k -> 0.00802 @70k -> 0.00715 @100k) but never reaches real_correct (D2 0.003475, constant). The forger improves but does not converge to the real manifold.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00005000/summary.json",
+          "evidence": "fake_correct.mean by step (extracted from the 4 summary.json files): D2 0.010987/0.009065/0.008021/0.007152; V10 0.012311/0.010240/0.009120/0.008104. real_correct fixed (D2 0.003475, V10 0.003945) because real data/verifier unchanged across forger steps."
+        },
+        {
+          "claim": "Secondary metric (does the forger reproduce E-coupling): fake_correct_vs_fake_shuffled AUROC RISES with forger training \u2014 D2 0.6088 @5k -> 0.8177 @25k -> 0.9670 @70k -> 0.9927 @100k; V10 0.5847 -> 0.7478 -> 0.8703 -> 0.9295. So by 100k the forged frame DOES carry E_target-specific structure (it is target-conditional), yet it is still trivially distinguished from real (AUROC 1.0 above).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00070000/summary.json",
+          "evidence": "auroc.fake_correct_vs_fake_shuffled values across the 4 summary.json files: D2 0.6088/0.8177/0.9670/0.9927; V10 0.5847/0.7478/0.8703/0.9295."
+        },
+        {
+          "claim": "Cross-verifier (LOSO) robustness: a verifier trained only on D2 still rejects 100k fakes on out-of-distribution V10, and vice-versa, at high AUROC. Combined verifier: fake t-vs-shuffled D2 0.9927 / V10 0.9295. D2-only verifier on V10: 0.8588. V10-only verifier on D2: 0.9927. Real-pair AUROC stays 1.0000 (t vs shuffled / t vs source) for all verifiers and sessions.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/stage_0_cross_verifier/cross_verifier_report.json",
+          "evidence": "combined.d2.fake_target_vs_shuffled=0.99268, combined.v10.fake_target_vs_shuffled=0.92947; d2_only.v10.fake_target_vs_shuffled=0.8588; v10_only.d2.fake_target_vs_shuffled=0.99273. All real_target_vs_shuffled and real_target_vs_source = 1.0. Generated 2026-05-03 (run.log)."
+        },
+        {
+          "claim": "Independent confirmation from a separate per-frame visualization pipeline (overnight Codex+Claude collab): frame-level AUROC correct-vs-fake at attacker step 100k = 0.9998, correct-vs-shuffled = 0.9999. 'Attacker non-convergence': fake_excess red% drops only 67.4% (5k) -> 52.4% (100k) \u2014 the forged-frame residual signal stays strongly above baseline across all training. This is a DIFFERENT estimator (per-frame, PatchCore epsilon-residual map) than the stage_0 pooled AUROC.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/agent_collab_overnight_export/final/EXECUTIVE_README.md",
+          "evidence": "'Frame-level AUROC corr-vs-fake (100k) 0.9998', 'corr-vs-shuffled 0.9999'; 'Mean fake_excess at step 5k 67.4% ... step 100k 52.4%'. CYCLE_LOG.md L67 'Attacker non-convergence \u2014 fake_excess 67% (5k) -> 52% (100k), modest reduction'."
+        },
+        {
+          "claim": "The denoiser's intrinsic discrimination (its foundation) is AUROC=1.0 correct-E vs wrong-E at every lag offset (-2,+2,-15,+15,+30) on both sessions, established on its own held-out eval before any forger test. Real correct-E residual ~0.00348 (D2) vs wrong-E ~0.00748 \u2014 the same elevated band the forger output lands in.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "D2 auroc.correct_vs_wrong_avg=1.0 and correct_vs_wrong_-2/+2/-15/+15/+30 all =1.0; by_condition.correct.mean=0.003484 vs wrong_-2.mean=0.007485. Canary corroborates: correct_mean 0.001414 << wrong_mean 0.004838 (canary_summary.json phase_g_reproduction)."
+        },
+        {
+          "claim": "'Excess red' is a VISUALIZATION transform, not a separate detection metric: excess = max(0, z_bad - z_correct - margin) over the epsilon-residual map, gamma+sigma smoothed, reference-calibrated against real correct-E frames. Red = residual exceeding the real-correct baseline. Quantitative claims rest on AUROC/lift tables, not the red display.",
+          "tier": "scaffolding",
+          "source_file": "/path/to/poliebotics_phase_b/agent_collab_overnight_export/final/MORNING_VISUALIZATION_SUMMARY.md",
+          "evidence": "Section 3 'Excess map: max(0, z_bad - z_correct - 0.50), clipped [0,4.0], gamma=0.65, Gaussian sigma=1.5'; Section 4 'Display clipped; quantitative claims use AUROC/lift tables'; Section 9 'Do not claim the display transform is a new metric'."
+        }
+      ],
+      "trust_flags": [
+        "Forger .pt checkpoint files (step_00005000..100000.pt, editor_final.pt) are NOT present in the local g1a mirror \u2014 the checkpoints/ directory is empty locally and editor_final.pt is absent. The eval/canary logs and summary.json outputs prove they existed and ran on Lambda, but the binary weights cannot be re-verified from this machine. Do not imply the weights are on-hand.",
+        "Two different AUROC numbers for the SAME real-vs-fake-100k question must not be conflated: stage_0 BLOCK-BOOTSTRAP POOLED estimator = 1.0000 (scripts/stage_0/eval.py auroc_pooled); overnight FRAME-LEVEL per-pixel-pooled estimator = 0.9998 (EXECUTIVE_README). Both are real measured outputs from different pipelines; state which one when citing.",
+        "real_correct MSE is IDENTICAL across all four forger checkpoints (D2 0.003475, V10 0.003945) \u2014 this is expected (real data + verifier are fixed; only the forger changes), NOT a copy-paste error. Do not present it as four independent measurements of the real baseline.",
+        "'AUROC = 1.0' is a finite-sample estimate on ~198 D2 / 200 V10 held-out frames per checkpoint (n_frames in summary.json). Phrase as 'AUROC 1.0 on the held-out eval set', not as a proof of zero error rate.",
+        "SCOPE is strictly within-session / same-rig (sessions D2 = Yoga, V10 = AI-improv). The cross-verifier test is cross-SESSION-within-rig (LOSO over D2/V10), NOT cross-camera/projector/subject. No cross-rig generalization is demonstrated.",
+        "fake_correct_vs_fake_shuffled rising to ~0.99 (100k) means the forger DID learn to make E_target-conditional output \u2014 do not claim the forger 'fails to encode the emission'. The point is the verifier still separates it from real at AUROC 1.0 anyway (the substrate/physical-coupling signal, not E-content, is what the denoiser keys on).",
+        "The F_A_V1_FINAL_REPORT.md numbers (loss/probe trajectories, held-out binder rank-1) describe FORGER training quality, NOT verifier fake-rejection. Do not present the forger's binder-rank-1 result as a verifier result."
+      ],
+      "open_questions": [
+        "The forger checkpoint .pt files and verifier model_final.pt are not on the local mirror; confirm they are retrievable from Lambda if the weights themselves need to back any published claim.",
+        "Stage_0 eval used 5 timesteps (50,150,300,500,750) x K=4 noise samples; the reported per-frame MSE is averaged over all of these. The video should not imply single-pass denoising \u2014 it is a multi-timestep, multi-noise-seed residual average.",
+        "No adaptive/white-box attacker that optimizes directly against the diffusion verifier's residual was run \u2014 F-A was trained against surrogate BINDERS (Phase E), then tested against the Phase G diffusion verifier. The 'fake rejection' is therefore a transfer/black-box-to-verifier result, not an end-to-end adversarial-against-the-denoiser result. Confirm framing before claiming robustness to an adaptive attacker.",
+        "fake_correct_vs_fake_shuffled for D2-only verifier scoring V10 (0.8588) is the weakest cell; whether that LOSO drop reflects genuine session-specific verifier weakness vs sample noise is flagged in the report's own interpretation but not separately quantified."
+      ]
+    },
+    {
+      "area": "audit-trust",
+      "facts": [
+        {
+          "claim": "The 2026-04-27 audit (AUDIT_FINDINGS / PART_A / PART_B) is entirely about Phase D \u2014 the octave-head / XOFDecoderV2 retrieval-FMR architecture (octave_heads.py, coord_aware_fpn.py, candidate_ranking.py, STN). This is a DIFFERENT, EARLIER component than the Phase G diffusion verifier. None of its findings touch the Phase G diffusion eval results.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/AUDIT_PART_A.md",
+          "evidence": "Every criterion A1-A20 cites src/models/octave_heads.py, coord_aware_fpn.py, xof_decoder_v2.py, eval/candidate_ranking.py, eval/metrics.py \u2014 no reference to any phase_g/ file."
+        },
+        {
+          "claim": "The headline Phase D audit failure (A5, FAIL) is an octave->FPN routing bug: code routes oct0->P5, oct1->P5, oct2->P4, oct3->P4 instead of the spec'd oct0->P5,oct1->P4,oct2->P3,oct3->P2. This affects the octave-head decoder, NOT the diffusion verifier.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/AUDIT_PART_A.md",
+          "evidence": "A5 FAIL: 'src/models/octave_heads.py:31 sets OCTAVE_FPN_LEVEL = (3, 3, 2, 2)'; A5 is one of 11 FAILs / 4 PARTIALs in Part A (5 PASS)."
+        },
+        {
+          "claim": "Part B flagged 2 BLOCKERs against Phase D scaffolding: there is NO Phase D training entrypoint (train_decoder.py/train_emission.py only register Phase B/C classes), and the configs' `extends:` inheritance is documented but not implemented in code. These mean the Phase D octave-head experiment was scaffolding, not a completed trained run.",
+          "tier": "scaffolding",
+          "source_file": "/path/to/poliebotics_phase_b/AUDIT_PART_B.md",
+          "evidence": "BLOCKER B1/B8/B10 'no full Phase D trainer in src/training/; sanity_checks.py only profiles and overfits one A0 batch'; BLOCKER B4/B8 'extends is documented but not implemented'."
+        },
+        {
+          "claim": "Phase G diffusion verifier main run: within-session held-out AUROC = 1.000 for correct-E vs every wrong-E offset (-2,+2,-15,+15,+30 and avg), on both D2 (198 frames) and V10 (200 frames). Backed by real eval output JSON.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "D2 auroc.correct_vs_wrong_avg = 1.0; V10 auroc.correct_vs_wrong_avg = 1.0; matching report table in report/diagnostic_report.md lines 17,25."
+        },
+        {
+          "claim": "Phase G shuffled-control run (identical architecture/data, only real-vs-shuffled C/E pairing differs) sits at chance: AUROC = 0.5006 (D2) / 0.500625 (V10) for correct-vs-wrong, with delta_wrong ~7e-8 (bf16 numerical floor). This rules out generic E-statistics / architecture artifact.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json",
+          "evidence": "D2 auroc.correct_vs_wrong_avg = 0.5006376900316294, delta_wrong.mean = 6.98e-08; V10 = 0.500625."
+        },
+        {
+          "claim": "Phase G synthetic_positive control passed (pipeline can detect a known injected E-dependent signal): AUROC vs wrong = 1.000 on both sessions, delta_wrong ~+0.0011 to +0.0012. Confirms the eval pipeline is not trivially always-positive.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/report/diagnostic_report.md",
+          "evidence": "report table: synthetic_positive D2 AUROC vs wrong 1.000 \u0394_wrong +0.00113; V10 1.000 \u0394_wrong +0.00122."
+        },
+        {
+          "claim": "The Phase G verifier IS a conditional epsilon-prediction (denoising-diffusion) U-Net. Conditioning on emission E is ControlNet-style spatial hint injection via zero-conv 1x1 adapters at 4 scales \u2014 NOT FiLM-on-E. FiLM is used ONLY for the scalar diffusion timestep t. Confirmed directly in model source.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py",
+          "evidence": "Docstring lines 1-6: 'conditioned on E via ControlNet-style spatial hint injection. NOT FiLM on E ... FiLM is used only for the diffusion timestep t'; ZeroConvAdapter (zero-init 1x1) class lines 160-169; ResBlock t-FiLM lines 86-103."
+        },
+        {
+          "claim": "Verification mechanism matches operator framing: a genuine (capture,emission) pair denoises cleanly = low noise-prediction residual (correct-E mean MSE ~0.0035 D2 / ~0.0039 V10); a wrong/mismatched-E pair = high residual (~0.0075 D2 / ~0.0080 V10). The separation IS the discriminator.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json",
+          "evidence": "D2 by_condition correct.mean 0.003484 vs wrong_+2.mean 0.007486; V10 correct 0.003938 vs wrong 0.008049; delta_wrong CI excludes zero."
+        },
+        {
+          "claim": "Phase G main run training config: 39.77M-class U-Net (base_ch=96, mults [1,2,4,4]), input 768x1024 downsampled from raw packed CFA crop, trained on D2+V10 real pairs, 25000 steps, bf16, cond_drop_prob 0.2. Single-frame (one (C_t,E_t) pair at a time).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/training_config.json",
+          "evidence": "base_ch 96, mults [1,2,4,4], max_steps 25000, bf16 true, cond_drop_prob 0.2; param count 39.77M from SESSION_HANDOFF.md line 38."
+        },
+        {
+          "claim": "The Phase G eval is WITHIN-SESSION: held-out blocks are drawn from the SAME session as training (D2-trained eval'd on held-out D2 blocks, V10 on held-out V10 blocks). This measures within-session generalization on correct-vs-wrong-E, NOT cross-session.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/report/diagnostic_report.md",
+          "evidence": "Caveat line 77: 'Held-out blocks are within the same session as training, so this diagnostic measures within-session generalization, NOT cross-session.'"
+        },
+        {
+          "claim": "F-A v1 attacker (EditorControlNet, 42.3M params, 100k steps) reached only diversity plateau ~0.018 and produces washed-out/patchy partial subject rendering; sharp E_target reproduction NOT achieved. Held-out binder family quality regressed -0.6 to -2.6 dB vs training family between step 10k and 100k (soft white-box specialization).",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/F_A_V1_FINAL_REPORT.md",
+          "evidence": "Section 3 'Diversity plateau at 0.018'; Section 5 held-out target_gap +1.10 dB vs training +4.44 dB; Section 6 'Sharp E_target reproduction on the subject is not achieved at step 100k'."
+        },
+        {
+          "claim": "F-A v2 (the stronger attacker) trainer code DOES NOT EXIST \u2014 it is design-spec stage only, gated behind operator review + CGPT round-10 + Codex audit + smoke test. No F-A v2 result exists to cite.",
+          "tier": "scaffolding",
+          "source_file": "/path/to/poliebotics_phase_b/SESSION_HANDOFF.md",
+          "evidence": "'Trainer code does NOT exist. Spec is at experiments/fa_v2/fa_v2_design_spec.md'; Strict prohibitions: 'Do NOT implement F-A v2 trainer.'"
+        },
+        {
+          "claim": "The Phase F FiLM mini-experiment FAILED (VERDICT FAIL): FiLM-on-E conditioning could not carry spatial emission info \u2014 diversity flat at ~8e-5, 100x below the 0.01 passing threshold ('binder-leak only' failure). This failure is WHY Phase G uses ControlNet hint injection, not FiLM, for E.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/STATUS.md",
+          "evidence": "STATUS.md 'Phase F mini-experiment FINAL: VERDICT FAIL ... Diversity flat at ~8x10^-5 throughout \u2014 100x below the 0.01 passing threshold.'"
+        },
+        {
+          "claim": "Phase H supervised CNN baseline is E-aware only for COARSE contrasts (target vs shuffled/source AUROC=1.0) but BLIND to fine XOF perturbations (Type 1 global and Type 3 localized bit-flips ~chance). It has a known label-locking limitation (~17-33 unique frames per label). It is a coarse baseline, NOT a production verifier.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/SESSION_HANDOFF.md",
+          "evidence": "Section 6: 'Phase H is blind to fine XOF perturbations; Type 1 global bit flips and Type 3 localized bit flips ~ chance ... a supervised coarse baseline with a known limitation, not a production verifier.'"
+        },
+        {
+          "claim": "The 2026-04-30 local-machine crash was an NVIDIA driver hang on the RTX 5090 (driver 595.58.03, Blackwell), NOT caused by CC's workload, OOM, disk, or thermals. GPU errors began before the heaviest CC step. It is an infra incident with no bearing on any result's validity.",
+          "tier": "measured-result",
+          "source_file": "/path/to/poliebotics_phase_b/crash_investigation.md",
+          "evidence": "TL;DR 'Cause: NVIDIA driver hang on the RTX 5090. Not OOM, not disk, not CPU thermals'; 'GPU errors began at 22:59:17 UTC \u2014 i.e. before step 35000 even started.'"
+        },
+        {
+          "claim": "Phase E binder family is the verification baseline: all 13 Phase E binders reached matched PSNR >= 25 dB, Window-FMR@5 = 0.000 across all four negative families, Top-1 retrieval = 1.000 on family-balanced eval. This is the retrieval-binder baseline that Phase F/G attack, distinct from the diffusion verifier.",
+          "tier": "claimed-unverified",
+          "source_file": "/path/to/poliebotics_phase_b/STATUS.md",
+          "evidence": "STATUS.md 'Window-FMR@5 = 0.000 across all four negative families on every binder. Top-1 retrieval = 1.000' \u2014 these numbers appear in STATUS.md summary prose; per-binder eval-output files were not independently opened in this audit."
+        }
+      ],
+      "trust_flags": [
+        "Cross-session AUROC = 1.0 (D2-only verifier -> V10 held-out, and V10-only -> D2 held-out) is asserted ONLY in SESSION_HANDOFF.md prose (Section 2). NO cross-session Phase G eval-output file was found under experiments/phase_g_diffusion_diagnostic/ \u2014 the only Phase G eval JSONs (main/shuffled/synthetic_positive) are WITHIN-session, and the diagnostic report explicitly caveats 'NOT cross-session'. The video should NOT assert cross-session AUROC=1.0 as a measured result without locating the backing eval output; treat as claimed-unverified.",
+        "Do NOT claim cross-rig, cross-camera, cross-projector, or cross-subject generalization. SESSION_HANDOFF.md Section 2 explicitly states the cross-session result 'does NOT prove cross-rig or cross-subject generalization.' All results are within-session / same-rig (sessions D2, V10).",
+        "Do NOT assert any octave-head / candidate-ranking / Window-FMR retrieval architecture is spec-conformant or validated: the Phase D octave->FPN routing is AUDIT-FAIL (A5), there is no Phase D trainer (BLOCKER B1), and `extends` config inheritance is unimplemented (BLOCKER B4). That entire Phase D component is superseded scaffolding, not a result.",
+        "Do NOT claim FiLM-on-E conditioning works \u2014 it FAILED (Phase F mini-exp, diversity 8e-5, 100x below threshold). Only the ControlNet-style hint injection (Phase G) carries spatial E. FiLM in Phase G is timestep-only.",
+        "Do NOT claim Phase G detects fine XOF bit-flips (Type 1 global / Type 3 localized) unless the Item 1 perturbation-sensitivity table confirms it per condition (SESSION_HANDOFF Section 7 warns against this). Phase H is confirmed blind to these; Phase G fine-perturbation sensitivity was not established in the files audited.",
+        "Do NOT claim F-A v2 (the stronger attacker) exists or has results \u2014 trainer code does not exist; it is design-spec only.",
+        "Do NOT call F-A v1 'defeated by raw realism alone' or claim sharp E_target reproduction \u2014 F-A v1 only achieves washed-out partial rendering and is caught at AUROC=1.0; its visual quality plateaued after step 70k.",
+        "The Phase E FMR=0.000 / Top-1=1.000 numbers are taken from STATUS.md summary prose; per-binder eval-output files were not opened in this audit. Safe to mention as baseline but flag as summary-sourced if used as a headline number.",
+        "Body-vs-off-body finding INVERTED under proper Mask R-CNN segmentation (SESSION_HANDOFF Section 9): the off-body region carries the discriminative chain-coupling signal; do NOT assert 'body region is what Phase G uses' or use variance-box E2/E3 ablation numbers (those were misleading and superseded)."
+      ],
+      "open_questions": [
+        "Where is the eval-output file backing the cross-session AUROC=1.0 claim (D2-only->V10, V10-only->D2)? It is only in SESSION_HANDOFF.md prose; the experiments/phase_g_diffusion_diagnostic/ tree contains only within-session main/shuffled/synthetic eval JSONs. Locate the cross-session run output before the video asserts it.",
+        "The Phase G main eval used a 25000-step checkpoint (training_config max_steps=25000) and ~198-200 held-out frames per session. Is this the final/canonical verifier checkpoint, or was a longer/larger run done later? HANDOFF_TO_REMOTE references step_00025000.pt as the canonical Phase G checkpoint, consistent with 25k.",
+        "Phase G is single-frame (no temporal C_{t-1}/E_{t-1}). A temporal Phase G is design-only and NOT authorized/trained \u2014 confirm the video does not imply temporal verification exists.",
+        "The synthetic_positive control uses isotropic photometric injection (blur(E)+C); the report itself caveats this does not guarantee the main signal has the same spectral structure. Is there a stronger positive control if the video wants to claim the pipeline is robustly calibrated?",
+        "Did the Phase G main run ever get evaluated against actual generated/fake video frames (F-A v1 fakes) under the SAME single-frame eval harness? Stage 0 reports F-A v1 caught at AUROC=1.0 (SESSION_HANDOFF Section 4) but that backing eval output was not opened in this audit \u2014 confirm before the video claims the verifier catches generated fakes."
+      ]
+    },
+    {
+      "area": "video-data",
+      "facts": [
+        {
+          "claim": "The candidate ranking is a same-session L1-distance retrieval: for each selected D2 row, the recovered projected challenge E_hat is compared by mean-L1 pixel distance against a pool of 1 true projected challenge + 50 wrong-real projected challenges, sorted ascending by distance_l1 (ties broken by candidate_row), and ranked #1..#51.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/logs/render_candidate_emission_ranking_dashboard.py",
+          "evidence": "candidates = [(row,'true',true_path)] + [(r,'wrong_real',emission_path(r)) for r in wrong_rows if r != row]; if len(candidates)!=1+WRONG_POOL_SIZE -> 'expected 51'; scored.sort(key=lambda d:(float(d['distance_l1']),int(d['candidate_row']))); l1_mean(a,b)=float(np.abs(a-b).mean()) (lines 194-221, 113-114)"
+        },
+        {
+          "claim": "distance_l1 is the mean of absolute per-pixel RGB differences (range [0,1]) between E_hat and the candidate image, both opened RGB and resized to 1920x1080, normalized /255 to float32. NOT a model loss or AUROC.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/logs/render_candidate_emission_ranking_dashboard.py",
+          "evidence": "def l1_mean(a,b): return float(np.abs(a-b).mean()) (l113-114); image_float resizes to (1920,1080), /255.0 (l108-110); footer 'candidate rank, not AUROC' (l344); sidecar distance_metric 'L1 mean over RGB pixels between recovered projected challenge E_hat and each candidate projected challenge' (l557)"
+        },
+        {
+          "claim": "Exactly 1 true + 50 distractors per row. The 50 distractors are deterministic: rows in [5394,5992] that have an emission tile on disk, shuffled with numpy RandomState(seed=42), first 50 taken.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/logs/render_candidate_emission_ranking_dashboard.py",
+          "evidence": "WRONG_POOL_SEED=42; WRONG_POOL_RANGE=(5394,5992); WRONG_POOL_SIZE=50 (l63-65); deterministic_wrong_rows(): rng=np.random.RandomState(42); rng.shuffle(available); return available[:50] (l155-162)"
+        },
+        {
+          "claim": "For all three selected rows (1840, 1860, 1878) the TRUE projected challenge ranks #1 of 51 by L1.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/real_candidate_ranking.csv",
+          "evidence": "row 1840: rank 1 is_true True; row 1860: rank 1 is_true True; row 1878: rank 1 is_true True (CSV lines 2, 53, 104)"
+        },
+        {
+          "claim": "True L1 values per row: 1840 -> 0.0365614; 1860 -> 0.0359002; 1878 -> 0.0359872. The video's stated 'true 0.037' is the rounded true L1 (matches row 1840's 0.0366; all three rounds to ~0.036-0.037).",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/real_candidate_ranking.csv",
+          "evidence": "1840,1,true,1840,0.0365614,...; 1860,1,true,1860,0.0359002,...; 1878,1,true,1878,0.0359872 (lines 2, 53, 104)"
+        },
+        {
+          "claim": "Best (closest) distractor L1 per row: 1840 -> 0.2373202 (wrong row 5466); 1860 -> 0.2384728 (wrong row 5862); 1878 -> 0.2378813 (wrong row 5980). The video's '0.237' is exactly row 1840's best-distractor value, 0.2373202.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/real_candidate_ranking.csv",
+          "evidence": "1840,2,wrong_real,5466,0.2373202 (line 3); 1860,2,wrong_real,5862,0.2384728 (line 54); 1878,2,wrong_real,5980,0.2378813 (line 105)"
+        },
+        {
+          "claim": "The gap is large: true 0.037 vs nearest wrong 0.237 is ~6.5x; the source note records the ratio as ~6.5x (1840), ~6.6x (1860), ~6.6x (1878).",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/90_archive_source_packs/source_and_reference_packs/poliebotics_music_video_truthbeam_candidate_v43_recovery_anim_charts_20260511/01_recovery_animation/MULTIFRAME_RECOVERY_INFERENCE_NOTE.md",
+          "evidence": "table: 1840 rank 1 '~6.5x to next-best wrong'; 1860 '~6.6x'; 1878 '~6.6x' (lines 49-51)"
+        },
+        {
+          "claim": "The recovered/compared pattern E_hat is the model output of the EmissionPredictor (ConvNeXt-Tiny + 4-ch CFA stem + U-Net decoder, 38,012,379 params), checkpoint e2_fp16 epoch 15 (best_by_psnr.pt), run on CPU. It is pre-existing (loaded from recovery_frames/row_{N}_E_hat.png), NOT recomputed by this dashboard pass.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/90_archive_source_packs/source_and_reference_packs/poliebotics_music_video_truthbeam_candidate_v43_recovery_anim_charts_20260511/01_recovery_animation/MULTIFRAME_RECOVERY_INFERENCE_NOTE.md",
+          "evidence": "'Model used e2_fp16 epoch 15'; 'EmissionPredictor (ConvNeXt-Tiny + 4-ch CFA stem + U-Net decoder, 38,012,379 params)'; 'row_{N}_E_hat.png -- recovered \u00ca_t (model output)' (lines 14-16, 28). Dashboard script loads e_hat = image_float(paths['E_hat']) from FRAMES dir (l193, 129-135)"
+        },
+        {
+          "claim": "This dashboard pass is explicitly visualization-only: it recomputes L1/correlation distances from existing recovered images and existing same-session projected-challenge images, with no model inference, no training, no checkpoint change, no benchmark metric change.",
+          "tier": "scaffolding",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/logs/render_candidate_emission_ranking_dashboard.py",
+          "evidence": "docstring l4-7 'recomputes L1/correlation distances from existing recovered challenge images ... does not run model inference, train, alter checkpoints, or change benchmark metrics'; caveat l350 'Visualization-only recomputation from existing outputs'"
+        },
+        {
+          "claim": "Candidate images are real projected challenges (D2 derived/Emissions/tile_*.png), not generated/AI camera frames; the comparison is recovered-challenge-vs-emission-tile, all within the SAME D2 session (cittadel_first_human_20260425_020819).",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/real_candidate_ranking.csv",
+          "evidence": "every source_path = /path/to/20260417_4.7_fresh_start/sessions/cittadel_first_human_20260425_020819/derived/Emissions/tile_XXXXXX.png; script pool_note 'true projected challenge plus seed-42 wrong real projected challenges from same D2 session' (py l218)"
+        },
+        {
+          "claim": "The 'optical-consistency candidate rank' was NOT computed or used in this cut. The status doc marks it available=false, used_in_dashboard=false; the dashboard uses challenge-recovery (L1) ranking only.",
+          "tier": "claimed-unverified",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/optical_consistency_candidate_rank_status.md",
+          "evidence": "'available=false / source=not cached in the local source pack / used_in_dashboard=false ... The dashboard uses challenge-recovery ranking only: L1 distance between recovered E_hat and candidate projected challenges.' (lines 3-7)"
+        },
+        {
+          "claim": "A correlation_if_available column is also exported (Pearson corr of flattened E_hat vs candidate): the true row scores ~0.975 corr; distractors cluster near 0 (range roughly -0.05 to +0.06). Corr is secondary; ranking is by L1.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/02_edit_passes/20260518_candidate_emission_ranking_dashboard/02_rank_computation/real_candidate_ranking.csv",
+          "evidence": "1840,1,true,...,0.975227 vs 1840,2,wrong_real,...,0.066696 (lines 2-3); corr() via np.corrcoef (py l117-122)"
+        },
+        {
+          "claim": "The selected rows are IN-SAMPLE: rows 1840/1860/1878 fall within the e2_fp16 D2 training range [0,4194]; L1/PSNR/corr reflect in-sample fit, not holdout. The distractors are drawn from D2 [5394,5992] (val range).",
+          "tier": "claimed-unverified",
+          "source_file": "/path/to/truthbeam_working_set_20260516/90_archive_source_packs/source_and_reference_packs/poliebotics_music_video_truthbeam_candidate_v43_recovery_anim_charts_20260511/01_recovery_animation/recovery_sequence_metrics.csv",
+          "evidence": "every metrics row notes 'in-sample (D2 train range)'; INFERENCE_NOTE line 62 'The 20 selected rows are within the e2_fp16 D2 training range [0, 4194]. PSNR / correlation / L1 reflect in-sample fit.'; rank note line 53 'Wrong-pool source: same-session-random from D2 val range [5394, 5992], seed=42'"
+        },
+        {
+          "claim": "Per-row recovery quality (E_hat vs true E_t) from the upstream multiframe run: row 1840 L1 0.03655/PSNR 26.24/corr 0.9752; row 1860 0.03608/26.41/0.9756; row 1878 metrics in same CSV. Aggregate over 20 frames: L1 mean 0.0363, PSNR 26.30 dB, corr 0.9757.",
+          "tier": "measured-result",
+          "source_file": "/path/to/truthbeam_working_set_20260516/90_archive_source_packs/source_and_reference_packs/poliebotics_music_video_truthbeam_candidate_v43_recovery_anim_charts_20260511/01_recovery_animation/recovery_sequence_metrics.csv",
+          "evidence": "1840,...,0.03655,26.243,0.9752,yes,1,51; 1860,...,0.03608,26.407,0.9756,yes,1,51; INFERENCE_NOTE seq stats L1 mean 0.0363 / PSNR 26.30 / corr 0.9757 (lines 37-39)"
+        }
+      ],
+      "trust_flags": [
+        "The video's specific pair '0.037 vs 0.237' matches row 1840 exactly (true 0.0366 rounds to 0.037; nearest distractor 0.2373 rounds to 0.237). Rows 1860/1878 have slightly different values (true ~0.0359; nearest distractor 0.2385/0.2379). If the on-screen numbers are presented as universal, they are really row-1840-specific. Honest framing: 'true ~0.037 vs nearest wrong ~0.237' or label it as the row-1840 example.",
+        "This is a same-session, IN-SAMPLE L1 retrieval, NOT a holdout/generalization test and NOT an AUROC. The selected rows 1840/1860/1878 are inside the model's D2 training range [0,4194] (per recovery_sequence_metrics.csv notes and the inference note). Video must not imply held-out evaluation. The distractors come from D2 val range [5394,5992] but the queries are train-range.",
+        "Rank #1/51 is a candidate-rank visualization, explicitly 'consistent with (but not a re-derivation of) the audited benchmark Top-1=100%'. Do NOT present 1/51 as the benchmark or as recomputed proof of Top-1=100%.",
+        "Pool is 1 true + 50 REAL wrong projected challenges. There are NO synthetic decoys and NO generated/AI camera frames in this pool (SYNTHETIC_DECOY_STATUS.md). Video must not claim this cut tests against AI-generated/fake video; that pool was not used here.",
+        "'Optical-consistency candidate rank' is available=false / not used in this cut. Do not assert an optical-consistency metric for this dashboard.",
+        "E_hat was produced on CPU by the e2_fp16 EmissionPredictor checkpoint; the dashboard itself ran NO inference. Do not describe the dashboard pass as running the model.",
+        "Scope is within-session same-rig D2 only. No cross-rig/camera/projector/subject claim is supported by this artifact."
+      ],
+      "open_questions": [
+        "The CSV true L1 values (e.g. 0.0365614 for row 1840) differ trivially from recovery_sequence_metrics.csv L1_mean (0.03655) due to rounding/recompute path, but both are the same E_hat-vs-E_true L1; confirm the video cites the dashboard CSV value (0.037) and not a different rounding.",
+        "If the video wants a single canonical (true, distractor) pair, decide whether to standardize on row 1840 (0.037/0.237) and label it, or show all three rows; currently only 1840 yields exactly 0.037/0.237.",
+        "The dashboard hold video is rendered at 5.2s (hold_video duration_s=5.2, py l672/677), matching the promo's 5.2s pause cadence; confirm the cut actually uses this 5.2s asset vs the 3.0s-per-row sequence asset."
+      ]
+    }
+  ],
+  "synthesis": {
+    "ground_truth_summary": "The verification stack has THREE distinct model families, and the word \"binder\" is overloaded across them \u2014 resolving that is the central task. (1) The WORKING per-frame verifier behind every retrieval/PSNR/novel-XOF result is the EmissionPredictor emission-RECOVERY net: a ConvNeXt-Tiny/Large/V2 encoder with a 4-channel CFA stem + U-Net decoder + sigmoid output (3,1080,1920) that maps a capture C -> a predicted emission E_hat (src/models/emission_predictor.py docstring L1; emission_predictor_v2.py; emission_predictor_large.py). It is NOT a diffusion model. The Phase E family of 14 such binders was trained and evaluated: on 100 held-out D2+V10 frames all 14 reach AUROC(target vs novel)=1.0 and AUROC(target vs shuffled)=1.0 (experiments/binder_novel_eval/aggregate_summary.json: n_binders_loaded=14, mean=std=min=1.0, interpretation_case=best), with target-emission MSE ~0.006 vs novel/shuffled ~0.093 (~15x separation; per_binder_summary.json). (2) The Phase G fake/mismatch REJECTER is a separate conditional epsilon-prediction (denoising-diffusion) U-Net, DiffusionDiagnosticUNet (src/phase_g/diffusion_diagnostic_model.py): it predicts the noise added to a noised capture C_t, conditioned on emission E via ControlNet-style spatial hint injection (11-channel hint, 4-scale strided HintEncoder, zero-conv 1x1 adapters), with FiLM used ONLY for the scalar diffusion timestep t \u2014 explicitly NOT FiLM-on-E (that was the F-A-mini failure). The verification score is the noise-prediction residual MSE(eps_pred - true_noise): a genuine (C,E) pair denoises cleanly = low residual; a wrong-E or forged frame = high residual. (3) A THIRD thing also literally named \"diffusion binder\" \u2014 the CondDDPMUNet in scripts/phase_f/train_diffusion_binder.py (docstring: \"diffusion verifier scaffolding (trainable, not yet trained)\") \u2014 WAS actually trained (H1 to 5000 steps, final_loss 0.0096, 48M params) but FAILED as a verifier: its only verifier eval, the chain-byte probe, gives coin-flip 47-54% attack-success at every noise level (H1_PROBE_FINDING.md), while EmissionPredictors hit ~0.7%. So \"the binder that produced results\" = the EmissionPredictor recovery net; the diffusion path that produced results = the Phase G DiffusionDiagnosticUNet denoiser; the CondDDPMUNet \"diffusion binder\" produced training loss only, not a working verifier metric. Phase G main run (25000 steps, 8 GPUs, 39.77M params, bf16, cond_drop_prob 0.2) on within-session same-rig D2(5992 frames)/V10(3743) pairs gives, on held-out blocks, AUROC(correct-E vs wrong-E)=1.0 on both sessions (correct residual ~0.0035 D2/~0.0039 V10 vs wrong ~0.0075/~0.0080), AUROC vs uncond 0.977/0.942, with the residual sharply minimized at lag k=0; a shuffled-pairing control collapses to AUROC~0.5006 (delta_wrong ~7e-8), ruling out leakage. Fake rejection: the F-A v1 forger (EditorControlNet, 42.3M, 100k steps) at all checkpoints 5k/25k/70k/100k is separated from real at AUROC(real_correct vs fake_correct)=1.0 on D2 and V10 (experiments/stage_0/eval/step_000*/summary.json); the forger residual falls with training (D2 0.01099->0.00715) but never reaches the real ~0.0035 band. Cross-verifier (leave-one-session-out, 100k-step Stage-0 verifiers) holds: real_correct vs fake_correct AUROC=1.0 and real_correct vs real_shuffled AUROC=1.0 for the D2-only verifier scoring V10 and the V10-only verifier scoring D2 (stage_0_cross_verifier/{d2_only,v10_only}_verifier/step_00100000/summary.json) \u2014 this is same-rig cross-SESSION, not cross-rig. ALL results are strictly within-session / same-rig (sessions D2=Yoga, V10=AI-improv); no cross-rig/camera/projector/subject generalization is demonstrated.",
+    "denoiser_resolution": "Frame Phase G as a conditional epsilon-prediction (denoising-diffusion) U-Net used in VERIFICATION, named DiffusionDiagnosticUNet (src/phase_g/diffusion_diagnostic_model.py). The slide-safe statement: \"A genuine (capture, emission) pair denoises cleanly \u2014 low noise-prediction residual; a mismatched or forged frame does not \u2014 high residual. The residual gap is the discriminator.\" Mechanism exactly as coded: the capture C is noised (q_sample at timestep t), the U-Net predicts the added noise conditioned on emission E, and the score is MSE(eps_pred - true_noise), averaged over timesteps {50,150,300,500,750} x K=4 noise draws (scripts/stage_0/eval.py, scripts/phase_g/eval_diffusion_diagnostic.py). Conditioning on E is ControlNet-style spatial hint injection (zero-conv 1x1 adapters at 4 scales over an 11-channel hint = E RGB + zeros + normalized coord_x/coord_y); FiLM is used ONLY for the scalar timestep t. DO NOT call it \"FiLM-conditioned on E\" (that was the F-A-mini FAILURE) and DO NOT say it \"never denoises\" the fake \u2014 keep the denoising framing: genuine pairs yield LOW residual (~0.0035 D2 correct-E), wrong/fake yield HIGH residual (~0.0075). Measured residuals: correct ~0.003484 (D2)/0.003938 (V10); wrong ~0.0075/0.0080. Do not imply single-pass denoising \u2014 it is a multi-timestep, multi-noise-seed residual average, single-frame (no temporal context).",
+    "binder_resolution": "\"Binder\" is overloaded across THREE code objects and the video must use it for only ONE. THE BINDER (working verifier, source of all retrieval/PSNR/novel-XOF results) = the EmissionPredictor emission-RECOVERY net: ConvNeXt encoder + 4-ch CFA stem + U-Net decoder + sigmoid, capture C -> predicted emission E_hat (src/models/emission_predictor.py; v2 adds CoordAwareFPN). 14 Phase E binders trained+evaluated: AUROC(target vs novel)=AUROC(target vs shuffled)=1.0, ~15x MSE separation (binder_novel_eval/aggregate_summary.json & per_binder_summary.json); matched recovery ~25-26 dB PSNR. This is the \"binder\" to name. The WEAK FiLM FINDING is a DIFFERENT, EARLIER experiment: the Phase F FiLM mini-experiment tested FiLM-on-E conditioning for a FORGER/editor and FAILED (VERDICT FAIL, diversity ~8e-5, 100x below the 0.01 threshold, \"binder-leak only\" \u2014 STATUS.md). Label it as: \"FiLM-on-E conditioning failed to carry spatial emission information (Phase F mini-experiment) \u2014 which is WHY the Phase G verifier uses ControlNet hint injection for E, not FiLM.\" The FiLM failure attaches to the conditioning mechanism of the editor/diffusion path, NOT to the EmissionPredictor recovery net. THIRD object: scripts/phase_f/train_diffusion_binder.py CondDDPMUNet is also called \"diffusion binder\" \u2014 it was trained (H1, 5000 steps, loss 0.0096) but FAILED as a verifier (coin-flip chain-byte probe). Do not call it \"the binder\" or attribute any recovery/discrimination number to it. Summary mapping: recovery net = \"the binder\" (works); FiLM-on-E = the failed conditioning mode (do not credit); CondDDPMUNet diffusion-binder = trained-but-failed-verifier (do not headline). The Phase G denoiser is the verifier, separate from all three \"binder\" senses.",
+    "safe_to_claim": [
+      "Phase G verifier is a conditional epsilon-prediction (denoising-diffusion) U-Net, DiffusionDiagnosticUNet, that predicts noise added to a noised capture conditioned on emission E. Source: src/phase_g/diffusion_diagnostic_model.py docstring L1-13.",
+      "Conditioning on E is ControlNet-style spatial hint injection (11-ch hint: E RGB + zeros + normalized coords; zero-conv 1x1 adapters at 4 scales). FiLM is used ONLY for the scalar diffusion timestep t. Source: src/phase_g/diffusion_diagnostic_model.py docstring L3-6, L15-25.",
+      "Verification score = noise-prediction residual MSE(eps_pred - true_noise); low residual = clean denoise = genuine (C,E) pair, high residual = mismatch/fake. Source: scripts/stage_0/eval.py score_one() and scripts/phase_g/eval_diffusion_diagnostic.py (timesteps 50/150/300/500/750, K=4).",
+      "Phase G main run trained 25,000 steps on 8 GPUs (DDP, bs2/GPU, AdamW lr1e-4, bf16, cond_drop_prob 0.2, seed 42); 39.77M params, base_ch96, mults [1,2,4,4], 768x1024. Loss 0.982->0.000626. Source: experiments/phase_g_diffusion_diagnostic/main/training_config.json + model_final.pt + history.jsonl.",
+      "Held-out within-session AUROC(correct-E vs wrong-E)=1.000 at every offset on BOTH D2 (198 frames) and V10 (200 frames). Source: experiments/phase_g_diffusion_diagnostic/main/eval/summary.json (D2 & V10 auroc.correct_vs_wrong_avg=1.0; verified directly).",
+      "Correct-E residual ~0.00348 (D2)/~0.00394 (V10) vs wrong-E ~0.00748/~0.00804; Delta_wrong +0.0040/+0.0041 with 95% CI excluding zero. Source: main/eval/summary.json by_condition (verified directly).",
+      "Residual is sharply minimized at lag k=0 and jumps to the wrong-E plateau at every other lag (chain-alignment / temporal-coupling signature). Source: main/eval/summary.json lag_curve.",
+      "Shuffled-pairing negative control (same arch/data, only real-vs-shuffled pairing differs, 25000 steps) collapses to chance: AUROC=0.5006 (D2)/0.500625 (V10), delta_wrong ~7e-8 \u2014 rules out trivial leakage. Source: experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json (verified directly).",
+      "Synthetic-positive control (E-dependent blur injection, 15000 steps) is detected: AUROC vs wrong=1.0 both sessions, delta_wrong +0.0011/+0.0012 \u2014 pipeline is not trivially always-positive. Source: experiments/phase_g_diffusion_diagnostic/synthetic_positive/eval/summary.json.",
+      "Fake rejection: the F-A v1 forger (EditorControlNet, 42.3M params, 100k steps) is separated from real at AUROC(real_correct vs fake_correct)=1.000 at EVERY forger checkpoint 5k/25k/70k/100k on BOTH D2 and V10. Source: experiments/stage_0/eval/step_000{05000,25000,70000,100000}/summary.json (verified directly).",
+      "The forger residual falls with training (D2 0.01099@5k -> 0.00715@100k; V10 0.01231 -> 0.00810) but never reaches the real-correct band (~0.00348 D2/~0.00394 V10). Source: stage_0/eval step summaries.",
+      "The forger becomes target-conditional with training (fake_correct vs fake_shuffled AUROC rises to ~0.99 D2/0.93 V10 by 100k) yet is still separated from real at AUROC 1.0. Source: stage_0/eval/step_000*/summary.json auroc.fake_correct_vs_fake_shuffled.",
+      "Cross-verifier (leave-one-session-out, 100k-step Stage-0 verifiers): real_correct vs fake_correct AUROC=1.0 and real_correct vs real_shuffled AUROC=1.0 for D2-only verifier on V10 and V10-only verifier on D2. THIS IS EVAL-BACKED in experiments/stage_0_cross_verifier/{d2_only,v10_only}_verifier/step_00100000/summary.json (verified directly) \u2014 same-rig cross-SESSION only.",
+      "The WORKING per-frame binder is the EmissionPredictor recovery net (ConvNeXt + 4-ch CFA stem + U-Net decoder + sigmoid, capture->E_hat). Source: src/models/emission_predictor.py docstring L1.",
+      "14 Phase E EmissionPredictor binders, on 100 held-out D2+V10 frames: AUROC(target vs novel)=AUROC(target vs shuffled)=1.0 (mean=std=min=1.0), target MSE ~0.006 vs novel/shuffled ~0.093 (~15x). Source: experiments/binder_novel_eval/aggregate_summary.json + per_binder_summary.json (verified directly).",
+      "The Phase F mini-experiment FiLM-on-E conditioning FAILED (VERDICT FAIL, diversity ~8e-5, 100x below threshold) \u2014 this is the documented reason Phase G uses ControlNet hint injection for E, not FiLM. Source: STATUS.md; memory note feedback_phase_f_film_too_weak.md.",
+      "Video-data candidate-rank artifact: for selected D2 rows 1840/1860/1878 the true projected challenge ranks #1 of 51 by mean-L1; true L1 ~0.037 (row 1840 = 0.0366) vs nearest wrong ~0.237 (row 1840 = 0.2373), ~6.5x gap. Same-session L1 retrieval, EmissionPredictor e2_fp16 ep15 E_hat. Source: truthbeam_working_set_20260516/.../real_candidate_ranking.csv + render_candidate_emission_ranking_dashboard.py.",
+      "All results are within-session / same-rig (D2=Yoga, V10=AI-improv). Source: diagnostic_report.md caveat L77 ('within-session generalization, NOT cross-session'); SESSION_HANDOFF disclaimers."
+    ],
+    "do_not_claim": [
+      "Do NOT call the Phase G verifier FiLM-conditioned on emission E. FiLM-on-E was the F-A-mini FAILURE; Phase G uses ControlNet zero-conv hint injection for E and FiLM only for the scalar timestep t. (src/phase_g/diffusion_diagnostic_model.py)",
+      "Do NOT call the CondDDPMUNet 'diffusion binder' (scripts/phase_f/train_diffusion_binder.py) 'the verifier' or attribute any PSNR/recovery/discrimination metric to it. It was trained (loss 0.0096) but its ONLY verifier eval FAILED at coin-flip 47-54% attack-success. (H1_PROBE_FINDING.md)",
+      "Do NOT present the fa_v2 'fresh binders' (A1/A2/B1/B2/C1/C2/D1) as trained-with-results \u2014 no local checkpoint or acceptance verdict exists; fa_v2/ is excluded from the mirror; '7 fresh binders trained' is a handoff-doc claim only. (SESSION_HANDOFF.md L188-190; scripts/fa_v2/eval_fresh_binder.py thresholds are targets not results)",
+      "Do NOT cite the 22 dB / AUROC>=0.95 in eval_fresh_binder.py as achieved results \u2014 they are pass/fail thresholds in unrun scaffolding.",
+      "Do NOT claim F-A v2 (the stronger attacker) exists or has results \u2014 trainer code does not exist; design-spec only. (SESSION_HANDOFF.md)",
+      "Do NOT claim cross-rig, cross-camera, cross-projector, or cross-subject generalization. ALL results are within-session / same-rig (D2, V10). The cross-verifier test is cross-SESSION-within-rig only. (diagnostic_report.md L77; cross_verifier_report.json)",
+      "Do NOT claim Phase G detects fine XOF bit-flips (Type 1 global / Type 3 localized) \u2014 no merged Item-1 per-condition perturbation table was found; Phase H is confirmed blind to these and SESSION_HANDOFF warns against the claim. (SESSION_HANDOFF Section 6-7)",
+      "Do NOT claim a temporal Phase G verifier exists \u2014 Phase G is single-frame; temporal is design-only and not trained. (SESSION_HANDOFF)",
+      "Do NOT present 'AUROC=1.0' as a zero-error proof \u2014 it is a finite-sample estimate on ~198 D2 / ~200 V10 held-out frames; phrase as 'AUROC 1.0 on the held-out eval set'.",
+      "Do NOT conflate the two real-vs-fake AUROC estimators: stage_0 block-bootstrap POOLED = 1.0000 vs overnight FRAME-LEVEL per-pixel = 0.9998. Both are real but from different pipelines. (scripts/stage_0/eval.py vs agent_collab_overnight_export EXECUTIVE_README)",
+      "Do NOT claim the forger 'fails to encode the emission' \u2014 by 100k it IS target-conditional (fake_correct vs fake_shuffled ~0.99); the point is the verifier separates it from real anyway.",
+      "Do NOT call 'excess red' a detection metric \u2014 it is a display/visualization transform; quantitative claims rest on AUROC/lift tables. (MORNING_VISUALIZATION_SUMMARY.md Section 9)",
+      "Do NOT claim robustness to an adaptive/white-box attacker \u2014 F-A was trained against surrogate Phase E BINDERS then tested against the Phase G denoiser; fake rejection is a transfer (black-box-to-verifier) result, NOT an end-to-end adversarial-against-the-denoiser result.",
+      "Do NOT present the video candidate-rank #1/51 as the audited benchmark Top-1=100% or as a held-out test \u2014 it is a same-session, IN-SAMPLE (D2 train range [0,4194]) L1 retrieval visualization, explicitly visualization-only, distractors from D2 val range. (render_candidate_emission_ranking_dashboard.py docstring; recovery_sequence_metrics.csv 'in-sample' notes)",
+      "Do NOT claim the video candidate pool tests against AI-generated/fake video \u2014 the pool is 1 true + 50 REAL wrong projected challenges, no synthetic decoys. (SYNTHETIC_DECOY_STATUS.md)",
+      "Do NOT present the '0.037 vs 0.237' pair as universal \u2014 it is row-1840-specific (rows 1860/1878 are ~0.0359 / 0.2385/0.2379); label it as the row-1840 example or say '~0.037 vs ~0.237'.",
+      "Do NOT cite the Phase D octave-head / candidate-ranking / Window-FMR retrieval architecture as validated \u2014 it is AUDIT-FAIL (A5 octave->FPN routing bug), has no trainer (BLOCKER B1), and unimplemented config inheritance (B4); superseded scaffolding. (AUDIT_PART_A.md, AUDIT_PART_B.md)",
+      "Do NOT headline Phase E Window-FMR@5=0.000 / Top-1=1.000 without flagging they are STATUS.md summary prose (claimed-unverified tier; per-binder eval files not independently opened for those specific numbers).",
+      "Do NOT assert 'the body region is what Phase G uses' or use the variance-box E2/E3 body-vs-off-body ablation numbers \u2014 the finding INVERTED under Mask R-CNN segmentation (off-body carries the discriminative signal). (SESSION_HANDOFF Section 9)",
+      "Do NOT imply the forger/verifier .pt weights are on-hand \u2014 checkpoints/ is empty locally; only logs/summaries are in the mirror; weights lived on Lambda. (verified: empty checkpoints dir)",
+      "Do NOT cite 40.95M params for the trained Phase G model \u2014 that is the model-file default attn config (never used); the trainer forces last-scale-only attn = 39.77M (confirmed in checkpoint).",
+      "Do NOT use the 'optical-consistency candidate rank' for the video cut \u2014 status doc marks it available=false, used_in_dashboard=false. (optical_consistency_candidate_rank_status.md)"
+    ]
+  },
+  "specBlocks": [
+    {
+      "segment": "03 \u2014 Verification theory: the diffusion-denoiser verifier, the emission-recovery binder, and the diagnostic controls (within-session / same-rig: D2=Yoga, V10=AI-improv)",
+      "spec_block_lines": [
+        "PHASE G VERIFIER \u2014 a conditional \u03b5-prediction (denoising-diffusion) U-Net, DiffusionDiagnosticUNet. A noised capture C_t is denoised; the net predicts the added noise conditioned on emission E. [src/phase_g/diffusion_diagnostic_model.py docstring L1-13]",
+        "VERIFICATION SCORE = noise-prediction residual MSE(\u03b5_pred \u2212 true_noise), averaged over timesteps {50,150,300,500,750} \u00d7 K=4 noise draws (single-frame, no temporal context). A genuine (capture, emission) pair denoises cleanly = LOW residual; a mismatched or forged frame does not = HIGH residual. The residual gap is the discriminator. [scripts/stage_0/eval.py; scripts/phase_g/eval_diffusion_diagnostic.py]",
+        "CONDITIONING ON E = ControlNet-style spatial hint injection: 11-channel hint (E RGB + zeros + normalized coord_x/coord_y), zero-conv 1\u00d71 adapters at 4 scales. FiLM is used ONLY for the scalar diffusion timestep t \u2014 NOT FiLM-on-E. [src/phase_g/diffusion_diagnostic_model.py docstring L3-6, L15-25]",
+        "WHY NOT FiLM-on-E: an earlier Phase F mini-experiment found FiLM-on-E conditioning failed to carry spatial emission information (VERDICT FAIL, diversity ~8e-5, ~100\u00d7 below threshold) \u2014 the documented reason Phase G routes E through ControlNet hint injection instead. [STATUS.md; feedback_phase_f_film_too_weak.md]",
+        "TRAINING \u2014 25,000 steps, 8 GPUs (DDP), batch 2/GPU, AdamW lr 1e-4, bf16, T=1000, cond_drop_prob 0.2, seed 42; 39.77M params, base_ch 96, mults [1,2,4,4], 768\u00d71024. [experiments/phase_g_diffusion_diagnostic/main/training_config.json]",
+        "RESULT (held-out, within-session) \u2014 AUROC(correct-E vs wrong-E) = 1.000 at every offset on BOTH sessions: D2 (198 frames) and V10 (200 frames). [main/eval/summary.json; verified directly]",
+        "RESIDUALS \u2014 correct-E ~0.00348 (D2) / ~0.00394 (V10) vs wrong-E ~0.00748 (D2) / ~0.00804 (V10); \u0394_wrong +0.0040 / +0.0041, 95% CI excludes zero. Residual is sharply minimized at lag k=0 and jumps to the wrong-E plateau at every other lag (chain-alignment signature). AUROC(correct vs unconditional) 0.977 (D2) / 0.942 (V10). [main/eval/summary.json by_condition + lag_curve]",
+        "NEGATIVE CONTROL (leakage check) \u2014 a shuffled-pairing run (same architecture/data, only real-vs-shuffled pairing differs, 25,000 steps) collapses to chance: AUROC 0.5006 (D2) / 0.5006 (V10), \u0394_wrong ~7e-8. Rules out trivial leakage. [shuffled/eval/summary.json; verified directly]",
+        "POSITIVE CONTROL (sensitivity check) \u2014 an E-dependent blur-injection run (15,000 steps) is detected: AUROC vs wrong = 1.0 both sessions, \u0394_wrong +0.0011 / +0.0012. The pipeline is not trivially always-positive. [synthetic_positive/eval/summary.json]",
+        "FAKE REJECTION \u2014 the F-A v1 forger (EditorControlNet, 42.3M params, 100k steps) is separated from real at AUROC(real_correct vs fake_correct) = 1.000 at EVERY checkpoint 5k/25k/70k/100k on BOTH D2 and V10. [experiments/stage_0/eval/step_000*/summary.json; verified directly]",
+        "FORGER NEVER CLOSES THE GAP \u2014 its residual falls with training (D2 0.01099\u21920.00715; V10 0.01231\u21920.00810) yet never reaches the real-correct band (~0.00348 D2 / ~0.00394 V10). It does become target-conditional (fake_correct vs fake_shuffled AUROC rises to ~0.99 D2 / ~0.93 V10 by 100k) \u2014 and is still separated from real at AUROC 1.0. [stage_0/eval step summaries]",
+        "CROSS-VERIFIER (leave-one-session-out, 100k-step Stage-0 verifiers) \u2014 real_correct vs fake_correct AUROC = 1.0 AND real_correct vs real_shuffled AUROC = 1.0 for the D2-only verifier scoring V10 and the V10-only verifier scoring D2. Same-rig cross-SESSION, not cross-rig. [stage_0_cross_verifier/{d2_only,v10_only}_verifier/step_00100000/summary.json; verified directly]",
+        "THE BINDER (separate working per-frame net behind every retrieval/PSNR/novel-XOF result) = the EmissionPredictor emission-RECOVERY net: ConvNeXt encoder + 4-channel CFA stem + U-Net decoder + sigmoid, mapping capture C \u2192 predicted emission E_hat. NOT a diffusion model. [src/models/emission_predictor.py docstring L1]",
+        "BINDER EVAL \u2014 14 Phase E EmissionPredictor binders, 100 held-out D2+V10 frames: AUROC(target vs novel) = AUROC(target vs shuffled) = 1.0 (mean = std = min), target MSE ~0.006 vs novel/shuffled ~0.093 (~15\u00d7 separation). [experiments/binder_novel_eval/aggregate_summary.json + per_binder_summary.json; verified directly]",
+        "SCOPE \u2014 all results are strictly within-session / same-rig (D2 = Yoga, V10 = AI-improv). AUROC 1.0 is a finite-sample estimate on ~198 D2 / ~200 V10 held-out frames. No cross-rig / cross-camera / cross-projector / cross-subject generalization is demonstrated; the cross-verifier test is cross-session-within-rig only. [diagnostic_report.md caveat L77; SESSION_HANDOFF.md]"
+      ],
+      "all_from_safe_list": true
+    },
+    {
+      "segment": "05 \u2014 Bounded recovery: the emission-recovery binder reconstructing E-hat from the capture, and this cut's L1 candidate ranking (1 of 51)",
+      "spec_block_lines": [
+        "BOUNDED RECOVERY \u2014 the binder (per-frame emission-recovery net)",
+        "Model: EmissionPredictor \u2014 ConvNeXt encoder + 4-channel CFA stem + U-Net decoder + sigmoid",
+        "Maps capture C -> predicted emission E_hat (3 x 1080 x 1920); not a diffusion model",
+        "[src/models/emission_predictor.py docstring L1-9]",
+        "",
+        "Phase E binder family: 14 EmissionPredictors trained + evaluated",
+        "Held-out set: 100 D2 + V10 frames, 22 conditions",
+        "AUROC(target vs novel) = 1.000  (mean = std = min = 1.0, n=14)",
+        "AUROC(target vs shuffled) = 1.000  (mean = std = min = 1.0, n=14)",
+        "Target-emission MSE ~0.0062  vs  novel/shuffled ~0.093  (~15x separation)",
+        "[experiments/binder_novel_eval/aggregate_summary.json + per_binder_summary.json]",
+        "",
+        "THIS CUT \u2014 same-session L1 candidate ranking (row 1840)",
+        "Recovered E_hat ranks the true projected challenge #1 of 51",
+        "True-challenge mean-L1 = 0.0366  vs  nearest wrong = 0.2373  (~6.5x gap)",
+        "Pool = 1 true + 50 REAL wrong projected challenges (no synthetic decoys)",
+        "Visualization-only, same-session L1 retrieval (not a held-out benchmark)",
+        "[truthbeam_working_set/.../real_candidate_ranking.csv]",
+        "",
+        "SCOPE: within-session / same-rig only (D2 = Yoga, V10 = AI-improv)",
+        "No cross-rig / camera / projector / subject generalization claimed"
+      ],
+      "all_from_safe_list": true
+    },
+    {
+      "segment": "06 \u2014 Substitute-frame test: the diffusion denoiser rejecting F-A generated/fake frames (Session B / V10)",
+      "spec_block_lines": [
+        "SUBSTITUTE-FRAME TEST \u2014 Session B / V10 (AI-improv), within-session / same-rig",
+        "Verifier: Phase G DiffusionDiagnosticUNet \u2014 conditional epsilon-prediction (denoising-diffusion) U-Net.",
+        "Score = noise-prediction residual MSE(eps_pred - true_noise), averaged over timesteps {50,150,300,500,750} x K=4 draws.",
+        "Genuine (capture, emission) pair denoises cleanly = LOW residual; substitute/forged frame does NOT = HIGH residual.",
+        "Substitute frames: F-A v1 forger (EditorControlNet, 42.3M params, 100k steps), evaluated at checkpoints 5k / 25k / 70k / 100k.",
+        "V10 real-correct residual ~0.00394 vs forged residual 0.01231 (5k) -> 0.00810 (100k).",
+        "Forger residual falls with training but never reaches the V10 real-correct band (~0.00394).",
+        "AUROC(real-correct vs fake-correct) = 1.0 on V10 at EVERY forger checkpoint (5k/25k/70k/100k).",
+        "Forger becomes target-conditional by 100k (fake-correct vs fake-shuffled AUROC 0.585 -> 0.929) yet stays separated from real at AUROC 1.0.",
+        "Cross-verifier: D2-only verifier scoring V10 -> real vs fake AUROC 1.0, real vs real-shuffled AUROC 1.0 (same-rig cross-SESSION).",
+        "AUROC 1.0 = on the held-out V10 eval set (finite sample, ~200 frames); transfer (black-box) fake-rejection, not white-box adaptive.",
+        "Scope: within-session / same-rig only (V10 = AI-improv); no cross-rig / camera / projector / subject claim.",
+        "Source: experiments/stage_0/eval/step_000{05000,25000,70000,100000}/summary.json; stage_0_cross_verifier/d2_only_verifier/step_00100000/summary.json (verified directly)."
+      ],
+      "all_from_safe_list": true
+    },
+    {
+      "segment": "07",
+      "spec_block_lines": [
+        "SEGMENT 07 \u2014 DIAGNOSTICS DASHBOARD  |  verifier residual-MSE separation, held-out, within-session / same-rig (D2=Yoga, V10=AI-improv)",
+        "VERIFIER  Phase G DiffusionDiagnosticUNet \u2014 conditional \u03b5-prediction (denoising-diffusion) U-Net. Score = noise-prediction residual MSE(\u03b5_pred \u2212 true_noise), averaged over timesteps {50,150,300,500,750} \u00d7 K=4 noise draws. Genuine (capture,emission) pair denoises cleanly \u2192 LOW residual; mismatched/forged frame \u2192 HIGH residual. [src/phase_g/diffusion_diagnostic_model.py; scripts/stage_0/eval.py; scripts/phase_g/eval_diffusion_diagnostic.py]",
+        "CONDITIONING  E injected ControlNet-style: 11-ch spatial hint (E RGB + zeros + normalized coord_x/coord_y) added via zero-conv 1\u00d71 adapters at 4 scales. FiLM is used ONLY for the scalar diffusion timestep t \u2014 NOT FiLM-on-E. [diffusion_diagnostic_model.py docstring L3-6, L15-25]",
+        "TRAIN  25,000 steps, 8 GPUs (DDP), bs2/GPU, AdamW lr1e-4, bf16, cond_drop_prob 0.2, seed 42 \u00b7 39.77M params \u00b7 base_ch96 \u00b7 mults [1,2,4,4] \u00b7 768\u00d71024 \u00b7 loss 0.982\u21920.000626. [main/training_config.json + model_final.pt + history.jsonl]",
+        "AUROC  correct-E vs wrong-E = 1.000 at every offset, BOTH sessions \u2014 D2 (n=198) and V10 (n=200) held-out frames. AUROC correct-E vs unconditional = 0.977 (D2) / 0.942 (V10). [main/eval/summary.json \u2014 verified directly]",
+        "RESIDUAL (mean)  correct-E \u2248 0.00348 (D2) / 0.00394 (V10)  vs  wrong-E \u2248 0.00748 / 0.00804 \u00b7 \u0394_wrong = +0.0040 / +0.0041, 95% CI excludes zero. [main/eval/summary.json by_condition \u2014 verified directly]",
+        "z-TAIL / LAG  residual sharply MINIMIZED at lag k=0, jumps to the wrong-E plateau at every other lag (chain-alignment / temporal-coupling signature). [main/eval/summary.json lag_curve]",
+        "NEG. CONTROL (shuffled pairing)  same arch/data, only real\u2194shuffled pairing differs, 25k steps \u2192 AUROC collapses to chance 0.5006 (D2) / 0.5006 (V10), \u0394_wrong \u2248 7e-8 \u2014 rules out trivial leakage. [shuffled/eval/summary.json \u2014 verified directly]",
+        "POS. CONTROL (E-dependent blur injection, 15k steps)  detected: AUROC vs wrong = 1.0 both sessions, \u0394_wrong +0.0011/+0.0012 \u2014 pipeline is not trivially always-positive. [synthetic_positive/eval/summary.json]",
+        "FAKE REJECTION  F-A v1 forger (EditorControlNet, 42.3M, 100k steps) separated from real at AUROC(real_correct vs fake_correct)=1.000 at EVERY checkpoint 5k/25k/70k/100k, BOTH D2 and V10. Forger residual falls with training (D2 0.01099@5k\u21920.00715@100k; V10 0.01231\u21920.00810) but never reaches the real-correct band (~0.0035 D2 / ~0.0039 V10). Forger becomes target-conditional (fake_correct vs fake_shuffled \u21920.993 D2 / 0.929 V10 by 100k) yet stays separated from real at AUROC 1.0. [experiments/stage_0/eval/step_000{05000,25000,70000,100000}/summary.json \u2014 verified directly]",
+        "CROSS-VERIFIER (leave-one-session-out, 100k-step Stage-0)  real_correct vs fake_correct = 1.0 AND real_correct vs real_shuffled = 1.0 for the D2-only verifier scoring V10 and the V10-only verifier scoring D2 \u2014 same-rig cross-SESSION only (NOT cross-rig). [stage_0_cross_verifier/{d2_only,v10_only}_verifier/step_00100000/summary.json \u2014 verified directly]",
+        "RECOVERY RANKING (the binder = EmissionPredictor recovery net: ConvNeXt + 4-ch CFA stem + U-Net decoder + sigmoid, capture\u2192\u00ca)  14 Phase E binders, 100 held-out D2+V10 frames: AUROC(target vs novel)=AUROC(target vs shuffled)=1.000 (mean=std=min=1.0); target-MSE ~0.006 vs novel/shuffled ~0.093 (~15\u00d7 separation). [binder_novel_eval/aggregate_summary.json + per_binder_summary.json \u2014 verified directly]",
+        "CANDIDATE-RANK PANEL (visualization, same-session in-sample L1 retrieval, EmissionPredictor e2_fp16 \u00ca)  D2 row 1840: true projected challenge ranks #1 of 51 by mean-L1; true L1 = 0.0366 vs nearest wrong = 0.2373 (~6.5\u00d7 gap). Example row only \u2014 visualization, not a held-out benchmark. [truthbeam_working_set/.../real_candidate_ranking.csv; render_candidate_emission_ranking_dashboard.py]",
+        "FiLM-WEAK DIAGNOSTIC (correct label)  FiLM-on-E conditioning FAILED to carry spatial emission info in the EARLIER Phase F mini-experiment (VERDICT FAIL; diversity ~8e-5, ~100\u00d7 below threshold) \u2014 this is WHY the Phase G verifier uses ControlNet hint injection for E, not FiLM. The failure attaches to the conditioning mechanism, NOT to the EmissionPredictor recovery net. [STATUS.md; feedback_phase_f_film_too_weak.md]",
+        "SCOPE  All results are within-session / same-rig (D2=Yoga, V10=AI-improv); cross-verifier is cross-SESSION-within-rig only. No cross-rig / camera / projector / subject generalization is demonstrated. AUROC values are finite-sample estimates on ~198 D2 / ~200 V10 held-out frames. [diagnostic_report.md caveat L77; SESSION_HANDOFF disclaimers]"
+      ],
+      "all_from_safe_list": true
+    }
+  ],
+  "verdicts": [
+    {
+      "segment": "03 \u2014 Verification theory: the diffusion-denoiser verifier, the emission-recovery binder, and the diagnostic controls (within-session / same-rig: D2=Yoga, V10=AI-improv)",
+      "all_grounded": false,
+      "issues": [
+        {
+          "line": "TRAINING \u2014 25,000 steps, 8 GPUs (DDP), batch 2/GPU, AdamW lr 1e-4, bf16, T=1000, cond_drop_prob 0.2, seed 42; 39.77M params, base_ch 96, mults [1,2,4,4], 768\u00d71024. [experiments/phase_g_diffusion_diagnostic/main/training_config.json]",
+          "problem": "number-mismatch"
+        }
+      ]
+    },
+    {
+      "segment": "05 \u2014 Bounded recovery: the emission-recovery binder reconstructing E-hat from the capture, and this cut's L1 candidate ranking (1 of 51)",
+      "all_grounded": false,
+      "issues": [
+        {
+          "line": "AUROC(target vs novel) = 1.000  (mean = std = min = 1.0, n=14)",
+          "problem": "number-mismatch"
+        },
+        {
+          "line": "AUROC(target vs shuffled) = 1.000  (mean = std = min = 1.0, n=14)",
+          "problem": "number-mismatch"
+        }
+      ]
+    },
+    {
+      "segment": "06 \u2014 Substitute-frame test: the diffusion denoiser rejecting F-A generated/fake frames (Session B / V10)",
+      "all_grounded": true,
+      "issues": []
+    },
+    {
+      "segment": "07",
+      "all_grounded": true,
+      "issues": [
+        {
+          "line": "FAKE REJECTION  ... [experiments/stage_0/eval/step_000{05000,25000,70000,100000}/summary.json \u2014 verified directly]",
+          "problem": "number-mismatch"
+        }
+      ]
+    }
+  ]
+}

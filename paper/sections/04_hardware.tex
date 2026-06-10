@@ -1,0 +1,60 @@
+\section{Capture and Emission Pipeline}
+\label{sec:hardware}
+
+This section documents the physical capture and emission pipeline that produces every $(E_t, C_t)$ pair consumed downstream by the verifier, together with the on-disk representation, sampling rate, normalization, and dataset inventory. A guiding principle throughout is that the entire Truth Beam loop is \SI{8}{bit} end-to-end: the BLAKE3-XOF byte stream, the rendered emission tiles, and the camera capture all live in $[0,255]$, and no stage of the loop operates at higher bit depth. The protocol-level chain semantics that bind $E_t$ and $C_t$ are treated in \Cref{sec:protocol_chain}; here we describe the optics, sensor configuration, and data handling that those semantics ride on.
+
+\subsection{Sensor and bit depth}
+\label{sec:hardware:sensor}
+
+The capture camera is built around a Sony IMX540 image sensor. The sensor possesses a \SI{12}{bit} analog-to-digital converter natively, but the camera is deliberately configured to deliver \SI{8}{bit} BayerRG8 frames rather than its full ADC depth. As a consequence the sensor maximum value seen by every downstream stage is $255$, and the protocol is \SI{8}{bit} from emission synthesis through capture. We emphasize this configuration explicitly because an earlier internal description characterized the format as a ``12-bit packed Bayer'' final specification; that phrasing was a misnomer. The \SI{12}{bit} figure refers only to the sensor's native ADC capability, not to the bit depth at which any TB artifact is rendered, projected, captured, hashed, or stored. The BLAKE3-XOF stage \cite{blake3} expands to raw \texttt{uint8} bytes, the renderer writes \SI{8}{bit} RGB PNGs, and the camera returns BayerRG8: there is no point in the loop above \SI{8}{bit}.
+
+\subsection{Raw frame format and color filter array}
+\label{sec:hardware:raw}
+
+Each raw capture frame $C_t$ is written to disk as a headerless block of exactly \num{24472000} bytes of \texttt{uint8} data, with no embedded metadata or padding. The frame is row-major with shape $(H, W) = (4600, 5320)$, and the byte count is exact: $4600 \times 5320 = \num{24472000}$. The color filter array is RGGB, i.e.\ within each $2\times2$ Bayer quad the top-left pixel is red, the top-right and bottom-left are the two green channels ($G_1$, $G_2$), and the bottom-right is blue. This pattern was verified against on-disk nearest-neighbor previews by byte-equality on a representative row.
+
+A subtlety worth recording for any reimplementation is the demosaicing flag. Although the camera SDK reports the CFA as BayerRG8, the correct OpenCV demosaic constant for this physical layout is \texttt{cv2.COLOR\_BayerBG2RGB\_EA}, \emph{not} \texttt{cv2.COLOR\_BayerRG2RGB}. The naming discrepancy reflects a red/blue convention difference between the camera vendor's labeling and OpenCV's internal naming; applying the literal \texttt{BayerRG2RGB} flag would wrongly swap the red and blue channels. Validation against the nearest-neighbor previews under the \texttt{BayerBG2RGB\_EA} flag yielded per-channel Pearson correlations of $1.0$ (R), $0.996$ (G), and $0.991$ (B), confirming the flag choice.
+
+\subsection{Emission tiles and projection}
+\label{sec:hardware:emission}
+
+The emission target $E_t$ projected at chain step $t$ is rendered at $1080 \times 1920$ ($H \times W$); equivalently, the PIL image size is $W{=}1920$, $H{=}1080$. Each tile is an \SI{8}{bit}-per-channel RGB PNG stored as \texttt{uint8} in $[0,255]$ at the path \texttt{\{session\}/derived/Emissions/tile\_\{t:06d\}.png}; the dataset loader divides by $255$ to obtain a \texttt{float32} image in $[0,1]$ before any further normalization. These tiles are the images that were actually projected during recording, generated deterministically from the chain state via the bit-exact octave renderer detailed in \Cref{sec:protocol_chain}. The projector emits at $1920 \times 1080$. The patent \cite{patent2025} gives, as exemplary values, a projector refresh of approximately \SI{16}{\milli\second} and a configuration of $1920\times1080$ projected against $5360\times4600$ detected; these are exemplary figures from the patent rather than measured quantities in this dataset, and we note that the patent's exemplary detected width ($5360$) differs from the actual on-disk raw frame width ($5320$) and should not be conflated with it. The $1080\times1920$ ($H\times W$) schema notation and the $1920\times1080$ projector-emit notation describe the same $2.07$\,MP frame in transposed axis order.
+
+\subsection{Commit rate and the \texttt{capture\_frame\_id} stride artifact}
+\label{sec:hardware:rate}
+
+The chain commits at approximately \SI{2.5}{\hertz}, and the correct physical reading of this rate is \emph{one physical exposure per chain step}: each chain advance corresponds to a single captured frame projected under a single emission tile. This point requires care because the GenICam metadata field \texttt{capture\_frame\_id} advances in strides of four (for example, chain row $0$ carries \texttt{capture\_frame\_id}${=}4$). That stride is a GenICam hardware-tick artifact of the acquisition layer; it is \emph{not} evidence of a \SI{10}{\hertz} acquisition with a one-in-four commit policy, and the camera should not be described as running at \SI{10}{\hertz}. The authoritative frame index is the chain row index $t$: on-disk capture files are named \texttt{frame\_\{t:06d\}.raw} where $t$ is the chain row, and \texttt{capture\_frame\_id} is retained as metadata only. We adopt the convention throughout that ``frame $t$'' means chain row $t$, with one physical exposure per row.
+
+\subsection{Normalization and black-level handling}
+\label{sec:hardware:norm}
+
+Training-time normalization is applied at dataset-load time as a per-channel robust standardization: each channel is centered on its median and scaled by $\mathrm{IQR}/1.349$, where the interquartile range divided by $1.349$ is the robust analogue of the standard deviation under a Gaussian assumption. Crucially, both statistics are computed on training rows only, so that held-out evaluation frames do not leak into the normalization parameters. This method was adopted under an audit mandate, replacing an earlier naive division by $255$.
+
+No black-level (dark-pedestal) subtraction is applied. The capture manifest records \texttt{black\_level}${=}0$ with \texttt{black\_level\_source}${=}$``\texttt{no\_measurement\_found}''. This value of zero should not be read as a measured dark level: it records the \emph{absence} of any measured dark-frame or pedestal value anywhere in the calibration, hardware-setup, or scripts trees. Black-level subtraction is therefore explicitly forbidden until a measured value is confirmed, precisely so that an unverified pedestal estimate cannot silently bias the residual statistics on which verification depends.
+
+\subsection{Dataset inventory}
+\label{sec:hardware:dataset}
+
+The dataset comprises two recording sessions captured on the same rig with a single human performer: D2 (\texttt{cittadel\_first\_human}) with \num{5992} chain rows, and V10 (\texttt{cittadel\_v10\_mainnet\_improv}) with \num{3743} chain rows. Both sessions are complete in the sense that every chain row $t$ has a corresponding emission tile \texttt{tile\_\{t:06d\}.png} and raw capture \texttt{frame\_\{t:06d\}.raw}, giving \num{9735} frames in total across the two sessions. The two sessions differ in their chain protocol version (D2 under the v9 chain, V10 under the v10 chain), a difference treated in \Cref{sec:protocol_chain}; for the present purposes they are two physically homogeneous same-rig captures. The performer is the same individual in both sessions but is dressed differently in each (different costume and mask --- yoga attire in D2, an improv costume in V10), so the sessions are not visually identical at the subject level. \Cref{tab:hw_inventory} summarizes the per-session counts and the per-frame storage footprint.
+
+\begin{table}[t]
+\centering
+\caption{Per-session capture inventory. Raw frame size is exact ($4600\times5320\times\SI{1}{byte}$); raw totals are decimal gigabytes ($10^9$\,B). Both sessions are complete: one raw capture and one emission tile per chain row.}
+\label{tab:hw_inventory}
+\begin{tabular}{lrrr}
+\toprule
+Session & Chain rows / frames & Raw Bayer total & Emission tiles \\
+\midrule
+D2 (\texttt{cittadel\_first\_human})        & \num{5992} & \SI{146.64}{\giga\byte} & \num{5992} \\
+V10 (\texttt{cittadel\_v10\_mainnet\_improv}) & \num{3743} & \SI{91.60}{\giga\byte}  & \num{3743} \\
+\midrule
+Total & \num{9735} & \SI{238.23}{\giga\byte} & \num{9735} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each raw frame is \num{24472000} bytes, so the per-session raw Bayer footprints are $\num{5992}\times\num{24472000} = \SI{146.64}{\giga\byte}$ for D2 and $\num{3743}\times\num{24472000} = \SI{91.60}{\giga\byte}$ for V10, totaling \SI{238.23}{\giga\byte} of raw capture. The emission tile set occupies \SI{23.82}{\giga\byte} across the \num{9735} PNGs, and the per-session chain logs are negligible (a few megabytes each). All raw frames are treated as read-only and are never modified in place.
+
+\paragraph{Scope and privacy.} Both sessions feature an identifiable human performer, so any public release of raw frames, emission tiles, derived previews, or RGB thumbnails is a privacy and consent matter, and the standing display rules forbid any manual suppression of body or person regions in promoted artifacts. We also flag the scope of the dataset explicitly: this is a same-rig, single-operator, two-session corpus. It is suitable for same-rig cross-session and cross-protocol analysis, but it does not on its own support any cross-rig, cross-camera, cross-projector, or cross-subject claim. Two open calibration items are surfaced here for completeness and carried into any release manifest: the measured black level is unknown (recorded as $0$ with source ``\texttt{no\_measurement\_found}'', no subtraction applied), and the projector-pipeline lock status is unconfirmed while the camera photometry is locked.
+
+The end-to-end pipeline---each raw $C_t$ paired with the emission $E_t$ projected at the same chain step and the resulting per-pixel verification residual---is illustrated for representative captures in \Cref{fig:overview} of \Cref{sec:system_threat}; the quantitative separability claims that such illustrations visualize are reported in \Cref{sec:results_main}.

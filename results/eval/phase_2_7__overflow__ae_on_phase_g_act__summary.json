@@ -1,0 +1,7 @@
+{
+  "model_tag": "ae_on_phase_g_act",
+  "ckpt_step": 20000,
+  "n_eval_cells": 1590,
+  "mean_E2_seg_AUROC_CE_correct": 0.28429840561224495,
+  "note": "Diagnostic only \u2014 Phase G activation cache has CE_correct only, no CE_shuffled. Cannot compute AE_specific_lift; not a substrate-family result."
+}

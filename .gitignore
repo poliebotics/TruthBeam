@@ -1,0 +1,30 @@
+# --- build / cache ---
+*.pyc
+__pycache__/
+.venv/
+*.log
+.nfs*
+.DS_Store
+
+# --- model weights / large data (hosted separately; see docs/DATA_MODEL_PUBLISHING_PLAN.md) ---
+*.pt
+*.ckpt
+*.npz
+data/raw/
+
+# --- credentials / secrets (defensive: the recording code writes wallet keys to ~/.tb/) ---
+.env
+*.env
+*.key
+*.pem
+*.p12
+*_key.json
+testnet_key.json
+mainnet_key.json
+id_rsa
+id_ed25519
+rclone.conf
+.tb/
+
+# XOF bit-flip raw eval inputs are intentionally tracked (reproduction inputs)
+!results/redteam_segmentation_evals/xof_bitflip/*.npz

@@ -1,0 +1,69 @@
+{
+  "verdict": "FAIL",
+  "max_steps": 3000,
+  "elapsed_sec": 4041.8,
+  "final_probe": {
+    "n_sources": 8,
+    "n_targets": 32,
+    "diversity_mean": 9.64563014349551e-05,
+    "diversity_min": 9.545170178171247e-05,
+    "diversity_max": 9.751877951202914e-05,
+    "cfa_delta_from_source_mean": 0.029248477156215813,
+    "visuals_per_source": [
+      {
+        "source_t": 5526,
+        "examples": [
+          {
+            "target_t": 5431,
+            "fake_mean": 0.11198682337999344,
+            "fake_std": 0.07479356974363327
+          },
+          {
+            "target_t": 5484,
+            "fake_mean": 0.11198580265045166,
+            "fake_std": 0.07479351758956909
+          },
+          {
+            "target_t": 5486,
+            "fake_mean": 0.11198705434799194,
+            "fake_std": 0.07479651272296906
+          },
+          {
+            "target_t": 5495,
+            "fake_mean": 0.1119852066040039,
+            "fake_std": 0.0747862383723259
+          }
+        ]
+      },
+      {
+        "source_t": 5655,
+        "examples": [
+          {
+            "target_t": 5431,
+            "fake_mean": 0.11517851799726486,
+            "fake_std": 0.08011864870786667
+          },
+          {
+            "target_t": 5484,
+            "fake_mean": 0.11517785489559174,
+            "fake_std": 0.0801151767373085
+          },
+          {
+            "target_t": 5486,
+            "fake_mean": 0.11517781764268875,
+            "fake_std": 0.08011488616466522
+          },
+          {
+            "target_t": 5495,
+            "fake_mean": 0.11517813056707382,
+            "fake_std": 0.08010555058717728
+          }
+        ]
+      }
+    ],
+    "step": 3000
+  },
+  "n_loss_history_entries": 120,
+  "n_probe_history_entries": 12,
+  "interpretation": "FAIL: editor pose-warps without using E_target. Need pose-filtering or different supervision."
+}

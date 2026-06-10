@@ -1,0 +1,19 @@
+{
+  "n_d2": 50,
+  "n_v10": 56,
+  "leakage_flags": [],
+  "classifications": {
+    "D2|fake_5k": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|fake_5k": "MAJOR FINDING \u2014 body alone insufficient",
+    "D2|fake_25k": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|fake_25k": "MAJOR FINDING \u2014 body alone insufficient",
+    "D2|fake_70k": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|fake_70k": "MAJOR FINDING \u2014 body alone insufficient",
+    "D2|fake_100k": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|fake_100k": "MAJOR FINDING \u2014 body alone insufficient",
+    "D2|shuffled_E": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|shuffled_E": "MAJOR FINDING \u2014 body alone insufficient",
+    "D2|cross_session_E": "MAJOR FINDING \u2014 body alone insufficient",
+    "V10|cross_session_E": "MAJOR FINDING \u2014 body alone insufficient"
+  }
+}
