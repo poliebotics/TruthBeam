@@ -131,9 +131,9 @@ log "Report → $OUT_ROOT/cross_verifier_report.md"
 # Codex audit MED 2026-05-04: g1a mirror happens via the cron job ON g1a
 # (every 30 min, sources Lambda → g1a). Lambda has no creds to push to g1a,
 # so we cannot force the mirror from this side. Sentinel touch is the
-# "Lambda-side complete" signal; CC/operator side will trigger the mirror
+# "Lambda-side complete" signal; the host side will trigger the mirror
 # from g1a after seeing the sentinel.
-log "Note: g1a cron mirror picks up new files within 30 min; CC will trigger "
+log "Note: g1a cron mirror picks up new files within 30 min; one can trigger a "
 log "      manual mirror from g1a side at next monitoring wakeup."
 
 log "==================================================================="

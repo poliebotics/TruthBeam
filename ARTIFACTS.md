@@ -25,9 +25,21 @@ reviewer always knows where something is and whether it is required to reproduce
 | Pinned lockfile (tested **training/eval** environment; the optional online-verification extras in `requirements.txt` are not pinned) | `requirements-lock.txt` | tested training versions |
 
 ## External — Cloudflare R2 (bucket `truthbeam`)
-**Access:** the bucket is private. Reviewers obtain artifacts by (a) the curated **Zenodo** record (subset, once
-minted), or (b) request to the author for read-only/signed-URL access. Bulk sizes are large; nothing here is
-required to verify the *code→hash* promise (that runs from this repo alone).
+
+**A public subset is directly downloadable — no request, no login** — through the read-only gateway
+`data.truthbeam.com`. Step-by-step in **[REPRODUCE.md](REPRODUCE.md)**:
+
+| Public artifact | Direct URL | Size |
+|---|---|---|
+| Verifier weights (`model_final.pt`, 39.8 M params) | `https://data.truthbeam.com/models/verifier/model_final.pt` | 456 MB |
+| F-A v1 forger checkpoints (5k/25k/70k/100k) | `https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_*.pt` | ~165 MB ea |
+| Eval scores (2-minute, CPU-only reproduce input) | `https://data.truthbeam.com/models/repro/stage_0_eval/` | 4.3 MB |
+| Ground-truth corpus (sessions D2/V10) | `https://data.truthbeam.com/sessions/` | ~378 GiB |
+| 2023 demonstration video | `https://data.truthbeam.com/pinata/PolieBotics.mp4` | — |
+
+The **bulk eval trees** listed below (full `experiments/`, hundreds of GB) remain request/Zenodo-gated.
+Nothing there is required to verify the *code→hash* promise or to recompute the headline AUROC — both
+run from this repo plus the public subset above.
 
 | Artifact | R2 location (under bucket `truthbeam`) | Approx size | Backs |
 |---|---|---|---|

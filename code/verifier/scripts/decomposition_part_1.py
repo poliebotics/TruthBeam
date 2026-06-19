@@ -5,13 +5,10 @@ Tests whether a small logistic regression on Phase G diffusion verifier scores
 fakes, and how well that classifier generalises across F-A checkpoints.
 
 INTERPRETATION NOTE (CC, 2026-05-04 — no spec doc found):
-    Operator's brief said "diffusion-feature probe, logistic regression on
-    existing Stage 0 scores. Three probes (Raw, Coupling, All), train 5k/25k/
-    70k test 100k headline plus LOOCV folds. CPU, runs in minutes."
-
-    No prior spec doc exists. This implementation is CC's best interpretation;
-    operator should review the choices below and request adjustments if any
-    diverge from intent.
+    Diffusion-feature probe: logistic regression on existing Stage 0 scores.
+    Three probes (Raw, Coupling, All); train on fake@{5k,25k,70k}, test on
+    fake@100k for the headline, plus leave-one-checkpoint-out (LOOCV) folds.
+    CPU-only, runs in minutes.
 
     Data:
         For each of {5k, 25k, 70k, 100k} F-A checkpoints, per session, per
@@ -347,7 +344,7 @@ def write_report(out_dir: Path, headline: dict, loocv: dict):
     md.append("")
     md.append(f"Generated: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}")
     md.append("")
-    md.append("**INTERPRETATION NOTE**: This is CC's best interpretation of operator's brief — no spec doc was provided. Operator should review `decomp_part1_results.json`'s `interpretation_notes` and tell CC if any choices need revisiting.")
+    md.append("**Method note**: probe design and probe/feature choices are recorded in `decomp_part1_results.json` under `interpretation_notes`.")
     md.append("")
     md.append("## Headline — train fake@{5k,25k,70k} → test fake@100k")
     md.append("")

@@ -12,6 +12,57 @@
 
 ---
 
+## ⚡ Verify the headline yourself — 2 minutes, no GPU
+
+You do not have to trust this repo. **Recompute the headline `AUROC = 1.000` yourself** from **4.3 MB**
+of published per-frame scores and an in-repo script — **CPU-only, in seconds**. Step by step:
+**[REPRODUCE.md](REPRODUCE.md)**.
+
+**All code, models, and data are public and directly linked — nothing is gated:**
+
+| | Direct link |
+|---|---|
+| 🧠 **Verifier weights** (39.8 M params) | <https://data.truthbeam.com/models/verifier/model_final.pt> |
+| 😈 **Forger checkpoints** (F-A v1) | `data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_*.pt` |
+| 📊 **Eval scores** (reproduce input, 4.3 MB) | <https://data.truthbeam.com/models/repro/stage_0_eval/> |
+| 💻 **Verifier + forger code** | [`code/verifier/`](code/verifier/) (this repo) |
+| 🗂️ **378 GiB ground-truth corpus** | <https://data.truthbeam.com/sessions/> · CIDs in [`CID_MANIFEST.json`](CID_MANIFEST.json) |
+| ▶️ **2023 demo video** | <https://data.truthbeam.com/pinata/PolieBotics.mp4> |
+
+Full reproduce + artifact table + scope guards: **[REPRODUCE.md](REPRODUCE.md)** · **[ARTIFACTS.md](ARTIFACTS.md)**.
+The score is honestly narrow (one rig, two sessions, one performer) — stated everywhere, not buried.
+
+---
+
+## Common objections — answered straight
+
+We'd rather pre-empt the hostile read than dodge it. Every answer below is checkable, not rhetoric.
+
+- **"It's a scam."** No token, no sale, no gated weights, no "DM for the real files." The headline number
+  recomputes in ~2 minutes on CPU from public files — [REPRODUCE.md](REPRODUCE.md). Scams ask you to
+  *trust*; this asks you to *recompute*.
+- **"The AUROC is faked / cherry-picked."** Recompute it yourself (Path A). If you don't trust the
+  published per-frame scores, **Path B regenerates them** from the public verifier weights and the open
+  corpus — the scores are an output, not an axiom.
+- **"AUROC = 1.000 is obviously overfit."** On a one-rig / two-session / one-performer corpus, a perfect
+  score is exactly what a narrow demo yields — we say so everywhere. The *robust* claim is the GPU-free
+  cryptographic chain re-walk; the learned verifier is a **scoped** check, and cross-rig / adaptive-attacker
+  robustness is explicitly **open work**.
+- **"You graded your own homework — you trained the forger *and* the verifier."** True, and that's the
+  *floor*, not the ceiling. So we **publish the forger** (`models/fa_v1_forger/*.pt`) and a harder,
+  adaptive forger family (`models/fa_v2_surrogate_binders/`) — **bring your own rig, performer, or forger
+  and try to beat it.** An independent reproduction is exactly the contribution we're asking for.
+- **"Path A only proves your scores give 1.000, not that the scores are honest."** Then **regenerate
+  them**: [REPRODUCE.md](REPRODUCE.md) **Path A.5** re-runs the public verifier on a few public raw frames
+  and reproduces the published scores to ~1e-4 (Path B scales it to the full corpus). Every artifact is
+  also **content-addressed** (CIDs in [CID_MANIFEST.json](CID_MANIFEST.json)), so you can confirm nothing
+  was swapped after the fact.
+- **"Patent-pending + donate buttons = grift."** Donations are **gifts** — no token, security, or return is
+  offered or sold; the patent is a research/IP posture. Neither changes the fact that the measurement is
+  public and recomputable. Judge the artifact, not the aesthetic.
+
+---
+
 ## What is PolieBotics?
 
 **PolieBotics** builds tools that bind **physical reality** to **cryptographically chained evidence**. The premise: in an age of

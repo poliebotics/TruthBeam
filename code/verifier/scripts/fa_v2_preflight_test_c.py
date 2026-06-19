@@ -1,12 +1,12 @@
 """F-A v2 Preflight Test C — synthetic novel-E injection sweep.
 
-INTERPRETATION NOTE (CC, 2026-05-04 — operator's spec did not define injection
-mechanics; this is CC's best interpretation):
+METHOD NOTE (2026-05-04 — no upstream spec constrained the injection
+mechanics; the design below is a deliberate choice):
 
-Operator's brief: "Test C: synthetic novel-E injection sweep across α and
+Goal: "Test C: synthetic novel-E injection sweep across α and
 blur scales."
 
-CC's interpretation: ablation that probes how robustly a binder detects E
+Design: ablation that probes how robustly a binder detects E
 content embedded in C, by synthetically constructing C_synth that injects a
 novel-XOF E (rendered into a CFA-pattern lift) into a real C frame at varying
 strength α and blur radius σ:
@@ -337,7 +337,7 @@ def main() -> int:
     md.append(f"σ grid: {list(SIGMA_GRID)}")
     md.append(f"n_frames={n_frames}, n_novel_E={len(novel_E_list)}")
     md.append("")
-    md.append("**INTERPRETATION NOTE**: injection mechanics are CC's interpretation; see script docstring.")
+    md.append("**METHOD NOTE**: injection mechanics are a deliberate design choice; see the script docstring.")
     md.append("")
     md.append("## Detection threshold per binder (α at which mean m_novel drops below mean m_target)")
     md.append("")

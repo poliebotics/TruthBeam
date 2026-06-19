@@ -1,6 +1,6 @@
 """Overnight Phase G mechanism characterization battery.
 
-Per operator's directive 2026-05-05 — 9 experiments unattended,
+A battery of 9 experiments run unattended,
 target ~7-9h wall-clock, hard stop at 12h. Single deliverable
 MORNING_REPORT.md.
 
@@ -462,7 +462,7 @@ def run_exp2(log: TimingLog) -> dict:
     # Pathological cases JSON
     (out_dir / "pathological_cases.json").write_text(
         json.dumps(pathological, indent=2))
-    # Mirror to body_box_sanity.md per operator spec, AND save as summary.md
+    # Mirror to body_box_sanity.md, AND save as summary.md
     # so write_morning_report() picks it up. (Codex audit fix 2026-05-05.)
     # CSV
     csv_path = out_dir / "box_stats.csv"
@@ -508,7 +508,7 @@ def run_exp2(log: TimingLog) -> dict:
     elif pct_path < 25:
         md.append(f"⚠️ **Verdict**: {pct_path:.1f}% pathological — manuscript caveat needed.")
     else:
-        md.append(f"🚨 **Verdict**: {pct_path:.1f}% pathological — operator should "
+        md.append(f"🚨 **Verdict**: {pct_path:.1f}% pathological — a reviewer should "
                    f"consider re-running E2/E3 on cleanly-masked subset.")
     body_box_md = "\n".join(md)
     (out_dir / "body_box_sanity.md").write_text(body_box_md)
@@ -1231,7 +1231,7 @@ def run_exp7(log: TimingLog, device_id: int = 0) -> dict:
     # Mode B: Phase G input E perturbation (after resize to 768x1024) — same as A
     #         in our pipeline (rendered E is loaded and resized via Phase G's loader)
     # Mode C: binder input E perturbation (1150x1330)
-    # Operator's scope says "3 modes × 3 σ × 60 per session". To keep this
+    # The analysis scope says "3 modes × 3 σ × 60 per session". To keep this
     # interpretable and avoid silently merging Modes A and B, we run:
     #   A = perturb the rendered E magnitude in the full-resolution domain
     #       (load native 1080x1920, perturb, then Phase G's resize)
@@ -1391,7 +1391,7 @@ def run_exp7(log: TimingLog, device_id: int = 0) -> dict:
     md.append("")
     if n_nonmono > 0:
         md.append(f"🔧 **{n_nonmono} non-monotonic (session, mode) pair(s) "
-                   f"flagged**. Operator review needed: Phase G's response to "
+                   f"flagged**. Review needed: Phase G's response to "
                    f"synthetic E perturbations is not monotonic in some "
                    f"configurations.")
     else:
@@ -1565,7 +1565,7 @@ def run_exp8(log: TimingLog, device_id: int = 0) -> dict:
     if summary['n_frames'] == 0:
         md.append("⚠️ **No frames had all four required scalars** (E1 real / "
                    "E1 fake_100k / E4 real / E4 fake_100k). Cannot compute "
-                   "the inversion analysis. Operator should verify the "
+                   "the inversion analysis. A reviewer should verify the "
                    "causal-ablation manifest contents.")
         (out_dir / "summary.md").write_text("\n".join(md))
         return {"n_frames": 0, "sanity_max_diff_e1": float("nan"),
@@ -1626,7 +1626,7 @@ def run_exp8(log: TimingLog, device_id: int = 0) -> dict:
         md.append(f"🔧 **Verdict**: max |diff| = {overall_max:.2e} "
                    f"(E1 real {sanity_max_diff_e1:.2e}, E4 fake_100k "
                    f"{sanity_max_diff_e4_fake:.2e}). Possible implementation "
-                   f"discrepancy — flag for operator review BEFORE manuscript "
+                   f"discrepancy — flag for review BEFORE manuscript "
                    f"citation.")
     (out_dir / "summary.md").write_text("\n".join(md))
     return {"n_frames": len(rows_summary),
