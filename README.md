@@ -248,3 +248,22 @@ See [`CITATION.cff`](CITATION.cff). Cite the paper and the patent; cite the Zeno
 the pending patent. See [`LICENSE`](LICENSE). The artifacts are published so the work can be read, reviewed, and
 independently verified; publication grants no licence and no rights beyond those arising by law. For commercial or
 any other reuse, contact the author (xathal@protonmail.com).
+
+---
+
+## Status, reproduction & where this is going
+
+**Published as a stable snapshot (mid-2026).** The author is moving on to other work for the next few
+months, so issues, PRs, and email may go unanswered for a while — *by design, not neglect*: everything
+here is built to be checked **without us**. Recompute the result ([REPRODUCE.md](REPRODUCE.md)), re-walk
+the chain, and verify against the filings, dataset, and video yourself.
+
+**Independent reproduction is the contribution we most want.** Pull the open data, run the reproduce
+paths, and — the real test — **bring your own rig, performer, or forger** and try to break it.
+Re-implementations, forks, and collaboration are explicitly welcome while we're heads-down elsewhere.
+
+**Direction.** This single-rig release is the foundation. The filings **describe and enable** a larger
+**cross-rig witness mesh** — several Reality Kernel modules cross-checking one shared record — and the
+intent, over time, is to open a **public standard and reference modules** and to work with other
+researchers, so independent instruments can interoperate and verify each other. None of that is claimed
+as done here; it is the **trajectory and the open door**.
