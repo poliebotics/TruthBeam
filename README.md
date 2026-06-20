@@ -127,6 +127,40 @@ The Truth Beam closes a loop: **emit → project → capture → commit**, frame
 On top of that substrate this repository also includes an **emission-recovery binder** (reconstructs `Ê` from `C`)
 and a **red-team** attacker (a trained forger, *F-A v1*) used to stress-test the verifier.
 
+## What is actually proven — a time-bounded, live physical interaction
+
+The load-bearing claim of the Truth Beam is **not** "this image is real," and **not** only "a learned
+model flags the forgery." It is that the projection **binds the physical interaction in time** — and the
+binding separates cleanly into what is checkable offline and what is checkable against public networks:
+
+- **Ordering + tamper-evidence — offline, GPU-free.** Each emission depends, via BLAKE3, on every prior
+  capture, so the frames are one ordered, tamper-evident sequence; the offline chain re-walk also
+  confirms the recomputed terminal state `S_N` equals the value committed in the anchor. Change, drop, or
+  reorder any frame and every later emission diverges. *(This re-walk does not, by itself, establish the
+  external clock.)*
+- **Freshness — a lower time bound, on-chain.** The genesis state `S_0` folds in a **freshly-waited RSK
+  mainnet block** (the recorder waits for the *next* block after wall-time *T*), so the session could not
+  have been produced before that block existed. **drand** quicknet rounds folded through the chain add a
+  publicly **BLS-verifiable** per-round freshness floor (≈ one round / 3 s). You cannot pre-render footage
+  to match a challenge that did not yet exist.
+- **Commitment — an upper time bound, on-chain.** A final-root **Rootstock (RSK)** transaction commits
+  `S_N` in a mainnet block, so the record **demonstrably existed by** that block's timestamp once the
+  transaction is confirmed — no silent back-dating.
+
+Together these bind the recording to the window **[anchor_start, anchor_end]** as a **live
+light-in/light-out interaction**. The bound is the **window between anchors**, not a per-frame wall-clock;
+it proves *when*, and that *the interaction was live and ordered* — **not** the semantic truth of what was
+staged.
+
+**This is demonstrated, not asserted.** For both released sessions the anchors were looked up live on RSK
+mainnet and the drand rounds BLS-verified: D2 is bound to a **2459-second window** (2026-04-25 02:07:48 →
+02:48:47 UTC) at a **2.496 Hz** commit rate, V10 to a **1524-second window** at **2.494 Hz**. Full
+results + one-command reproduction: **[TEMPORAL_VERIFICATION.md](TEMPORAL_VERIFICATION.md)**. The
+external-clock checks run against public RSK/drand (`verify_*.py --online`); the ordering + tamper-evidence
+are the GPU-free offline re-walk ([REPRODUCE.md](REPRODUCE.md)). Either way, the time-binding stands
+**independently of the learned verifier** — which is the *secondary, empirical* layer that scores physical
+optical coupling on top.
+
 ---
 
 > **Scope (please read).** Every quantitative result here is **within-session / same-rig**: one projector–camera

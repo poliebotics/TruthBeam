@@ -93,6 +93,14 @@
     "sessions/d2/Recordings/frame_001336.raw": "QmaunW3VxzNs4z3oBD13PRSbkbABvroJGzWCX2knorKdUJ",
     "sessions/d2/derived/Emissions/tile_001336.png": "QmbcUJWUmRb63rfqQAjE7aKNGhifRJ1JDVnkx5Lu3eEiMr"
   },
+  "patent_filings": {
+    "_note": "Reality Kernel patent family, CIDv0 (== Pinata). Description + drawings per filing, each individually pinned. Full citation block, SHA-256s and BibTeX in reality_kernel/CITING.md.",
+    "WO2025-046153A2_Methods_and_Apparatus_for_Projector_Camera_Systems.pdf": "QmbguWqss4tC6CP3cBsaFrDp6DifgqkEpHg65cPfxSV3XB",
+    "PIGMIE_Filing1_Description_v0_38.pdf": "QmNwUZiiFMcVhrDcMsZ7U5WTKtgTmnF8FiE4hfGZUKQTbb",
+    "PIGMIE_Filing1_Drawings_v0_38.pdf": "QmbDv3YRaLdMNcCJaX81MoaSxBh5ukFxHypBQFCNXQszvp",
+    "PIGMIE_Filing2_Description_v42.pdf": "QmZuLRUTCBXEDb2SPr91Hi5qCay6EpeXCS13CmLHmUS6h6",
+    "PIGMIE_Filing2_Drawings_v42.pdf": "QmPS8bWrRRpDMHbVPbScRcihA6ixRtNyYqqHKtgDMqq89e"
+  },
   "repos_snapshot": {
     "_note": "v0 of `git archive HEAD | ipfs add -r` (no .git); recompute from the release tag at push, since the manifest's own presence changes the tree",
     "truthbeam_public": {
