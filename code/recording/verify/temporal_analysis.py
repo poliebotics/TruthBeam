@@ -42,29 +42,40 @@ def rpc(method, params, t=30):
 
 def U(s): return datetime.datetime.fromisoformat(s)
 
-# ---- RSK: look up every pulse tx ----
+# ---- RSK: every pulse tx — inclusion AND calldata commits the expected state ----
+# Inclusion in a block is not enough; we also confirm each tx's input carries the
+# expected commitment (per-pulse payload_commitment_hex, or the manifest's
+# anchor_end.payload_final_root_hex for the final-root tx).
 pulses = list(csv.DictReader(open(D + "anchor_txs.csv")))
-def receipt(p):
+final_root = m["anchor_end"]["payload_final_root_hex"].lower()
+def lookup(p):
     try:
-        rc = rpc("eth_getTransactionReceipt", [p["tx_hash"]])
-        return p["tx_hash"], (int(rc["blockNumber"], 16), rc["status"]) if rc else (None, None)
-    except Exception as e:
-        return p["tx_hash"], ("ERR", str(e))
+        tx = rpc("eth_getTransactionByHash", [p["tx_hash"]])
+        if not tx or tx.get("blockNumber") is None:
+            return p["tx_hash"], None
+        bn = int(tx["blockNumber"], 16)
+        expected = (p["payload_commitment_hex"] or final_root).lower()
+        commits = bool(expected) and expected in tx["input"].lower()
+        return p["tx_hash"], (bn, commits)
+    except Exception:
+        return p["tx_hash"], None
 res = {}
 with cf.ThreadPoolExecutor(max_workers=8) as ex:
-    for k, v in ex.map(receipt, pulses):
+    for k, v in ex.map(lookup, pulses):
         res[k] = v
-blocks = sorted({v[0] for v in res.values() if isinstance(v[0], int)})
+blocks = sorted({v[0] for v in res.values() if v})
 btime = {}
 with cf.ThreadPoolExecutor(max_workers=8) as ex:
     for bn, t in ex.map(lambda b: (b, int(rpc("eth_getBlockByNumber", [hex(b), False])["timestamp"], 16)), blocks):
         btime[bn] = t
-included = sum(1 for v in res.values() if isinstance(v[0], int) and v[1] == "0x1")
+included = sum(1 for v in res.values() if v)
+commits_ok = sum(1 for v in res.values() if v and v[1])
 lat = [btime[res[p["tx_hash"]][0]] - U(p["wall_utc_fired"]).timestamp()
-       for p in pulses if isinstance(res[p["tx_hash"]][0], int)]
+       for p in pulses if res[p["tx_hash"]]]
 si = [int(p["payload_state_index"]) for p in pulses]
-print(f"RSK pulses: {included}/{len(pulses)} included; {len(blocks)} blocks "
-      f"{blocks[0]}..{blocks[-1]} monotonic={blocks == sorted(blocks)}")
+print(f"RSK pulses: {included}/{len(pulses)} included; "
+      f"{commits_ok}/{len(pulses)} carry the expected commitment in calldata; "
+      f"{len(blocks)} blocks {blocks[0]}..{blocks[-1]} monotonic={blocks == sorted(blocks)}")
 print(f"  fired->inclusion latency s: median={statistics.median(lat):.0f} max={max(lat):.0f}")
 print(f"  state_index monotonic={all(si[i] <= si[i+1] for i in range(len(si)-1))} range {si[0]}..{si[-1]}")
 

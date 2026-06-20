@@ -11,6 +11,11 @@ sessions** — anyone can re-run it (commands at the bottom).
 > time window** is what *this* online check adds: the **RSK** block timestamps give the window, and the
 > **drand** BLS signatures give a publicly-verifiable per-round freshness floor inside it.
 
+**What this is — and is not.** A session-level **time *window*** bound, **not a per-frame UTC
+attestation**. Rootstock block timestamps are coarse (~30 s) *consensus* timestamps, not precise clock
+readings; drand freshness is per-**round** (~3 s, ≈ 7–8 frames), not per-frame; the window is no tighter
+than the anchor cadence; and none of it speaks to the semantic truth of what was staged.
+
 ## Results
 
 | | **D2** (session `61700096…`) | **V10** |
@@ -20,7 +25,7 @@ sessions** — anyone can re-run it (commands at the bottom).
 | fresh-block wait (freshness mechanism) | tip 8768851 → waited 3.57 s for next block | (next-block wait) |
 | **anchor_end** (session-end upper bound) | block **8768945**, hash `0x19b20a60…` ✓, **02:48:47 UTC** | block **8769357**, hash ✓, **05:35:53 UTC** |
 | final-root tx (commits `S_N`'s final root) | `0x9952d222…12c8f` — **in anchor_end block** ✓, commitment present in input ✓ | `0x42293125…` — in-block ✓, commitment in input ✓ |
-| RSK pulse txs (state commitments) | **161/161 included on-chain** ✓ (84 blocks, monotonic) | **102/102 included** ✓ (57 blocks) |
+| RSK pulse txs (state commitments) | **161/161 included** ✓ (84 blocks, monotonic); **161/161 commit the expected state in calldata** ✓ | **102/102 included** (57 blocks); **102/102 calldata-confirmed** ✓ |
 | pulse fired→inclusion latency | median ~12 s (max ~75 s ≈ 2–3 blocks) | median ~11 s (max ~49 s) |
 | drand chain | quicknet `52db9ba7…e971`, pubkey ✓, period 3 s | same |
 | drand rounds folded | **476**, rounds 28093180 → 28093983 | **324**, 28096824 → 28097325 |
@@ -42,12 +47,15 @@ refreshed every 3 s (≈ one round per 7–8 frames).
 
 Beyond the endpoints, **every** RSK pulse and **every** drand round was downloaded and checked:
 
-- **RSK pulses — all included, continuous, monotonic.** D2 **161/161** and V10 **102/102** pulse
-  transactions are confirmed on-chain (receipt status OK), landing in monotonically-increasing mainnet
-  blocks across the whole session (D2: 84 blocks 8768854→8768945). Their committed `state_index` values
-  rise monotonically and cover the full capture range (D2 9→5992 of 5992). Median fired→inclusion latency
-  ~12 s (max ~75 s ≈ 2–3 RSK blocks) — the chain is anchored **continuously through** the session, not
-  only at its ends.
+- **RSK pulses — all included, calldata-confirmed, continuous, monotonic.** D2 **161/161** and V10
+  **102/102** pulse transactions are confirmed on-chain, landing in monotonically-increasing mainnet
+  blocks across the whole session (D2: 84 blocks 8768854→8768945). Crucially — because *inclusion in a
+  block is not the same as committing a specific state* — **every** tx's input data was also checked to
+  carry its **expected commitment** (per-pulse `payload_commitment_hex`, or `payload_final_root_hex` for
+  the final-root tx): **161/161 and 102/102 match**. Their committed `state_index` values rise
+  monotonically and cover the full capture range (D2 9→5992 of 5992). Median fired→inclusion latency ~12 s
+  (max ~75 s ≈ 2–3 RSK blocks) — the chain is anchored **continuously through** the session, not only at
+  its ends. (`temporal_analysis.py` performs all of these checks.)
 - **drand — every round BLS-verified.** All **476** (D2) and **324** (V10) folded quicknet rounds were
   refetched and pass the BLS pairing-check — **zero failures**. The rounds advance monotonically at the
   3 s cadence from the session-open round to the session-close round, bracketing the window.
@@ -68,8 +76,8 @@ bound; drand is corroborating-evidence tier (non-gating in the offline verifier)
 
 ```bash
 # 1. fetch the two sessions' metadata (small; no raw frames needed)
-for s in d2 v10; do for f in manifest.json anchor_txs.csv chain_log.csv; do
-  curl -sO "https://data.truthbeam.com/sessions/$s/$f" --create-dirs -o "$s/$f"; done; done
+for s in d2 v10; do mkdir -p "$s"; for f in manifest.json anchor_txs.csv chain_log.csv; do
+  curl -fsSL -o "$s/$f" "https://data.truthbeam.com/sessions/$s/$f"; done; done
 
 # 2. authoritative path — the project's own verifier, online mode
 python3 code/recording/verify/verify_v9.py --session-dir ./d2 --online   # RSK incl. + drand BLS

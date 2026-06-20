@@ -19,8 +19,9 @@
 ## ⚡ Verify the headline yourself — 2 minutes, no GPU
 
 You do not have to trust this repo. **Recompute the headline `AUROC = 1.000` yourself** from **~2 MB**
-of published per-frame scores and an in-repo script — **CPU-only, in seconds**. Step by step:
-**[REPRODUCE.md](REPRODUCE.md)**.
+of published per-frame scores and an in-repo script — **CPU-only, in seconds** (it's a logistic-regression
+**probe over the published verifier scores**, not a rerun of the model; **Path A.5** regenerates those
+scores from the public weights). Step by step: **[REPRODUCE.md](REPRODUCE.md)**.
 
 **All code, models, and data are public and directly linked — nothing is gated:**
 
@@ -167,8 +168,10 @@ optical coupling on top.
 > apparatus, one human performer, two sessions (D2 = "Yoga", V10 = "AI-improv"). Nothing here establishes cross-rig,
 > cross-camera, cross-projector, or cross-subject generalization, and headline AUROC = 1.000 figures are
 > **finite-sample, held-out** estimates (D2 n=198, V10 n=200), not zero-error proofs. The one trained attacker is
-> **F-A v1**; the stronger adaptive attacker F-A v2 is design-only (not trained), so no adaptive / white-box
-> robustness is claimed.
+> **F-A v1** — a serious but **non-adaptive, same-rig surrogate**; the stronger verifier-aware attacker
+> F-A v2 is design-only (not trained), so no adaptive / white-box robustness is claimed. Much of the
+> verifier's discrimination also lives in **off-body, scene-coupled** signal (optics, projection, sensor),
+> so this is a **rig/corpus provenance** result, **not** evidence of general person-level forgery detection.
 
 > **License.** **All rights reserved. No open-source license and no patent license are granted** (see
 > [`LICENSE`](LICENSE)). The code and paper are published so the work can be **read, reviewed, and

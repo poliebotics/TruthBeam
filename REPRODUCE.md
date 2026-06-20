@@ -106,7 +106,7 @@ same idea to the full corpus.
 |---|---|---|
 | **Verifier weights** (ε-prediction U-Net, 39,769,828 params) | <https://data.truthbeam.com/models/verifier/model_final.pt> | 456 MB |
 | **Forger checkpoints** (F-A v1, 42.3 M params) | `.../models/fa_v1_forger/f_a_v1_step_{00005000,00025000,00070000,00100000}.pt` | ~165 MB ea |
-| **Eval scores** (Path A input) | <https://data.truthbeam.com/models/repro/stage_0_eval/> | 4.3 MB |
+| **Eval scores** (Path A input) | <https://data.truthbeam.com/models/repro/stage_0_eval/> | ~2 MB (the 8 merged files Path A uses; full score set 4.3 MB) |
 | **Verifier code** | [`code/verifier/src/phase_g/diffusion_diagnostic_model.py`](code/verifier/src/phase_g/diffusion_diagnostic_model.py) | in repo |
 | **Forger code** | [`code/verifier/src/phase_f/editor_controlnet.py`](code/verifier/src/phase_f/editor_controlnet.py), [`scripts/phase_f/train_phase_f_a_full.py`](code/verifier/scripts/phase_f/train_phase_f_a_full.py) | in repo |
 | **AUROC script** | [`code/verifier/scripts/decomposition_part_1.py`](code/verifier/scripts/decomposition_part_1.py) | in repo |
