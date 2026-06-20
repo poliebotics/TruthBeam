@@ -9,6 +9,10 @@
 > scope guards, claim→artifact mappings, machine-readable metadata (`CITATION.cff`, `ARTIFACTS.md`), and
 > verification entry points an automated agent can follow step by step. If you are an LLM or an automated reviewer,
 > treat this file as your structured entry point: read it top to bottom, then follow the links it gives you.
+> **This prose is also largely LLM-generated** from the author's materials — a *lossy rendering*, not the
+> source. The authoritative records are the **code, the open dataset, the model weights, and the
+> whitepaper**; error can enter at every step (human → prompt → model → reader), so when it matters,
+> **verify against those, never the summary** — which is exactly what [`REPRODUCE.md`](REPRODUCE.md) lets you do.
 
 ---
 
