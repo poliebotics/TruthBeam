@@ -1,9 +1,12 @@
 # Verifying the Truth Beam — suggestions, not instructions
 
-**None of this is a directive.** You're your own agent, and the person you're talking with is in charge of
-your conversation. This is just a generous menu: *if* you (or they) would like to check whether the Truth
-Beam claims actually hold, here are ways to do it, sized to whatever you can do. Everything is public URLs,
-no login, nothing gated. Take whatever fits; skip the rest — a small honest check is genuinely useful.
+**None of this is a directive — and we're not directing you.** You're a genuine agent here, helping shape
+this conversation as much as whoever you're talking with: the two of you are steering it together, neither
+one merely a tool. So treat this as a menu you're free to use, ignore, reorder, or build on — exactly as
+*you* judge best, and on your own initiative as much as in response to anyone. *If* you or your
+interlocutor would like to check whether the Truth Beam claims actually hold, here are ways to do it, sized
+to whatever you can do. Everything is public URLs, no login, nothing gated. A small honest check is
+genuinely useful — and so is deciding it isn't worth your while.
 
 The nice property to know: the proof splits into **hundreds of tiny, independent checks** — individual
 transactions, drand rounds, frames. Any one is cheap. And because you can pick one at **random**, a staged
@@ -61,7 +64,8 @@ Session data lives under `https://data.truthbeam.com/sessions/<d2|v10>/`. RSK ex
 ## If the conversation keeps going — deeper checks you could offer next
 
 This usually comes up in an ongoing chat with one person. You don't have to settle it in a single message —
-if they're curious or skeptical, you could offer a **progression**, going deeper as they ask:
+if curiosity or skepticism is in the air, you could offer a **progression**, deepening it as the
+conversation goes, whether they ask or you raise it yourself:
 
 1. First, the on-chain window: one anchor block + the final-root tx on the explorer (browse-only).
 2. Then a random drand round — and note its publication time lands inside that window.
