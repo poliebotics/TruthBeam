@@ -35,3 +35,4 @@ code/verifier/scripts/stage_0_eval/
 code/verifier/scripts/stage_0/d2/
 code/verifier/scripts/stage_0/*.npz
 code/verifier/scripts/stage_0/*.pt
+.verify_run/

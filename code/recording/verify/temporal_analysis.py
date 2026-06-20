@@ -84,11 +84,13 @@ rows = [r for r in csv.reader(open(D + "chain_log.csv")) if r and not r[0].start
 dri = rows[0].index('drand_round_number')
 urounds = sorted({int(r[dri]) for r in rows[1:] if r[dri] and r[dri] != '0'})
 def verify(rn):
-    try:
-        rd = fetch_round(rn, chain_hash=CH)
-        return verify_round_full(rn, rd["randomness"], rd["signature"], pubkey_hex=PK)
-    except Exception:
-        return None
+    for _attempt in range(3):                    # retry transient network blips
+        try:
+            rd = fetch_round(rn, chain_hash=CH)
+            return verify_round_full(rn, rd["randomness"], rd["signature"], pubkey_hex=PK)
+        except Exception:
+            continue
+    return None
 with cf.ThreadPoolExecutor(max_workers=12) as ex:
     vs = list(ex.map(verify, urounds))
 print(f"drand: BLS valid={sum(v is True for v in vs)}/{len(urounds)} "

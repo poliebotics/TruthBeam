@@ -23,6 +23,10 @@ of published per-frame scores and an in-repo script — **CPU-only, in seconds**
 **probe over the published verifier scores**, not a rerun of the model; **Path A.5** regenerates those
 scores from the public weights). Step by step: **[REPRODUCE.md](REPRODUCE.md)**.
 
+**Or run everything in one command** — `bash verify_all.sh` — a clean-room check that, from a bare
+machine, fetches **only public URLs** and verifies both **Path A** (the AUROC) and the **temporal binding**
+(RSK-mainnet anchors + per-tx calldata + drand BLS), printing a pass/fail transcript. No private context.
+
 **All code, models, and data are public and directly linked — nothing is gated:**
 
 | | Direct link |
@@ -176,7 +180,9 @@ optical coupling on top.
 > **License.** **All rights reserved. No open-source license and no patent license are granted** (see
 > [`LICENSE`](LICENSE)). The code and paper are published so the work can be **read, reviewed, and
 > independently verified**; publication grants no licence and no rights beyond those arising by law.
-> For any reuse or licensing inquiry, contact the author (xathal@protonmail.com).
+> **Verifying and reproducing the published results is welcome and needs no permission; any *other* use**
+> (redistribution, derivative works, commercial use, or a patent licence) **requires a licence — contact
+> the author (xathal@protonmail.com).**
 
 ## What's in this repository
 
