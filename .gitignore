@@ -28,3 +28,10 @@ rclone.conf
 
 # XOF bit-flip raw eval inputs are intentionally tracked (reproduction inputs)
 !results/redteam_segmentation_evals/xof_bitflip/*.npz
+
+# reproduce-run outputs (REPRODUCE.md Path A/A.5)
+code/verifier/scripts/out/
+code/verifier/scripts/stage_0_eval/
+code/verifier/scripts/stage_0/d2/
+code/verifier/scripts/stage_0/*.npz
+code/verifier/scripts/stage_0/*.pt
