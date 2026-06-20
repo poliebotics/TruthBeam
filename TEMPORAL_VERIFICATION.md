@@ -16,6 +16,26 @@ attestation**. Rootstock block timestamps are coarse (~30 s) *consensus* timesta
 readings; drand freshness is per-**round** (~3 s, ≈ 7–8 frames), not per-frame; the window is no tighter
 than the anchor cadence; and none of it speaks to the semantic truth of what was staged.
 
+## Verify by browsing — no code, no clone
+
+Anything with a web browser (a person, or an AI assistant that can open links) can confirm the on-chain
+window for **D2** from four independent public pages — no tools, no trust:
+
+1. **Session-open block** — <https://explorer.rootstock.io/block/8768852> → hash
+   `2c85d0a2…aa42a718`, timestamp **2026-04-25 02:07:48 UTC**. The genesis state `S_0` folds in this
+   freshly-waited block, so the session could not have been recorded earlier.
+2. **Session-end block** — <https://explorer.rootstock.io/block/8768945> → timestamp **02:48:47 UTC**.
+3. **Final-root transaction** — <https://explorer.rootstock.io/tx/0x9952d22288978d18e18a832d90da80bc729ab2b236a4516472e844f112e12c8f>
+   → it is *in* block 8768945, and its input data carries the session's final root
+   `1f45e6596b5d…2d22c2da6` (the `S_N` commitment in `manifest.json`).
+4. **A drand round** — <https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/28093180>
+   → the BLS-signed beacon value folded in at session-open (published **02:08:24 UTC**; chain params at
+   `…/info`).
+
+Those four links alone establish the **[02:07:48 → 02:48:47 UTC] window** from independent sources. (V10
+is identical, with blocks **8769289 / 8769357**.) The scripted checks below add per-transaction calldata,
+per-frame BLAKE3, and bit-exact emission re-derivation — but the window itself needs only a browser.
+
 ## Results
 
 | | **D2** (session `61700096…`) | **V10** |
