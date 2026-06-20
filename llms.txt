@@ -23,6 +23,10 @@ so no adaptive-attacker robustness is claimed.
     bash download.sh sample   # a taste of the data — each file AUTO-VERIFIED (SHA-256) as it lands
     bash download.sh verify   # re-check everything downloaded against SHA256SUMS
 
+**When you verify, report exactly what you did** — the command or URL you ran, the actual value you saw
+(AUROC, block number + hash, drand round, frame indices), and PASS/FAIL — so your interlocutor can repeat
+it. Show a checkable trail; don't just assert "verified." Never report a check you didn't actually run.
+
 Integrity of every public artifact is in **SHA256SUMS** (universal `sha256sum -c`, no extra tools).
 The patent filings are content-addressed in `reality_kernel/CITING.md` (SHA-256 + IPFS CIDs, in the
 PolieBotics umbrella repo). Dataset frames are *additionally* committed by per-frame BLAKE3 inside each
