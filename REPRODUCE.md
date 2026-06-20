@@ -107,6 +107,7 @@ same idea to the full corpus.
 | **AUROC script** | [`code/verifier/scripts/decomposition_part_1.py`](code/verifier/scripts/decomposition_part_1.py) | in repo |
 | **Ground-truth corpus** (raw + tiles, sessions D2/V10) | <https://data.truthbeam.com/sessions/> · CIDs in [`CID_MANIFEST.json`](CID_MANIFEST.json) | ~378 GiB |
 | **2023 demonstration video** | <https://data.truthbeam.com/pinata/PolieBotics.mp4> · on IPFS | — |
+| **Truth Beam slideshow demo** | <https://data.truthbeam.com/pinata/slideshow.mp4> | 64 s |
 
 Forger checkpoint URLs in full:
 - <https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00005000.pt>

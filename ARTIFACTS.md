@@ -36,6 +36,7 @@ reviewer always knows where something is and whether it is required to reproduce
 | Eval scores (2-minute, CPU-only reproduce input) | `https://data.truthbeam.com/models/repro/stage_0_eval/` | 4.3 MB |
 | Ground-truth corpus (sessions D2/V10) | `https://data.truthbeam.com/sessions/` | ~378 GiB |
 | 2023 demonstration video | `https://data.truthbeam.com/pinata/PolieBotics.mp4` | — |
+| Truth Beam slideshow demo | `https://data.truthbeam.com/pinata/slideshow.mp4` | 64 s |
 
 The **bulk eval trees** listed below (full `experiments/`, hundreds of GB) remain request/Zenodo-gated.
 Nothing there is required to verify the *code→hash* promise or to recompute the headline AUROC — both
