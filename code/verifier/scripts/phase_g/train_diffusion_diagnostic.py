@@ -163,8 +163,7 @@ def main() -> None:
     # Attention only at the deepest down/up scale (96×128 with 768×1024 input,
     # mults 1,2,4,4). Adding attention at scale 2 (192×256) would inflate the
     # attention QK^T matrix to ~2.4 G entries → ~38 GB at bs=2 bf16 = OOM on
-    # A100-80GB. Mid block already adds attention at 48×64. (Codex audit
-    # 2026-05-01 HIGH finding.)
+    # A100-80GB. Mid block already adds attention at 48×64.
     attn_at = tuple(i == len(args.mults) - 1 for i in range(len(args.mults)))
     model = DiffusionDiagnosticUNet(
         in_ch=4, base_ch=args.base_ch,

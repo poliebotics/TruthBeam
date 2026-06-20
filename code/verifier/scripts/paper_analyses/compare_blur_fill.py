@@ -1,8 +1,6 @@
 """Track 2B — cross-fill comparison: mean-fill pilot vs blur-fill σ ∈ {2, 4, 8}.
 
-Per operator's spec 2026-05-04:
-
-    Comparison panel: fixed-fill (pilot) vs blur-fill (σ=2,4,8) side by
+Comparison panel: fixed-fill (pilot) vs blur-fill (σ=2,4,8) side by
     side for representative frames.
 
 This is the methodology-validation summary for Track 2B. Per-σ panels

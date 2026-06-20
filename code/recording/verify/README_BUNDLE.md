@@ -178,7 +178,7 @@ python3 code/recording/verify/verify_v9.py \
 ```
 
 (The verifier ships in the public TruthBeam repository,
-github.com/poliebotics/TruthBeam, under `code/recording/verify/`.)
+github.com/poliebotics/truthbeam, under `code/recording/verify/`.)
 
 Offline verification checks the cryptographic chain (the hard claim)
 without any network calls. Reports `chain_integrity: PASS|FAIL`,

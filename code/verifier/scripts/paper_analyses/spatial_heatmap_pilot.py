@@ -1,6 +1,6 @@
 """Spatial sensitivity heatmap pilot v2 — C-only occlusion of Phase G verifier.
 
-Per operator's expanded spec 2026-05-04. Methodology validation + preliminary
+Per the project's expanded spec 2026-05-04. Methodology validation + preliminary
 insight; not a paper-ready claim.
 
 Score:
@@ -572,7 +572,7 @@ def run_smoke(args, model, dc, training_means, cells, log) -> None:
         "dc_mean": float(detection_contribution.mean()),
     }
 
-    # Stability: mean-fill ↔ blur-fill correlation on REAL only (operator's spec)
+    # Stability: mean-fill ↔ blur-fill correlation on REAL only (the project's spec)
     dm = heatmaps[("real", "mean_fill")][1]
     db = heatmaps[("real", "blur_fill")][1]
     if dm.std() > 0 and db.std() > 0:

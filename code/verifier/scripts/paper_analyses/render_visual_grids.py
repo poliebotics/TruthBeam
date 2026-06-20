@@ -1,8 +1,6 @@
 """High-resolution visual grids for Phase G discrimination inspection.
 
-Per operator's directive 2026-05-05:
-
-  6 representative frames (3 D2 + 3 V10), one 5×3 grid per frame:
+6 representative frames (3 D2 + 3 V10), one 5×3 grid per frame:
 
   Row 1 — Inputs (what Phase G operates on):
     Col 1: debayered C at native 768×1024, RGB
@@ -97,7 +95,7 @@ def block_average_2d(arr: np.ndarray, factor: int) -> np.ndarray:
 
 def cfa_packed_to_rgb(C_packed: np.ndarray) -> np.ndarray:
     """(4, H, W) packed CFA float [0, 1] → (H, W, 3) uint8 RGB via
-    (R, mean(G1, G2), B). Per operator default."""
+    (R, mean(G1, G2), B). Per the default."""
     if C_packed.shape[0] != 4:
         raise ValueError(f"expected 4 CFA channels, got {C_packed.shape}")
     rgb = np.stack([
@@ -303,7 +301,7 @@ def render_frame_grid(frame_dir: Path, sess: str, row: int,
     # E magnitude resampled for footprint overlay on score-field rows (we
     # use INPUT resolution for Row 1 panels since the inputs there are
     # native; for score-field rows the contour can be omitted to keep the
-    # row focused on the score field — operator's spec says contours are
+    # row focused on the score field — the project's spec says contours are
     # on Row 1 Col 3, with optional overlay on score panels. We add them
     # as an OPTIONAL second supplementary variant later if needed.)
     E_mag_input = E_mag_native  # for Row 1 inputs (native res)
@@ -630,7 +628,7 @@ def main() -> int:
         "natural magnitudes — cross-row comparison is qualitative).",
         "- Each panel annotated with its actual [vmin, vmax] underneath.",
         "",
-        "## What the grid answers (operator's pre-registered framing)",
+        "## What the grid answers (the project's pre-registered framing)",
         "",
         "1. Where does projection actually land? — Row 1 Col 3 footprint contours.",
         "2. Where is Phase G's prediction error highest under each condition? "

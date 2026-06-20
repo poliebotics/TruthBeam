@@ -8,7 +8,7 @@ re-scoring path for the thorough.
 
 ## ⚡ Path A — recompute `AUROC = 1.000` in ~2 minutes, no GPU, no 378 GiB
 
-The headline number is computed by an in-repo script from **published per-frame scores** (4.3 MB total).
+The headline number is computed by an in-repo script from **published per-frame scores** (the 8 merged score files, ~2 MB).
 You do **not** need the model, a GPU, or the full corpus to check it.
 
 ```bash
@@ -18,7 +18,7 @@ pip install numpy scikit-learn
 # 1. this repo
 cd code/verifier/scripts
 
-# 2. download the 4.3 MB eval scores (the real + forged per-frame verifier outputs)
+# 2. download the eval scores (8 merged npz, ~2 MB) (the real + forged per-frame verifier outputs)
 for ck in 00005000 00025000 00070000 00100000; do
   for s in d2 v10; do
     mkdir -p stage_0_eval/step_$ck
@@ -43,6 +43,11 @@ That number is exactly as honest as its scope: **one rig, two sessions, one perf
 F-A v1 forger.** A perfect score on a narrow same-rig corpus is what a narrow demo yields — it is **not**
 a cross-rig or adaptive-attacker claim. Security here is **empirical, attacker- and budget-indexed
 hardness**, never formal or unconditional. (See [`README.md`](README.md) → scope guards.)
+
+*(Precisely what Path A computes: a **diffusion-feature probe** — logistic regression on the published
+per-frame verifier scores, trained on the {5k, 25k, 70k} forger checkpoints and tested on the held-out
+100k checkpoint. It reproduces the same perfect real-vs-fake separation the headline reports; the
+verifier's own scores are the input, and those are regenerable from the public model via Path A.5.)*
 
 ---
 
@@ -115,6 +120,13 @@ Forger checkpoint URLs in full:
 - <https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00070000.pt>
 - <https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00100000.pt>
 
+**About the F-A v1 forger (and dual use).** It is a *real* learned adversary (an EditorControlNet
+trained on same-rig D2/V10 temporal pairs), not a strawman — but it is a **same-rig surrogate**, trained
+*without* white-box access to the verifier's gradients, so beating it is the **floor**, not a
+robust-adaptive guarantee. The weights are published for **reproducibility and red-teaming of this
+rig/corpus** — they are scoped to this setup, not a general face-swap tool. Use them to *check the
+claim* (or to build a stronger attacker and break it), not to forge.
+
 ---
 
 ## Path B — full re-scoring (GPU, the heavy path)
@@ -133,9 +145,12 @@ To regenerate the per-frame scores Path A consumes (instead of trusting the publ
 
 ## Re-walk the cryptographic chain (no model at all)
 
-Independent of any learned verifier, the **hash-chain + anchors are reproducible math**: re-derive each
-emission from the committed state and check the drand + Rootstock anchors. GPU-free verifier entry
-points are under [`code/recording/verify/`](code/recording/verify/); see [`RESTORE.md`](RESTORE.md).
+Independent of any learned verifier, the **hash-chain + anchors are reproducible math**: re-walk the
+committed chain, check each frame's emission against its committed BLAKE3 hash, verify the
+tile-generator source hash against the genesis commit, and check the drand + Rootstock anchors. *(The
+shipped verifier hash-checks the committed emissions and the anchors — it does not re-render each `E_t`
+pixel-for-pixel.)* GPU-free verifier entry points are under
+[`code/recording/verify/`](code/recording/verify/); see [`RESTORE.md`](RESTORE.md).
 
 ---
 

@@ -31,7 +31,7 @@ SESSIONS = ("d2", "v10")
 
 
 def _load_session(eval_root: Path, ckpt_step: int, sess: str) -> dict:
-    """Load per-cond means. HALTS on missing NPZ (Codex audit HIGH)."""
+    """Load per-cond means. HALTS on missing NPZ."""
     npz_path = eval_root / f"step_{ckpt_step:08d}" / f"stage0_{sess}_raw.npz"
     if not npz_path.exists():
         raise SystemExit(
@@ -49,7 +49,7 @@ def _aurocs(per_cond: dict, ctx: str = "") -> dict:
 
     Returns {(real|fake)_target_vs_<neg>: auroc}.
 
-    Codex audit HIGH 2026-05-04: if AUROC fails (e.g. all NaN scores or
+    if AUROC fails (e.g. all NaN scores or
     single-class labels), raise instead of writing NaN — the report should
     halt loudly so the operator knows the verifier output was malformed.
     """
@@ -83,7 +83,7 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
-    # Codex audit MED 2026-05-04: enforce all three eval roots resolve to a
+    # enforce all three eval roots resolve to a
     # consistent base (all on Lambda or all local). Mixed state would silently
     # compare against the wrong combined baseline.
     roots_present = [args.combined_eval.exists(),

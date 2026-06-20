@@ -279,7 +279,7 @@ def main() -> None:
             raise SystemExit(
                 f"resume_step {resume_step} >= max_steps {args.max_steps}; "
                 "increase --max-steps or pick an earlier checkpoint")
-        # Codex audit MED 2026-05-03: validate that critical training args
+        # validate that critical training args
         # match between the saved ckpt and the current invocation. Cosine LR
         # schedule, batch size, and base LR all affect convergence — silent
         # mismatches would change the trajectory invisibly.

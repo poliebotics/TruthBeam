@@ -1,8 +1,6 @@
 """Step 2 of the verifier-heatmap two-step.
 
-Per operator's spec 2026-05-04:
-
-    All four answers confirmed: averaged (K=4 × 5-timestep), 8× only
+All four answers confirmed: averaged (K=4 × 5-timestep), 8× only
     (96×128), both magnitude and signed contrast, same 4+4 stratified
     subset.
 

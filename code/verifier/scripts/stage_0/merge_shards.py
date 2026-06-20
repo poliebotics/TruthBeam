@@ -66,7 +66,7 @@ def merge_session(eval_dir: Path, session: str, expected_num_shards: int) -> dic
     extras = {}
     if c_fake_all:
         if len(c_fake_all) != len(shard_files):
-            # Codex audit HIGH 2026-05-04: silent partial-merge would produce
+            # silent partial-merge would produce
             # truncated c_fake output that doesn't match `rows` length. Halt
             # loudly instead.
             raise SystemExit(

@@ -72,7 +72,7 @@ def fmt_mean_ci(d: dict | None) -> str:
 
 
 def autonomous_decision(summaries: dict[str, dict | None]) -> tuple[str, list[str]]:
-    """Apply the operator's decision criteria. Returns (label, reasoning)."""
+    """Apply the recording decision criteria. Returns (label, reasoning)."""
     main = summaries.get("main")
     shuffled = summaries.get("shuffled")
     synth = summaries.get("synthetic_positive")

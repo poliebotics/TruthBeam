@@ -264,7 +264,7 @@ def main() -> int:
 
     # ---- pick device ----
     # CRITICAL: Phase H trains DDP on GPUs 0-6 (rank 7 sometimes idle). Default
-    # to cuda:7 to avoid contention. Codex audit 2026-05-04.
+    # to cuda:7 to avoid contention.
     if args.device is not None:
         device = torch.device(args.device)
     elif torch.cuda.is_available():

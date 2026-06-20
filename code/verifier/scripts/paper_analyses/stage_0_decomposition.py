@@ -1,6 +1,6 @@
 """Tier 0 Analysis X3 — Stage 0 four-condition decomposition figure.
 
-Per operator spec 2026-05-03: visualize what F-A v1 achieves and what it
+visualize what F-A v1 achieves and what it
 doesn't. Uses target/zero/shuffled/source MSE for both real and F-A across
 all 4 checkpoints (existing data, no new compute).
 

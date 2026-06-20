@@ -42,7 +42,7 @@ class FreshBinderB(nn.Module):
         super().__init__()
         self.emission_h = emission_h
         self.emission_w = emission_w
-        # Codex audit MED 2026-05-03: pretrained kwarg lets eval-time
+        # pretrained kwarg lets eval-time
         # reconstruction skip the timm download (weights will be overwritten
         # from the saved ckpt anyway).
         self.encoder = timm.create_model(

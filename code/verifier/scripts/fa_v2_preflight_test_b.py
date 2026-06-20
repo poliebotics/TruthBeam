@@ -280,7 +280,7 @@ def main() -> int:
 
     for bi, bname in enumerate(binder_names):
         spec = binders_meta[bname]["spec"]
-        # Codex audit HIGH 2026-05-04: binder load failure should halt rather
+        # binder load failure should halt rather
         # than silently produce NaN rows — otherwise downstream summary masks
         # broken binders. Raise to caller.
         binder = load_binder(spec, device, dtype)
@@ -353,7 +353,7 @@ def main() -> int:
             interp = "partial fool (intermediate)"
         else:
             interp = "binder rejects F-A fakes (good gradient for v2)"
-        # Codex audit MED 2026-05-04: format conditional precedence — build
+        # format conditional precedence — build
         # the strings first, don't try to interleave conditional inside f-string.
         m_real_s = f"{m_real:.5f}" if m_real is not None else "NA"
         ratio_s  = f"{ratio:.2f}"  if ratio  is not None else "NA"

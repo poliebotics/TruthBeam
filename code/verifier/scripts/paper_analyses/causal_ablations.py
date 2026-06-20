@@ -1,8 +1,6 @@
 """Causal ablations for Phase G discrimination.
 
-Per operator's directive 2026-05-05 (post-visual-grids):
-
-  5 ablations × 7 conditions × 120 frames = 4200 evaluations.
+5 ablations × 7 conditions × 120 frames = 4200 evaluations.
 
 Ablations:
   E1 baseline             — no modification
@@ -342,7 +340,7 @@ def find_matched_pose_in_subset(this_row: int,
     """Nearest-neighbor matching within a SUBSET candidate pool.
     Operator decision 2026-05-05: candidate pool = the 120-frame test
     subset (instead of full session). This makes E5 a within-test-set
-    similarity baseline; cheaper to compute and matches the operator's
+    similarity baseline; cheaper to compute and matches the recording
     'hard-negative pose-similar' intent.
 
     `this_row` is the test frame's session row.

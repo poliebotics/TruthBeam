@@ -1,6 +1,6 @@
 """Determinism + storage-match checks for the chain-byte probe renderer.
 
-Three checks (per operator's pre-launch determinism block):
+Three checks (per the project's pre-launch determinism block):
 
 1. Renderer self-consistency: render the same chain bytes twice with
    bitexact_renderer.render_from_streams; verify pixel-exact match.

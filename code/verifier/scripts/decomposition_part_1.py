@@ -4,7 +4,7 @@ Tests whether a small logistic regression on Phase G diffusion verifier scores
 (from existing Stage 0 NPZ outputs) can separate real captures from F-A v1
 fakes, and how well that classifier generalises across F-A checkpoints.
 
-INTERPRETATION NOTE (CC, 2026-05-04 — no spec doc found):
+METHOD NOTE (2026-05-04):
     Diffusion-feature probe: logistic regression on existing Stage 0 scores.
     Three probes (Raw, Coupling, All); train on fake@{5k,25k,70k}, test on
     fake@100k for the headline, plus leave-one-checkpoint-out (LOOCV) folds.

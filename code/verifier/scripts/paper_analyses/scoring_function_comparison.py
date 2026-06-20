@@ -349,7 +349,7 @@ def extract_per_condition(
         accum_residual_4ch.add_(residual_4ch.sum(dim=0).double())
 
     # Finalize in-place to avoid creating six float64 temporaries on the
-    # GPU when memory headroom is tight (per Codex audit 2026-05-05).
+    # GPU when memory headroom is tight.
     accum_mse.div_(n_samples)
     accum_mae.div_(n_samples)
     accum_signed.div_(n_samples)

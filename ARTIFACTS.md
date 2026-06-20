@@ -47,7 +47,7 @@ run from this repo plus the public subset above.
 | Phase G verifier weights + training logs/configs (`main`/`shuffled`/`synthetic_positive`, `model_final.pt`) | `models/` and `lambda/experiments/phase_g_diffusion_diagnostic/` | 478 MB / 455 MiB each | headline verifier + controls; §5 training wall-time/loss figures |
 | F-A v1 forger checkpoints (5k/25k/70k/100k) + 14 binders | `models/`, `lambda/experiments/` | ~6–12 GB | red-team |
 | Stage-0 cross-session verifiers (step 100000) | `lambda/experiments/{stage_0_cross_verifier,cross_session_ablation}/` | — | §6 cross-session AUROC |
-| Raw capture corpus (D2 5,992 + V10 3,743 BayerRG8 frames) + emission tiles | `raw/`, `sessions/` | ~262 GB | dataset |
+| Raw capture corpus (D2 5,992 + V10 3,743 BayerRG8 frames) + emission tiles — the **raw analysis subset** (the full public `sessions/` release is ~378 GiB = 406 GB) | `raw/`, `sessions/` | ~262 GB | dataset |
 | Derived pack: 208 NPZ map shards (full-res robust-z / excess maps) | `lambda/experiments/` / curated Zenodo subset | ~14 GB | §10 derived products (the wide CSV itself now ships in-repo, above) |
 | Full eval trees (all `experiments/`) | `lambda/experiments/` | ~659 GB | full reproduction |
 

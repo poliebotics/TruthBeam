@@ -152,7 +152,7 @@ class PhaseHBaselineDataset(Dataset):
     def _build_sample(self, idx: int, retry_count: int = 0) -> dict:
         """Internal sample builder with bounded retry on render failure.
 
-        Per Codex audit 2026-05-02: a render failure in a worker would
+        Per a render failure in a worker would
         crash the DataLoader and kill training. Wrap in try/except and
         fall back to a SAFE positive (identity render — proven bit-exact)
         on any unexpected exception. Bounded retry count prevents infinite

@@ -5,7 +5,7 @@ Runs all acceptance criteria on a trained fresh-binder ckpt:
     - AUROC(correct_E vs ±2/±15/+30 wrong-frame E) ≥ 0.95
     - output range ≥ 0.3 (max-min over channels) — catches collapse
     - no NaN/Inf in any forward pass
-    - 5 qualitative spot-check frames saved as PNGs (CC visual review)
+    - 5 qualitative spot-check frames saved as PNGs (visual review)
 
 Pass/fail JSON + report.md written to <ckpt_parent>/acceptance/.
 
@@ -57,7 +57,7 @@ def psnr01(p: torch.Tensor, t: torch.Tensor) -> float:
 
 
 def load_binder(ckpt_path: Path, device: torch.device) -> tuple[torch.nn.Module, dict]:
-    # Codex audit MED 2026-05-03: weights_only=False is needed because cfg dict
+    # weights_only=False is needed because cfg dict
     # is in the ckpt; the threat model assumes operator-trusted ckpts only.
     # If running on third-party ckpts, switch to weights_only=True and parse
     # cfg from a sibling JSON file.
@@ -65,7 +65,7 @@ def load_binder(ckpt_path: Path, device: torch.device) -> tuple[torch.nn.Module,
     cfg = ck["args"]
     family = cfg["family"]
     model_cls = FRESH_BINDER_REGISTRY[family]
-    # Codex audit MED 2026-05-03: override pretrained=False at eval-time
+    # override pretrained=False at eval-time
     # reconstruction. The timm encoders' weights are loaded from the ckpt
     # state_dict regardless, so initial pretrain download is wasted compute
     # (and a Lambda offline-mode failure surface). Family D doesn't use this

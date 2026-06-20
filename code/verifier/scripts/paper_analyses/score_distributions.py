@@ -1,6 +1,6 @@
 """Tier 0 Analysis B — Phase G / Stage 0 score distribution figures.
 
-Per operator spec 2026-05-03: turn AUROC=1.0 from claim into visible evidence.
+turn AUROC=1.0 from claim into visible evidence.
 
 Produces a 2×2 panel figure:
     [0,0]: Phase G real-correct vs wrong-frame E score distributions (D2+V10)

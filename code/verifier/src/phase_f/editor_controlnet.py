@@ -254,7 +254,7 @@ class EditorControlNet(nn.Module):
         """Zero out the hint encoder's first-conv weights for the E(t-1)
         and Δ channels. With this zero-init, control and treatment runs
         produce identical step-0 outputs regardless of E_source value
-        (operator's warm-start trick for the v1.5 ablation, 2026-04-30):
+        (the project's warm-start trick for the v1.5 ablation, 2026-04-30):
 
           channels 0-2: E(t)        — kept as-is
           channels 3-5: E(t-1)      — zeroed

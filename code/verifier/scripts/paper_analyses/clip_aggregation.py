@@ -1,6 +1,6 @@
 """Tier 0 Analysis X1 — Clip-level aggregation curves.
 
-Per operator spec 2026-05-03: Truth Beam is a video system. Show that evidence
+Truth Beam is a video system. Show that evidence
 compounds across frames.
 
 For each experiment with per-frame scores, simulate clip-level verification by

@@ -1,6 +1,6 @@
 """Tier 0 V1 — Figure 1: system overview.
 
-Per operator spec 2026-05-03: publication-ready Figure 1 using ACTUAL session
+publication-ready Figure 1 using ACTUAL session
 data. Chain semantics verified in
 `experiments/paper_analyses/figure_1/chain_semantics_verification.md` BEFORE
 drawing.

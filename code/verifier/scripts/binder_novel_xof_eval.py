@@ -5,7 +5,7 @@ E values when paired with real C captures. Question: do binders give appropri-
 ately HIGH MSE for novel E (correctly rejecting), or LOW MSE (failing to
 discriminate)?
 
-Per operator's preflight spec 2026-05-03:
+Method note (2026-05-03):
     - 100 real C frames stratified across D2/V10 held-out blocks
     - 22 E conditions per frame: target, shuffled (lag > 60), 20 novel
     - 13 binders (Phase E exp001c family loaded from PHASE_E_THRESHOLDS.json)
@@ -109,7 +109,7 @@ def sample_held_out_frames(n_total: int, seed: int = 0) -> list[tuple[str, int]]
     Deterministic via numpy.random.RandomState(seed).
     Filters to rows present in chain_log AND with .raw on disk.
 
-    NOTE (Codex audit MED 2026-05-04): this is a balanced 50/50 D2:V10 sample,
+    NOTE: this is a balanced 50/50 D2:V10 sample,
     NOT a representative sample of the true held-out distribution (held-out
     block sizes differ across sessions). The balance is deliberate for
     discrimination preflight — we want symmetric per-session signal so that
@@ -149,7 +149,7 @@ def sample_held_out_frames(n_total: int, seed: int = 0) -> list[tuple[str, int]]
 def pick_shuffled_partner(session: str, row: int, chain: dict, rs: np.random.RandomState,
                           session_dir: Path, lag_min: int = LAG_MIN_SHUFFLED) -> int:
     """Pick a partner row with |lag|>lag_min that has BOTH a chain entry and an
-    emission tile PNG on disk. (Codex audit MED 2026-05-04: previous version
+    emission tile PNG on disk. (previous version
     only checked chain, so missing PNGs would surface as FileNotFoundError
     much later in the eval loop.)
     """
@@ -214,7 +214,7 @@ def load_binder(spec: dict, device: torch.device, dtype: torch.dtype) -> torch.n
     state = ck["model"] if isinstance(ck, dict) and "model" in ck else ck
     state = {k[len("module."):] if k.startswith("module.") else k: v
              for k, v in state.items()}
-    # Codex audit HIGH 2026-05-04: capture missing/unexpected so we can fail
+    # capture missing/unexpected so we can fail
     # loudly if a binder ckpt is incompatible with the model code (e.g. arch
     # drift). Empty sets = clean load. Anything non-empty is a hard error.
     missing, unexpected = m.load_state_dict(state, strict=False)
@@ -294,8 +294,7 @@ def main() -> int:
     # ---- pick device ----
     # CRITICAL: Phase H trains DDP=8 across ALL GPUs. Default to CPU and
     # require explicit `--device cuda:N` if the operator wants GPU. This
-    # prevents accidental contention with running training. (Codex audit
-    # CRITICAL finding 2026-05-04.)
+    # prevents accidental contention with running training.
     if args.device is not None:
         device = torch.device(args.device)
     else:
@@ -427,7 +426,7 @@ def main() -> int:
     mean_n = float(np.mean(sanity_novel))
     print(f"[sanity] {sanity_binder_name}: "
           f"mean target={mean_t:.5f}  shuffled={mean_s:.5f}  novel={mean_n:.5f}")
-    # Codex audit HIGH 2026-05-04: check per-frame proportion AND aggregate
+    # check per-frame proportion AND aggregate
     # mean, not just the mean. A binder that flips on individual frames but
     # averages OK should NOT pass. Require ≥80% per-frame correctness.
     n_target_lt_shuffled = sum(1 for t, s in zip(sanity_target, sanity_shuffled) if t < s)
@@ -541,7 +540,7 @@ def main() -> int:
         if np.isnan(col).all():
             per_binder[bname] = {"loaded": False, "reason": "all-NaN (load failed)"}
             continue
-        # Codex audit HIGH 2026-05-04: partial NaN should also fail-loud, not
+        # partial NaN should also fail-loud, not
         # silently flow into nanmean and produce misleading per-binder stats.
         # If any frame for this binder has any NaN/Inf score, mark as failed.
         if not np.isfinite(col).all():
@@ -616,7 +615,7 @@ def main() -> int:
     auroc_tn_std  = float(np.nanstd(aurocs_tn))
     nov_over_shuf_mean = float(np.nanmean(means_n / np.maximum(means_s, 1e-12)))
 
-    # Codex audit MED 2026-05-04: "best" must require EVERY loaded binder
+    # "best" must require EVERY loaded binder
     # to pass the bounds individually, not just the aggregate mean — otherwise
     # one or two strong binders can mask a fleet of failed ones.
     per_binder_passes_best = all(

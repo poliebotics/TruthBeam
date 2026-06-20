@@ -54,7 +54,7 @@ class FreshBinderC(nn.Module):
         super().__init__()
         self.emission_h = emission_h
         self.emission_w = emission_w
-        # Codex audit MED 2026-05-03: pretrained kwarg lets eval-time
+        # pretrained kwarg lets eval-time
         # reconstruction skip the timm download.
         self.encoder = timm.create_model(
             "resnet50", pretrained=pretrained, features_only=True,

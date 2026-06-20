@@ -76,7 +76,7 @@ def augment(cap: torch.Tensor, em: torch.Tensor, rng: torch.Generator
             ) -> tuple[torch.Tensor, torch.Tensor]:
     """50% horizontal flip only.
 
-    Codex audit MED 2026-05-03: rotation/scale augmentation was dropped because
+    rotation/scale augmentation was dropped because
     cap (1150x1330 / 2300x2660) and em (1080x1920) have different aspect ratios,
     and applying the same normalized-coords affine breaks the C↔E correspondence
     (the projector calibration is NOT a pure 2D affine between the two spaces).
@@ -221,7 +221,7 @@ def main() -> int:
         if not torch.isfinite(loss):
             raise RuntimeError(f"[NaN HALT] loss not finite at step {step}: {loss.item()}")
         loss.backward()
-        # Codex audit HIGH 2026-05-03: error_if_nonfinite=True so grad NaN/Inf
+        # error_if_nonfinite=True so grad NaN/Inf
         # halts immediately rather than silently corrupting weights.
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0,
                                        error_if_nonfinite=True)

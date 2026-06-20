@@ -79,7 +79,7 @@ from the on-disk `verification_bundle.json`, recomputes
 from it; any tampering with the calibration, wallet, host config, or
 generator source changes `S_0` and the chain fails to walk.
 
-`~/.tb/pipeline_calibration_<rig_hash>.json` (the operator's machine-
+`~/.tb/pipeline_calibration_<rig_hash>.json` (the recording machine-
 local calibration store) is a convenience cache only: at verify time
 the calibration is read *out of the session's own bundle*, not from the
 operator machine. Sessions are therefore self-contained for verification.

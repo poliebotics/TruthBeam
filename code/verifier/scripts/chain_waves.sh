@@ -46,7 +46,7 @@ echo 'EXIT=' \$? >> experiments/$exp/run.log
 }
 
 # Pair-launch: when wave-1 exp finishes, launch wave-2 exp on the same GPUs.
-# Skip wave-2 launch if wave-1 failed (exit non-zero) — operator's "no GPU
+# Skip wave-2 launch if wave-1 failed (exit non-zero) — the project's "no GPU
 # contention from cascading failed experiments" rule.
 chain() {
   local w1="$1" w2="$2" gpus="$3" port="$4" nproc="$5"

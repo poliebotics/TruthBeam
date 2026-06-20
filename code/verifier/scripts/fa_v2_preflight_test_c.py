@@ -271,7 +271,7 @@ def main() -> int:
     overall_t0 = time.time()
     for bi, bname in enumerate(binder_names):
         spec = binders_meta[bname]["spec"]
-        # Codex audit HIGH 2026-05-04: halt on binder load failure rather than
+        # halt on binder load failure rather than
         # silently leave NaN result planes.
         binder = load_binder(spec, device, dtype)
         cap_h, cap_w = spec["capture_h"], spec["capture_w"]

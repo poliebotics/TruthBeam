@@ -70,7 +70,7 @@ class FreshBinderA(nn.Module):
         self.emission_w = emission_w
         # Family A's distinguishing feature is NO ImageNet pretrain. Default
         # is False; the kwarg exists so eval can explicitly skip the timm
-        # initialization download (Codex audit MED 2026-05-03).
+        # initialization download.
         self.encoder = timm.create_model(
             "resnet18", pretrained=pretrained, features_only=True,
             in_chans=in_channels, out_indices=(1, 2, 3, 4),

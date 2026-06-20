@@ -18,7 +18,7 @@
 
 ## ⚡ Verify the headline yourself — 2 minutes, no GPU
 
-You do not have to trust this repo. **Recompute the headline `AUROC = 1.000` yourself** from **4.3 MB**
+You do not have to trust this repo. **Recompute the headline `AUROC = 1.000` yourself** from **~2 MB**
 of published per-frame scores and an in-repo script — **CPU-only, in seconds**. Step by step:
 **[REPRODUCE.md](REPRODUCE.md)**.
 
@@ -28,7 +28,7 @@ of published per-frame scores and an in-repo script — **CPU-only, in seconds**
 |---|---|
 | 🧠 **Verifier weights** (39.8 M params) | <https://data.truthbeam.com/models/verifier/model_final.pt> |
 | 😈 **Forger checkpoints** (F-A v1) | `data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_*.pt` |
-| 📊 **Eval scores** (reproduce input, 4.3 MB) | <https://data.truthbeam.com/models/repro/stage_0_eval/> |
+| 📊 **Eval scores** (reproduce input, ~2 MB) | <https://data.truthbeam.com/models/repro/stage_0_eval/> |
 | 💻 **Verifier + forger code** | [`code/verifier/`](code/verifier/) (this repo) |
 | 🗂️ **378 GiB ground-truth corpus** | <https://data.truthbeam.com/sessions/> · CIDs in [`CID_MANIFEST.json`](CID_MANIFEST.json) |
 | ▶️ **2023 demo video** | <https://data.truthbeam.com/pinata/PolieBotics.mp4> |

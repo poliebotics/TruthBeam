@@ -463,7 +463,7 @@ def run_exp2(log: TimingLog) -> dict:
     (out_dir / "pathological_cases.json").write_text(
         json.dumps(pathological, indent=2))
     # Mirror to body_box_sanity.md, AND save as summary.md
-    # so write_morning_report() picks it up. (Codex audit fix 2026-05-05.)
+    # so write_morning_report() picks it up.
     # CSV
     csv_path = out_dir / "box_stats.csv"
     if box_stats:
@@ -1119,7 +1119,7 @@ def run_exp6(log: TimingLog, device_id: int = 0) -> dict:
             # Score 50 wrong candidates. Pre-registered protocol requires
             # exactly correct + 50 wrong; any candidate-load failure
             # invalidates this frame's rank → skip the frame.
-            # (Codex audit fix 2026-05-05.)
+            #
             scores_wrong: list[float] = []
             candidate_failure = False
             for j in picks:
@@ -1465,8 +1465,7 @@ def run_exp8(log: TimingLog, device_id: int = 0) -> dict:
     pearson_e1_e4_real = float(np.corrcoef(e1_real_arr, e4_real_arr)[0, 1]) if e1_real_arr.size > 1 else float("nan")
     pearson_e1_e4_fake = float(np.corrcoef(e1_fake_arr, e4_fake_arr)[0, 1]) if e1_fake_arr.size > 1 else float("nan")
 
-    # Helper for safe-format that handles None medians (Codex audit fix
-    # 2026-05-05).
+    # Helper for safe-format that handles None medians.
     def _med(arr):
         return float(np.median(arr)) if arr.size else float("nan")
 
@@ -1482,7 +1481,7 @@ def run_exp8(log: TimingLog, device_id: int = 0) -> dict:
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
 
-    # Sanity check: re-run Phase G on 5 random frames. Per Codex audit
+    # Sanity check: re-run Phase G on 5 random frames.
     # 2026-05-05, the 1e-3 tolerance check must cover BOTH the E1 real
     # path AND the E4 fake_100k path (since the AUROC=0.151 inversion
     # specifically lives in the E4 fake_100k cell). We re-render the
@@ -1586,7 +1585,7 @@ def run_exp8(log: TimingLog, device_id: int = 0) -> dict:
     md.append("")
     md.append("## Sanity check — re-run Phase G on 5 random frames")
     md.append("")
-    md.append("Per Codex audit 2026-05-05: the AUROC=0.151 finding must be "
+    md.append("Per the AUROC=0.151 finding must be "
                "verified by re-running BOTH the E1 real_correct path and the "
                "E4 fake_100k path. Tolerance: 1e-3.")
     md.append("")
@@ -1644,7 +1643,7 @@ def run_exp9(log: TimingLog) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     canon_csv = CAUSAL_ROOT / "per_frame" / "ablation_table.csv"
     if not canon_csv.exists():
-        # Codex audit 2026-05-05: returning {"error": ...} is silently
+        # returning {"error": ...} is silently
         # marked status=done by run_one. Raise instead so failed status
         # propagates to the morning report.
         raise FileNotFoundError(f"missing canonical table: {canon_csv}")

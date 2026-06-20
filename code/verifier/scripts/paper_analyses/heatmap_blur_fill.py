@@ -1,8 +1,6 @@
 """Track 2B — blur-fill control for the spatial heatmap pilot.
 
-Per operator's spec 2026-05-04:
-
-    Diagnostic: tests whether saliency reflects E-coupling or generic
+Diagnostic: tests whether saliency reflects E-coupling or generic
     C-content. Pilot occludes C with fixed fill (mean). Blur-fill replaces
     occluded patch with a Gaussian-blurred version of itself.
 

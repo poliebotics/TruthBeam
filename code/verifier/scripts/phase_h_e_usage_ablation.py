@@ -1,6 +1,6 @@
 """Sub-diag 6.4 — Phase H E-usage ablation. CRITICAL.
 
-Per operator's 2026-05-03 directive: determine whether Phase H step_25000 actually
+Per the project's 2026-05-03 directive: determine whether Phase H step_25000 actually
 *uses* E or is C-only. Compare classifier scores on (C, E_target) vs (C, E_zero)
 vs (C, E_shuffled) vs (C, E_source).
 
@@ -158,7 +158,7 @@ def main() -> int:
     # Load model + validate ckpt step matches expected
     print(f"[6.4] loading Phase H ckpt...")
     ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
-    # Codex audit MED 2026-05-03: validate ckpt identity to prevent silent
+    # validate ckpt identity to prevent silent
     # wrong-ckpt verdict.
     ckpt_step = int(ck.get("step", -1))
     print(f"  ckpt step={ckpt_step}, max_steps_arg={ck.get('args', {}).get('max_steps', '?')}")
@@ -240,7 +240,7 @@ def main() -> int:
         }
 
     # Verdict thresholds.
-    # Codex audit HIGH 2026-05-03: target-vs-zero is an OOD probe (Phase H never
+    # target-vs-zero is an OOD probe (Phase H never
     # saw zero-E during training, so its response to E_zero may be arbitrary).
     # PASS must require IN-DISTRIBUTION contrasts (target vs shuffled OR target vs source).
     # target-vs-zero is reported as a supplemental diagnostic, not load-bearing for PASS.
@@ -355,7 +355,7 @@ def main() -> int:
     (args.out / "e_usage_report.md").write_text("\n".join(md))
     print(f"[6.4] report → {args.out / 'e_usage_report.md'}")
     print(f"[6.4] VERDICT: {verdict_text[:80]}")
-    # Codex audit HIGH 2026-05-03: exit code MUST reflect c_only so wrapper
+    # exit code MUST reflect c_only so wrapper
     # scripts can halt fresh binder phase. PASS: rc=0; c_only: rc=2 (distinct
     # from generic failure rc=1); intermediate: rc=3.
     if c_only:

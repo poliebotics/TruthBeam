@@ -1,6 +1,6 @@
 """Visual grid generation — manuscript-ready figures from existing experiment outputs.
 
-Per operator's spec 2026-05-03. CPU/IO only — does NOT touch GPUs (Phase H may
+Per the project's spec 2026-05-03. CPU/IO only — does NOT touch GPUs (Phase H may
 still be training). Reads from existing artifacts only:
     - sessions/d2 + sessions/v10 (.raw + .png)
     - chain_log.csv per session (for byte-stream derivation)

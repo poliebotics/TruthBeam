@@ -1,8 +1,6 @@
 """Track 2A — resolution-stability comparison: 16×16 pilot vs 32×32 rerun.
 
-Per operator's spec 2026-05-04:
-
-    Comparison: per-frame correlation between 16×16 and 32×32 saliency
+Comparison: per-frame correlation between 16×16 and 32×32 saliency
     maps (downsample 32×32 to 16×16). Report Pearson + SSIM.
 
     Acceptance: per-frame correlation > 0.7 supports 16×16
@@ -407,7 +405,7 @@ def main() -> int:
         "  `data_range = max(map16.max(), map32.max()) - min(map16.min(), map32.min())`",
         "  and `win_size = 7` (the largest odd ≤ min(H,W) for 16×16 maps).",
         "- Per-frame mean folds BOTH compat and detection-contribution",
-        "  rows together for a single per-frame statistic. The operator's",
+        "  rows together for a single per-frame statistic. The the project's",
         "  spec phrase \"per-frame correlation\" is ambiguous between",
         "  per-(frame,source) and per-frame-aggregate; this script reports",
         "  both (per-(frame,source) detail table + per-frame mean for the",

@@ -1,6 +1,6 @@
 """Stage 0 — paired comparison eval: real (C, E) vs F-A-fake (C_fake, E).
 
-Per the operator's v7 spec Phase 2 (Stage 0 expanded). For each F-A v1
+Per the recording v7 spec Phase 2 (Stage 0 expanded). For each F-A v1
 checkpoint × session × held-out target frame:
 
     1. Render C_fake = F-A(C_source, E_source, E_target).
@@ -216,7 +216,7 @@ def evaluate_session(diff_model: DiffusionDiagnosticUNet,
                                source_row=source_row, target_row=target_row,
                                device=device, dtype=dtype).to(device, dtype=dtype)
         if c_fake_buffer is not None:
-            # Codex audit HIGH 2026-05-04: NumPy has no native bf16, so
+            # NumPy has no native bf16, so
             # converting bf16 → numpy silently widens or fails. Use float16
             # for storage instead (numpy supports it natively; precision is
             # equivalent for our 1080p visualisation + binder eval downstream).
