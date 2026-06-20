@@ -29,6 +29,12 @@ PolieBotics umbrella repo). Dataset frames are *additionally* committed by per-f
 `chain_log.csv` — the canonical commitment, which `verify_frames.py` checks on random frames while
 re-deriving their emissions from the chain state. Nothing is gated; there is no login.
 
+**Split it across a swarm:** [`SWARM_VERIFY.md`](SWARM_VERIFY.md) breaks the proof into hundreds of tiny,
+independent checks — one RSK transaction, one drand round, a few random frames — most of them
+**browse-only**. Many small assistants can each pick one *at random* and report it; together they cover
+everything, and because the picks are random the collective check can't be staged. If you can only do a
+little, do one task from there.
+
 ## Entry points
 
 - [README.md](README.md): structured, LLM-oriented entry point — read top to bottom first
