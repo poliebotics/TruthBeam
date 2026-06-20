@@ -33,8 +33,8 @@ python3 -m venv .venv
 # shellcheck disable=SC1091
 . .venv/bin/activate
 pip install -q --upgrade pip >/dev/null
-pip install -q numpy scikit-learn py_ecc >/dev/null
-echo "      deps: numpy, scikit-learn, py_ecc installed."
+pip install -q numpy scikit-learn py_ecc blake3 >/dev/null
+echo "      deps: numpy, scikit-learn, py_ecc, blake3 installed."
 
 echo; echo "[1/3] Path A — recompute the headline AUROC from public scores..."
 for ck in 00005000 00025000 00070000 00100000; do
@@ -57,15 +57,23 @@ for s in d2 v10; do
   python3 "$REPO/code/recording/verify/temporal_analysis.py" "$s" | tee "temporal_$s.log"
 done
 
-echo; echo "[3/3] Verdict"
+echo; echo "[3/4] Random frames — BLAKE3 commitments + emission re-derivation (GPU-free)..."
+for s in d2 v10; do
+  echo "--- $s ---"
+  python3 "$REPO/code/recording/verify/verify_frames.py" 5 "$s" | tee "frames_$s.log"
+done
+
+echo; echo "[4/4] Verdict"
 PASS=1
-if grep -q "AUROC combined=1.0000" pathA.log; then echo "  Path A     : AUROC = 1.0000  ✓"
-else echo "  Path A     : FAIL"; PASS=0; fi
+if grep -q "AUROC combined=1.0000" pathA.log; then echo "  Path A      : AUROC = 1.0000  ✓"
+else echo "  Path A      : FAIL"; PASS=0; fi
 for s in d2 v10; do
   if grep -q "carry the expected commitment in calldata" "temporal_$s.log" \
      && grep -qE "invalid=0 " "temporal_$s.log"; then  # 0 BLS failures (transient fetch retries OK)
-    echo "  Temporal $s : RSK calldata + drand BLS  ✓"
-  else echo "  Temporal $s : FAIL"; PASS=0; fi
+    echo "  Temporal $s  : RSK calldata + drand BLS  ✓"
+  else echo "  Temporal $s  : FAIL"; PASS=0; fi
+  if grep -q "^PASS — random frames" "frames_$s.log"; then echo "  Frames $s    : raw BLAKE3 + emission re-derivation  ✓"
+  else echo "  Frames $s    : FAIL"; PASS=0; fi
 done
 echo "=================================================================="
 if [ "$PASS" = 1 ]; then
