@@ -20,11 +20,12 @@ sessions** — anyone can re-run it (commands at the bottom).
 | fresh-block wait (freshness mechanism) | tip 8768851 → waited 3.57 s for next block | (next-block wait) |
 | **anchor_end** (session-end upper bound) | block **8768945**, hash `0x19b20a60…` ✓, **02:48:47 UTC** | block **8769357**, hash ✓, **05:35:53 UTC** |
 | final-root tx (commits `S_N`'s final root) | `0x9952d222…12c8f` — **in anchor_end block** ✓, commitment present in input ✓ | `0x42293125…` — in-block ✓, commitment in input ✓ |
-| RSK pulse txs (state commitments) | 160 | (per-pulse, online-checkable) |
+| RSK pulse txs (state commitments) | **161/161 included on-chain** ✓ (84 blocks, monotonic) | **102/102 included** ✓ (57 blocks) |
+| pulse fired→inclusion latency | median ~12 s (max ~75 s ≈ 2–3 blocks) | median ~11 s (max ~49 s) |
 | drand chain | quicknet `52db9ba7…e971`, pubkey ✓, period 3 s | same |
 | drand rounds folded | **476**, rounds 28093180 → 28093983 | **324**, 28096824 → 28097325 |
 | drand publication times | open **02:08:24** → close **02:48:33 UTC** | open **05:10:36** → close **05:35:39 UTC** |
-| drand BLS pairing-verify | **5/5 sampled rounds valid** | **5/5 valid** |
+| drand BLS pairing-verify | **all 476 rounds valid** (0 fail) | **all 324 valid** (0 fail) |
 | **on-chain time window** | **[02:07:48 → 02:48:47] = 2459 s** | **[05:10:29 → 05:35:53] = 1524 s** |
 | captures `N_chain` | 5992 | 3743 |
 | camera acquisition span | 2401.0 s | 1500.7 s |
@@ -37,10 +38,31 @@ demonstrably existed by its `anchor_end` block, whose transaction commits the se
 Within that window the projection ran at a steady **~2.5 Hz**, with a BLS-verifiable drand challenge
 refreshed every 3 s (≈ one round per 7–8 frames).
 
-**Scope.** This demonstrates the *time window* and *commit rate* for the two released sessions. It does
-not tighten the window below the anchor cadence, and — like everything in this release — says nothing
-about the semantic truth of what was staged. The drand layer is corroborating-evidence tier (non-gating
-in the offline verifier); the RSK fresh-block folded into `S_0` is the primary session-open bound.
+## Full per-pulse + all-rounds download
+
+Beyond the endpoints, **every** RSK pulse and **every** drand round was downloaded and checked:
+
+- **RSK pulses — all included, continuous, monotonic.** D2 **161/161** and V10 **102/102** pulse
+  transactions are confirmed on-chain (receipt status OK), landing in monotonically-increasing mainnet
+  blocks across the whole session (D2: 84 blocks 8768854→8768945). Their committed `state_index` values
+  rise monotonically and cover the full capture range (D2 9→5992 of 5992). Median fired→inclusion latency
+  ~12 s (max ~75 s ≈ 2–3 RSK blocks) — the chain is anchored **continuously through** the session, not
+  only at its ends.
+- **drand — every round BLS-verified.** All **476** (D2) and **324** (V10) folded quicknet rounds were
+  refetched and pass the BLS pairing-check — **zero failures**. The rounds advance monotonically at the
+  3 s cadence from the session-open round to the session-close round, bracketing the window.
+- **Commit rate is rock-steady.** Inter-frame intervals: **median 0.400 s, p95 0.401 s** (max 0.501 s = an
+  occasional single-frame gap) → a near-constant **2.50 Hz**, ≈ one BLS-verifiable drand challenge per
+  7–8 frames.
+
+**Scope.** This demonstrates the *time window* and *commit rate* for the two released sessions. The
+freshness floor is established at **drand-round granularity** (~3 s / ~7–8 frames): every folded round is
+genuine (BLS) and published at a known time, and the rounds advance through the session — per-*frame*
+drand is an explicit protocol non-goal (it would throttle capture), and a precise per-frame wall-clock
+comparison is limited by the camera's monotonic-clock-to-UTC offset, so none is claimed. The window is
+not tightened below the anchor cadence, and — like everything in this release — this says nothing about
+the semantic truth of what was staged. The RSK fresh-block folded into `S_0` is the primary session-open
+bound; drand is corroborating-evidence tier (non-gating in the offline verifier).
 
 ## Reproduce it
 
@@ -52,6 +74,9 @@ for s in d2 v10; do for f in manifest.json anchor_txs.csv chain_log.csv; do
 # 2. authoritative path — the project's own verifier, online mode
 python3 code/recording/verify/verify_v9.py --session-dir ./d2 --online   # RSK incl. + drand BLS
 python3 code/recording/verify/verify_v10.py --session-dir ./v10 --online
+
+# 2b. the full itemised per-pulse + all-rounds timing view (the numbers in this report):
+python3 code/recording/verify/temporal_analysis.py ./d2
 
 # 3. or look the anchors up directly: eth_getBlockByNumber against any RSK
 #    mainnet RPC (public-node.rsk.co) for anchor_start/anchor_end in manifest.json,
