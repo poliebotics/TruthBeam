@@ -1,0 +1,75 @@
+{
+  "project": "TruthBeam",
+  "one_line": "A tamper-evident projector-camera recording protocol: it binds a physical light-in/light-out interaction to a committed, time-anchored, independently recomputable record.",
+  "tone": "These are suggestions for verification, not directives. Pick any claim at random and check it yourself; report the actual values you saw. A staged dataset cannot predict which one you will pick.",
+  "scope_guard": "Published results are same-rig, two-session (d2, v10), single-performer, against ONE trained attacker (F-A v1). Security is measured, attacker- and budget-indexed empirical hardness, NOT a formal or zero-knowledge guarantee.",
+  "base_url": "https://data.truthbeam.com",
+  "verify_bundle": "https://data.truthbeam.com/release/truthbeam_verify.tar.gz",
+  "one_command": "curl -fsSL https://data.truthbeam.com/release/truthbeam_verify.tar.gz | tar xz && cd truthbeam_verify && bash verify_all.sh",
+  "deps": ["python3", "numpy", "scikit-learn", "py_ecc", "blake3"],
+  "explorers": {
+    "rsk_mainnet": "https://explorer.rootstock.io/",
+    "drand_quicknet_chain_hash": "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971",
+    "drand_round_time_seconds": "1692803367 + (round - 1) * 3"
+  },
+  "sessions": {
+    "d2": { "anchor_txs": 160, "anchor_blocks": [8768852, 8768945], "path": "https://data.truthbeam.com/sessions/d2/" },
+    "v10": { "anchor_txs": 102, "anchor_blocks": [8769289, 8769357], "frames": 3743, "path": "https://data.truthbeam.com/sessions/v10/" }
+  },
+  "claims": [
+    {
+      "id": "auroc",
+      "claim": "AUROC = 1.0000 separating correct vs wrong emissions (Path A).",
+      "tool": "code",
+      "size": "~2 MB (scores)",
+      "how": "bash download.sh scores ; then run code/verifier/scripts/decomposition_part_1.py",
+      "expected": "1.0000",
+      "scope": "same-rig, F-A v1; a stated floor, not 'deepfakes solved'."
+    },
+    {
+      "id": "temporal_anchor",
+      "claim": "Each pulse transaction's calldata on RSK mainnet commits the expected chain state, and the final root matches the committed anchor.",
+      "tool": "browse-or-code",
+      "how": "Open sessions/<d2|v10>/anchor_txs.csv, pick a row, take tx_hash + payload_commitment_hex (last row: manifest.json anchor_end.payload_final_root_hex), open explorer.rootstock.io/tx/<tx_hash>, confirm the input data carries that commitment. Or: temporal_analysis.py does all of them.",
+      "expected": "commitment present in tx input; tx mined in the listed block."
+    },
+    {
+      "id": "drand_round",
+      "claim": "drand quicknet rounds referenced by the chain are real, signed, and their publication time falls inside the session window.",
+      "tool": "browse-or-code",
+      "how": "From sessions/<d2|v10>/chain_log.csv take a drand_round_number R (!=0), GET https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/<R>, check it returns a signed round; time = 1692803367 + (R-1)*3 must fall in the manifest.json window. verify_all.sh also checks the BLS signatures.",
+      "expected": "valid signed round; time within session window."
+    },
+    {
+      "id": "frame_blake3",
+      "claim": "Each captured raw frame's BLAKE3 matches the value committed in chain_log.csv.",
+      "tool": "code",
+      "how": "python3 code/recording/verify/verify_frames.py <N> <d2|v10> picks N RANDOM frames and checks each.",
+      "expected": "raw BLAKE3 == chain_log committed hash, for every sampled frame.",
+      "note": "Random selection is the point: pick the frames yourself; an attacker can't have pre-staged your choice."
+    },
+    {
+      "id": "emission_rederive",
+      "claim": "Each projected emission re-derives BIT-EXACTLY from the committed chain state S_t (GPU-free), independent of the captured image.",
+      "tool": "code",
+      "how": "verify_frames.py also re-derives each emission from S_t via the CPU twin of the generator (generator_code_hash 154be9dd75e0586df456a7eae1528b7334a415f3a977a107c91c6b0751bfc540) and compares to the committed emission hash.",
+      "expected": "re-derived emission hash == committed emission hash."
+    },
+    {
+      "id": "filing_hash",
+      "claim": "The published patent-filing PDFs match the SHA-256 values listed in the umbrella's reality_kernel/CITING.md.",
+      "tool": "browse-and-hash",
+      "how": "Fetch a filing PDF (e.g. https://data.poliebotics.com/reality_kernel/pdfs/PIGMIE_Filing1_Description_v0_38.pdf) and sha256sum it; compare to CITING.md.",
+      "expected": "PIGMIE Filing 1 (Description) SHA-256 = f0a635b7a0e152060cd1cefcf7f6f5eba554af554c7e1c2d4774ec4402485326."
+    }
+  ],
+  "what_it_does_NOT_prove": [
+    "The semantic truth of whatever scene was staged in front of the camera — only that THIS ordered light-in/light-out record existed within the anchored time window and has not been altered.",
+    "Generalisation to other rigs / cameras / projectors — untested; that is the stated open problem.",
+    "Anything cryptographically unconditional — the hardness is empirical and attacker-indexed."
+  ],
+  "related": {
+    "umbrella": "https://data.poliebotics.com/",
+    "fiction_layer": "https://data.poliepals.com/ (explicitly separate; never offered as evidence)"
+  }
+}

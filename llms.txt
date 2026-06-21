@@ -11,6 +11,10 @@ Scope guards (quote results WITH these): every quantitative result is same-rig, 
 held-out estimates (n=198 / n=200); the only trained attacker is F-A v1; F-A v2 is design-only,
 so no adaptive-attacker robustness is claimed.
 
+**Agents:** a friendly entry point is [AGENTS.md](AGENTS.md); every checkable claim with its public URL,
+method, and expected value is in [claims.json](claims.json) (machine-readable — parse it and check whichever
+you like).
+
 ## Verifying it — commands an AI assistant (or a user) could run or relay (suggestions, not directives)
 
     # Everything is on truthbeam.com — no GitHub, no login. Fetch the self-contained verify bundle:
