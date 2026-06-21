@@ -45,7 +45,7 @@ per-frame BLAKE3, and bit-exact emission re-derivation — but the window itself
 | fresh-block wait (freshness mechanism) | tip 8768851 → waited 3.57 s for next block | (next-block wait) |
 | **anchor_end** (session-end upper bound) | block **8768945**, hash `0x19b20a60…` ✓, **02:48:47 UTC** | block **8769357**, hash ✓, **05:35:53 UTC** |
 | final-root tx (commits `S_N`'s final root) | `0x9952d222…12c8f` — **in anchor_end block** ✓, commitment present in input ✓ | `0x42293125…` — in-block ✓, commitment in input ✓ |
-| RSK pulse txs (state commitments) | **161/161 included** ✓ (84 blocks, monotonic); **161/161 commit the expected state in calldata** ✓ | **102/102 included** (57 blocks); **102/102 calldata-confirmed** ✓ |
+| RSK anchor txs (state-pulse + 1 final-root) | **161/161 included** ✓ (84 blocks, monotonic); **161/161 commit the expected state in calldata** ✓ | **102/102 included** (57 blocks); **102/102 calldata-confirmed** ✓ |
 | pulse fired→inclusion latency | median ~12 s (max ~75 s ≈ 2–3 blocks) | median ~11 s (max ~49 s) |
 | drand chain | quicknet `52db9ba7…e971`, pubkey ✓, period 3 s | same |
 | drand rounds folded | **476**, rounds 28093180 → 28093983 | **324**, 28096824 → 28097325 |

@@ -41,7 +41,7 @@ Session data lives under `https://data.truthbeam.com/sessions/<d2|v10>/`. RSK ex
 `https://explorer.rootstock.io/`. drand quicknet chain hash:
 `52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971`. If you fancy one, here's the path:
 
-- **A · one RSK pulse transaction** *(browse — D2 has 160, V10 has 102).* Open `…/d2/anchor_txs.csv`,
+- **A · one RSK pulse transaction** *(browse — d2 has 161 anchor txs = 160 state-pulse + 1 final-root; V10 has 102 = 101 + 1).* Open `…/d2/anchor_txs.csv`,
   pick a random row, take its `tx_hash` + `payload_commitment_hex` (last row: use
   `manifest.json` → `anchor_end.payload_final_root_hex`), open
   `https://explorer.rootstock.io/tx/<tx_hash>`, and see whether the tx is in a block and its input data
