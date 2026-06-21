@@ -54,7 +54,7 @@ Session data lives under `https://data.truthbeam.com/sessions/<d2|v10>/`. RSK ex
   8768852 / 8768945 (D2) or 8769289 / 8769357 (V10), and compare hash + timestamp to `manifest.json`.
 - **D · one patent filing** *(browse + a hash).* From the umbrella repo's `reality_kernel/CITING.md`, fetch
   a filing PDF (via its IPFS CID) and see whether `sha256sum` matches the listed value.
-- **E · a few random frames** *(code).* `git clone …/truthbeam && pip install numpy blake3 &&
+- **E · a few random frames** *(code).* `curl -fsSL https://data.truthbeam.com/release/truthbeam_verify.tar.gz | tar xz && cd truthbeam_verify && pip install numpy blake3 &&
   python3 code/recording/verify/verify_frames.py 3 d2` — it picks 3 random frames and checks each raw
   frame's BLAKE3 against `chain_log.csv` *and* re-derives each emission from the chain state.
 - **F · the headline AUROC** *(code, ~2 MB, CPU).* `bash download.sh scores` then run

@@ -2,11 +2,13 @@
 # ======================================================================
 #  TruthBeam — one-command clean-room verification
 #
-#  From a bare machine with  python3 + git + curl , run:
+#  From a bare machine with  python3 + curl  (no git, no login), run:
 #
-#      git clone https://github.com/poliebotics/truthbeam
-#      cd truthbeam
+#      curl -fsSL https://data.truthbeam.com/release/truthbeam_verify.tar.gz | tar xz
+#      cd truthbeam_verify
 #      bash verify_all.sh
+#
+#  (Or, if a GitHub mirror exists: git clone https://github.com/poliebotics/truthbeam.)
 #
 #  It fetches ONLY public URLs (data.truthbeam.com) — no private context,
 #  no logins — and verifies:
