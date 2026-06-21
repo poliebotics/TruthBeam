@@ -1,0 +1,38 @@
+# E1: exp001c replication baseline
+# - U-Net direct (no FPN), full G dup stem (legacy)
+# - Input: 4-channel packed CFA at 1150×1330 (asymmetric, matches exp001c)
+# - Output: 3-channel RGB at 1080×1920
+# - Train [0, 4194), Val [5394, 5992) — exp001c's original splits
+# - Per-GPU bs=2, DDP=2 → effective batch 4 (matches exp001c bs=4)
+experiment_id: phase_e_e1
+out_dir: /path/to/poliebotics_phase_b/experiments/phase_e/e1
+seed: 7
+
+data:
+  d2_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/d2
+  v10_dir: /path/to/poliebotics_phase_b/poliebotics_phase_b/data/v10
+  d2_train_start: 0
+  d2_train_end: 4194
+  d2_val_start: 5394
+  d2_val_end: 5992
+  capture_h: 1150
+  capture_w: 1330
+  emission_h: 1080
+  emission_w: 1920
+
+model:
+  arch: EmissionPredictor      # exp001c's U-Net + ConvNeXt-Tiny
+  pretrained: true
+
+train:
+  batch_size: 2                # per-GPU; effective 4 with DDP=2
+  val_batch_size: 4
+  num_workers: 4
+  lr: 1.0e-4
+  weight_decay: 0.05
+  warmup_steps: 200
+  grad_clip: 1.0
+  max_epochs: 30
+
+stop:
+  hard_cap_epochs: 30

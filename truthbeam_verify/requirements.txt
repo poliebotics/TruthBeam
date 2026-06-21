@@ -1,0 +1,26 @@
+# TruthBeam — Python dependencies.
+# Pin exact versions in your own environment for byte-reproducibility; the
+# bit-exact emission renderer and BLAKE3 chain are deterministic across versions,
+# but verifier numerics depend on the torch/CUDA build.
+
+# --- Core: CPU-only path (recording-verification + figures) ---
+numpy
+pillow
+opencv-python
+blake3
+pyyaml
+tqdm
+matplotlib
+scikit-learn
+imageio-ffmpeg
+requests
+py_ecc            # RSK / BLS anchor verification
+web3              # online RSK anchor verification (Chain -> world step)
+eth_account       # online RSK anchor verification
+
+# --- Verifier: GPU path (Phase G / F / H training & eval) ---
+torch             # install the CUDA build matching your driver; see pytorch.org
+timm
+
+# --- Optional: camera capture on the recording rig only ---
+# PyGObject       # plus system GStreamer; not needed for verification or figures

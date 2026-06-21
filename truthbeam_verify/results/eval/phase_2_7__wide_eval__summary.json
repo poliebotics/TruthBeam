@@ -1,0 +1,31 @@
+{
+  "model_tag": "ae_deep_global_wide",
+  "bottleneck": 256,
+  "step": 50000,
+  "gate": {
+    "model_tag": "ae_deep_global_wide",
+    "bottleneck": 256,
+    "L_C": 0.13566450592130422,
+    "L_E": 0.24126294426620007,
+    "L_total": 0.3769274501875043,
+    "fraction_C": 0.3599220641898522,
+    "fraction_E": 0.6400779358101478,
+    "dead_channels": 0,
+    "rank95_pooled": 47,
+    "effective_rank_fraction_pooled": 0.18359375,
+    "gate_C_lt_0.05": false,
+    "gate_E_lt_0.05": false,
+    "gate_balance": true,
+    "gate_eff_rank": true,
+    "PASS_ALL": false
+  },
+  "d3": {
+    "mean_cos_z_C_only": 0.3367586386203766,
+    "mean_cos_z_E_only": 0.9216724961996079,
+    "C_to_E_ratio": 0.36537776705820707
+  },
+  "mean_E2_seg_AE_specific_lift": 0.006909650227495574,
+  "mean_E2_seg_AE_representation_lift": 0.08159650472429722,
+  "n_E2_seg_cells": 8,
+  "ci_overlap_zero_count": 8
+}

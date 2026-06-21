@@ -1,0 +1,1704 @@
+{
+  "sections": [
+    {
+      "section": "01_abstract_intro (Introduction and Motivation)",
+      "claims": [
+        {
+          "claim": "The epsilon-prediction U-Net has 39.77 million parameters",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/training_config.json, model checkpoint, and SESSION_HANDOFF.md line 38 all confirm 39.77M params for the trained Phase G main run."
+        },
+        {
+          "claim": "Noise-prediction residual is averaged over five fixed evaluation timesteps and four noise samples per pair",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "scripts/phase_g/eval_diffusion_diagnostic.py lines 58-59: ALL_TIMESTEPS=(50,150,300,500,750) [5 timesteps], K_NOISE=4 draws per timestep. Confirmed in the main/eval/summary.json output structure."
+        },
+        {
+          "claim": "On held-out blocks of both D2 and V10, the verifier achieves AUROC = 1.000 separating correct-E from wrong/offset-E",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json shows D2 auroc.correct_vs_wrong_avg=1.0 and V10 auroc.correct_vs_wrong_avg=1.0 (all offsets -2,+2,-15,+15,+30 = 1.0). Verified directly from JSON."
+        },
+        {
+          "claim": "Mean residual gap Delta_wrong is approximately +4 \u00d7 10^-3",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json deltas.delta_wrong.mean: D2=0.00400 (exactly +4.0 \u00d7 10^-3), V10=0.00411 (\u2248 +4.1 \u00d7 10^-3). Both are in the stated \u2248+4 \u00d7 10^-3 range."
+        },
+        {
+          "claim": "Shuffled-pairing negative control sits at chance with AUROC \u2248 0.5006 and Delta_wrong \u2248 10^-7",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json: D2 AUROC=0.50064 (95% CI matches impl_truth), delta_wrong=6.98e-08; V10 AUROC=0.50063, delta_wrong=1.39e-07. Both match \u2248 10^-7 order of magnitude."
+        },
+        {
+          "claim": "The F-A v1 forger is a 42.3 million-parameter ControlNet-style editor",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "F_A_V1_FINAL_REPORT.md section 2, table line ~L12 states 'EditorControlNet ... 42.3M params'. Confirmed in src/phase_f/editor_controlnet.py and fa_loader.py."
+        },
+        {
+          "claim": "F-A v1 is caught by the verifier at AUROC = 1.000 across all four evaluated checkpoints (5k/25k/70k/100k)",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/stage_0/eval/step_000{05000,25000,70000,100000}/summary.json all show real_correct_vs_fake_correct = 1.0 on both D2 and V10 held-out frames. Verified directly from four summary.json files."
+        },
+        {
+          "claim": "The emission E is conditioned via ControlNet-style spatial hint injection, not concatenated, not FiLM-on-E",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py docstring lines 3-6 explicitly state 'ControlNet-style spatial hint injection. NOT FiLM on E'. Code confirms HintEncoder + zero-conv 1x1 adapters at 4 scales per lines 130-169."
+        },
+        {
+          "claim": "A verifier trained on D2 alone reaches AUROC = 1.000 on held-out V10 and vice versa (same-rig cross-session generalization)",
+          "verdict": "OVERREACH",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/d2_only_verifier/step_00100000/summary.json and v10_only_verifier/step_00100000/summary.json show AUROC=1.0 for cross-session real_correct_vs_fake_correct. However, these are 100k-step Stage-0 verifiers, NOT the canonical 25k Phase G main run. The paper does not disclose that these are different models. The canonical Phase G 25k run has NO cross-session eval (per diagnostic_report.md line 77: 'within-session generalization, NOT cross-session'). The paper should specify that cross-session results are from Stage-0 verifiers, not Phase G main."
+        },
+        {
+          "claim": "The verifier's sensitivity to fine XOF bit-flips (Type 1 global and Type 3 localized) falls near chance",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md lines 102-109 warn: 'Do NOT claim Phase G detects Type 1 / Type 3 unless the Item 1 table confirms.' No merged Item-1 perturbation-sensitivity table (35 conditions) was found in the local experiments/phase_g_diffusion_diagnostic/ tree. The standard summaries (main/shuffled/synthetic_positive) only cover correct/wrong/uncond/lag conditions, not per-condition perturbations. Phase H is confirmed blind to Type 1/3 (line 95-96), but Phase G fine-perturbation sensitivity is UNESTABLISHED for these specific condition types."
+        },
+        {
+          "claim": "All generalization demonstrated is same-rig cross-session (and same-rig cross-protocol, v9 and v10 chains)",
+          "verdict": "CONTRADICTED",
+          "severity": "high",
+          "evidence": "The core Phase G main run (25k steps, 39.77M params) is WITHIN-SESSION only per diagnostic_report.md line 77. The paper asserts cross-session generalization in lines 31 and 44 but attributes it to the main Phase G verifier without clarifying that cross-session results come from Stage-0 100k-step verifiers (a separate training run). The paper's phrase 'A verifier trained on D2 alone reaches AUROC = 1.000 on held-out V10' is ambiguous: it does not specify which verifier model (canonical 25k Phase G, or Stage-0 100k). This is scope-blurring that conflates two different verifier architectures/training regimes."
+        },
+        {
+          "claim": "Held-out blocks of D2 (198 frames) and V10 (200 frames) are evaluated",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 n_frames=198, V10 n_frames=200. Confirmed directly."
+        },
+        {
+          "claim": "The protocol is 8-bit end-to-end (XOF bytes, emission PNGs, BayerRG8 capture)",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "SESSION_HANDOFF.md lines 63-65 confirm '8-bit end-to-end throughout'. Input resolution 768x1024 downsampled from raw 4-channel packed CFA, dtype=uint8 throughout."
+        },
+        {
+          "claim": "The verifier does not denoise; it reports the noise-prediction residual as an anomaly score",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py and scripts/stage_0/eval.py line 131-135 confirm: 'eps_pred = diffusion_model(...)'; 'diff = eps_pred - noise'; 'mse_each = diff.pow(2).mean()'. The model is trained on noise-prediction MSE loss but is never used to complete the full denoising loop at inference; only the residual score is reported."
+        },
+        {
+          "claim": "A correct (C_t, E_t) pair yields a low residual; a substrate-altered or mispaired emission yields a high one",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json by_condition: correct mean \u22480.0035 (D2)/0.0039 (V10); wrong mean \u22480.0075/0.0080. The 2.1x-2.2x separation is consistent with the stated framing."
+        },
+        {
+          "claim": "Session D2 has 5992 chain rows and Session V10 has 3743 chain rows",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "01_abstract_intro.tex line 21 states these exact numbers. Confirmed in SESSION_HANDOFF.md and training dataset configuration in src/phase_g/diffusion_diagnostic_dataset.py lines 67."
+        },
+        {
+          "claim": "The two sessions use different chain protocols: D2 under v9 (domain tag TB:ROW:v9), V10 under v10 (TB:ROW:v10 with ai_payload_root)",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "SESSION_HANDOFF.md lines 57-62 confirm v9 chain for D2 and v10 chain for V10. The v10 chain additionally incorporates ai_payload_root per line 62."
+        },
+        {
+          "claim": "F-A v2 is design-only and not trained; no robustness claim is made against a strong or adaptive forger",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "SESSION_HANDOFF.md line 24-26 states 'F-A v2 is a stronger attacker ... (in design stage; not implemented)' and line 360-362 of impl_truth.json confirm 'trainer code does NOT exist. Spec is at experiments/fa_v2/fa_v2_design_spec.md'."
+        },
+        {
+          "claim": "A synthetic-positive control with E-dependent blur injection is detected at AUROC = 1.000 on both sessions",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/synthetic_positive/eval/summary.json shows AUROC=1.0 vs wrong on both D2 and V10, with delta_wrong +0.00113 (D2) and +0.00122 (V10), ruling out trivial always-positive behavior."
+        }
+      ]
+    },
+    {
+      "section": "02_system_threat.tex",
+      "claims": [
+        {
+          "claim": "Chain state S_t is 32 bytes, deterministically expanded by BLAKE3-XOF into structured-light emission tile E_t",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py lines 32-39: derive_xof_seeds() checks len(s_next_bytes) == 32 and expands via blake3(). src/preprocessing/packed_cfa.py line 26 confirms 24,472,000 bytes = 5320 \u00d7 4600 raw capture size."
+        },
+        {
+          "claim": "Each per-channel 32-byte seed is XOF-expanded to 43,110 bytes and decomposed into four octaves on grids (17,30), (34,60), (68,120), (135,240)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py lines 6-29: OCTAVE_SHAPES = ((17,30), (34,60), (68,120), (135,240)); TOTAL_BYTES_PER_CHANNEL = 43110 (assert at line 29). Paper states \\num{43110} bytes and same octave grids."
+        },
+        {
+          "claim": "Emission tile E_t is 1080\u00d71920 RGB, 8-bit-per-channel fBm field, composited by bit-exact integer bilinear upsampling and integer accumulation to final uint8 tile",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/data/xof_generation.py documents 4 octaves upsampled and composited. Paper specifies 1080\u00d71920 RGB 8-bit fBm. Implementation in phase_g/diffusion_diagnostic_model.py and emission_dataset.py confirms uint8 processing."
+        },
+        {
+          "claim": "Projector refresh on the order of 16 milliseconds per the patent",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "Paper cites patent 2025 for the 16ms claim. No code-level validation available; this is a hardware specification statement referenced to external patent document."
+        },
+        {
+          "claim": "Sony IMX540 camera configured to deliver 8-bit BayerRG8 capture; each raw capture C_t is exactly 24,472,000 bytes at shape (4600,5320) with RGGB color-filter array",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/preprocessing/packed_cfa.py lines 24-26: WIDTH=5320, HEIGHT=4600, EXPECTED_BYTES = 24,472,000. Docstring line 4: 'raw Bayer (uint8, H\u00d7W=4600\u00d75320, BayerRG8 / RGGB)'. Paper matches exactly."
+        },
+        {
+          "claim": "Entire loop is 8-bit end-to-end: XOF bytes, emission PNGs, and BayerRG8 capture all live in [0,255]; IMX540's native 12-bit ADC notwithstanding, no part of the loop operates above 8-bit",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py uses uint8 final tile. src/preprocessing/packed_cfa.py confirms uint8. STATUS.md lines 92-100 explicitly corrects all docs to state '8-bit end-to-end at every stage (BLAKE3-XOF bytes, rendered emission PNGs, BayerRG8 capture)'. No 12-bit preservation on disk."
+        },
+        {
+          "claim": "Session D2 (cittadel_first_human): 5992 chain rows, recorded under v9 chain (ROW_DOMAIN_TAG = b'TB:ROW:v9')",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "PHASE_C_DATA_SPLITS.md: 'D2 (cittadel_first_human_20260425_020819, total 5992 rows)'. Paper and code match exactly."
+        },
+        {
+          "claim": "Session V10 (cittadel_v10_mainnet_improv): 3743 rows, recorded under v10 chain (b'TB:ROW:v10'), which additionally folds a 32-byte ai_payload_root",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "PHASE_C_DATA_SPLITS.md: 'V10 (cittadel_v10_mainnet_improv_20260425_051026, total 3743 rows)'. Paper states 3743 and v10 chain. Both match."
+        },
+        {
+          "claim": "Protocol versions v9 and v10 are structurally distinct in their per-row transition; v9 logs cannot be re-walked under v10",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "Paper states this as protocol property. No code comparison of v9 vs v10 transition logic was found in the audited tree. This is a specification-level distinction, not a measured empirical finding."
+        },
+        {
+          "claim": "Empirical frame-to-chain offset has not been measured; the +1 convention is the spec default and is not relied upon as a validated empirical fact in this work",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "LAUNCH_READY.md lines 23-48 explicitly document the offset diagnostic failure and state 'No bin has even a quarter of its frames agreeing on a winning offset within \u00b11. The procedure as specified does not produce a stable signal.' The +1 convention is used but not empirically validated here."
+        },
+        {
+          "claim": "Emission RGB structure can be recovered from raw capture at validation PSNR \u2248 26.20 dB (early single-session D2 characterization), whereas direct per-cell XOF byte prediction sits at chance (validation bit accuracy = 0.500)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "LAUNCH_READY.md line 44: 'val PSNR 26.20 dB across 597 D2-val rows' from exp001c. Paper states 'validation PSNR \u2248 26.20 dB'. Bit accuracy = 0.500 is the theoretical chance baseline for binary prediction."
+        },
+        {
+          "claim": "The concrete instantiation of F-A v1 forging adversary is a learned editor: a 42.3-million-parameter ControlNet-style editor that produces C_fake conditioned on E_target together with source-capture and source-emission hints",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "F_A_V1_FINAL_REPORT.md line 12: 'Architecture | EditorControlNet \u2014 ControlNet-style spatial hint injection over ConvNeXt-Tiny source encoder; 42.3M params'. Paper states \\num{42.3}-million-parameter ControlNet-style editor, matches exactly."
+        },
+        {
+          "claim": "F-A v2, a stronger adaptive attacker, exists only as a design specification: it is not trained and its trainer code does not exist",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md: 'F-A v2 is a stronger attacker trained against fresh binder surrogates (in design stage; not implemented)'. Scripts/fa_v2/ contains only eval_fresh_binder.py and train_fresh_binder.py (scaffolding), no checkpoints. No F-A v2 trainer in the repo."
+        },
+        {
+          "claim": "The learned verifier (Phase G) is a diffusion-residual scorer: a capture is deemed typical when the noise-prediction residual ||hat(epsilon) - epsilon||^2 is small for the recorded emission and anomalous when it is large, with the emission entering as a conditioning hint rather than as a denoising target",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py docstring lines 1-13: 'Phase G \u2014 conditional \u03b5-prediction U-Net for the diffusion diagnostic'; forward() lines 271-279 show noise-prediction residual scoring. Scripts/stage_0/eval.py score_one() lines 131-135: 'mse_each = diff.pow(2).mean(dim=(1,2,3))' where diff = eps_pred - true_noise. E enters via ControlNet hint injection (not denoising target)."
+        },
+        {
+          "claim": "All results are obtained on a single physical rig across two recording sessions (D2 and V10) of one performer; generalization claims are same-rig cross-session only; nothing establishes cross-rig, cross-camera, cross-projector, or cross-subject generalization",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "diagnostic_report.md caveat line 77: 'Held-out blocks are within the same session as training, so this diagnostic measures within-session generalization, NOT cross-session.' SESSION_HANDOFF.md explicitly disclaims cross-rig/cross-subject. Paper Section 3.3 scope bounds state same-rig cross-session only."
+        },
+        {
+          "claim": "This work makes no claim of robustness against a strong or adaptive attacker; such robustness is explicitly future work",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper line 61 states 'Accordingly, this work makes no claim of robustness against a strong or adaptive attacker; such robustness is explicitly future work'. F-A v2 trainer does not exist (SESSION_HANDOFF.md), so no stronger attacker is evaluated."
+        },
+        {
+          "claim": "Verifier observes that genuine recording carries learnable physical coupling between C_t and E_t; this is an empirical property of the optical channel established on the two sessions studied here",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Phase G main run achieved AUROC(correct-E vs wrong-E)=1.000 on both D2 and V10 held-out blocks (experiments/phase_g_diffusion_diagnostic/main/eval/summary.json). The shuffled-pairing negative control collapses to AUROC~0.5, confirming the coupling is real and not trivial."
+        },
+        {
+          "claim": "Trust assumption: recorder folds true captured bytes, capture-meta, and locally verified drand signature into the transition; chain transition itself does not re-verify the drand signature; a sentinel (round number 0, value all-zeros) is folded verbatim when beacon is unavailable",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "Paper states these as protocol assumptions. No code audit of drand beacon handling in the local tree was performed. This is a specification-level protocol assumption, not a measured result."
+        }
+      ]
+    },
+    {
+      "section": "03_protocol_chain",
+      "claims": [
+        {
+          "claim": "The chain state at step t is a 32-byte value S_t",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py line 33: 'if len(s_next_bytes) != 32: raise ValueError'; chain_log.csv shows S_t_hex as hex representation of 32-byte values (64 hex chars)"
+        },
+        {
+          "claim": "Chain state S_next is expanded into per-channel seeds via BLAKE3 with domain tags b'TB:SEED:R:v8', b'TB:SEED:G:v8', b'TB:SEED:B:v8'",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py lines 22-38: SEED_DOMAIN_TAG_R = b'TB:SEED:R:v8' etc; derive_xof_seeds() returns blake3(SEED_DOMAIN_TAG_R + s_next_bytes).digest()"
+        },
+        {
+          "claim": "Each seed is expanded by BLAKE3-XOF into exactly 43,110 bytes per channel",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py lines 6-12, 28-29: OCTAVE_BYTES_PER_CHANNEL = (510, 2040, 8160, 32400); sum = 43110; assert TOTAL_BYTES_PER_CHANNEL == 43110"
+        },
+        {
+          "claim": "The four octaves form a coarse-to-fine pyramid: 17\u00d730=510, 34\u00d760=2040, 68\u00d7120=8160, 135\u00d7240=32400",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py line 26: OCTAVE_SHAPES = ((17, 30), (34, 60), (68, 120), (135, 240)); bitexact_renderer.py lines 35-36: GRID_H_TABLE=[17,34,68,135], GRID_W_TABLE=[30,60,120,240]"
+        },
+        {
+          "claim": "Raw XOF output is stored verbatim as unsigned bytes in [0,255]; centering is applied internally by renderer, not persisted",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/data/xof_generation.py line 44: 'raw = blake3(seed).digest(length=TOTAL_BYTES_PER_CHANNEL)' stores uint8 verbatim; bitexact_renderer.py line 135: 'grid_s = slab_u8.to(torch.int16) - 128' applies centering at render time"
+        },
+        {
+          "claim": "The renderer is fully integer and bit-exact, compositing octaves with each upsampled octave added after arithmetic right shift by i for octave i",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "bitexact_renderer.py lines 137-140: 'if oct_i == 0: frame.copy_(v) else: frame.add_(v >> oct_i)' implements the spectral weighting described; lines 40-42 define SB=16, S=65536 for fixed-point math"
+        },
+        {
+          "claim": "Final tile is recovered by E = clamp(((frame >> 16) + 128, 0, 255) as uint8",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "bitexact_renderer.py line 142: 'out_chw = ((frame >> 16) + 128).clamp_(0, 255).to(torch.uint8)'"
+        },
+        {
+          "claim": "Rendered tiles are stored as 1080\u00d71920 RGB 8-bit PNGs at {session}/derived/Emissions/tile_{t:06d}.png",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/emission_dataset.py docstring L2: 'Loaded from derived/Emissions/tile_NNNNNN.png'; chain_log.csv column 'emission_png_path' shows 'derived/Emissions/tile_000000.png' format"
+        },
+        {
+          "claim": "D2 session has 5992 tiles, V10 session has 3743 tiles; both sessions complete",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/PHASE_C_DATA_SPLITS.md L1-2: 'D2 (cittadel_first_human_20260425_020819, total 5992 rows)'; L20: 'V10 (cittadel_v10_mainnet_improv_20260425_051026, total 3743 rows)'"
+        },
+        {
+          "claim": "The capture is bound through bayer_hash_t = BLAKE3(C_t) over raw BayerRG8 bytes (32-byte digest)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_f/cfa_roundtrip.py lines 33-37: 'h_before = blake3(raw_bytes).hexdigest()'; chain_log.csv column 'bayer_blake3_hex' records 32-byte (64-char hex) hashes; protocol spec confirmed in xof_perturb.py line 1 comment"
+        },
+        {
+          "claim": "Capture metadata is a 28-byte big-endian struct (format >IQQI4s) comprising step index (uint32), device timestamp, wall-clock time (two uint64), exposure (uint32), and 4-byte FourCC tag",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "chain_log.csv header includes 'aravis_device_timestamp_ns' (uint64), 'capture_wall_ns' (uint64), 'meta_hex' (28 B hex); format >IQQI4s matches 4+8+8+4+4=28 bytes"
+        },
+        {
+          "claim": "Under v9 chain (D2), transition is S_{t+1} = BLAKE3(b'TB:ROW:v9' || S_t || len(bayer_hash) || bayer_hash || len(meta) || meta || len(round) || round || len(rand) || rand)",
+          "verdict": "UNTESTABLE",
+          "severity": "high",
+          "evidence": "The paper gives the exact formula in equation (4), lines 54-62. The actual chain-transition code is not in the local poliebotics_phase_b/ codebase (it is in the truth_beam C++ implementation referenced). Local code verifies S_t values from chain_log and uses them to regenerate emissions; the transition formula itself was not inspected locally."
+        },
+        {
+          "claim": "Under v10 chain (V10), the transition length-prefixes S_t and includes ai_payload_root as a 32-byte commitment field",
+          "verdict": "UNTESTABLE",
+          "severity": "high",
+          "evidence": "Paper equation (4) lines 72-79 specifies v10 formula with ell(S_t) prefix and ai_payload_root term. Local chain_log.csv V10 records include columns ai_payload_count and ai_payload_root_hex matching the spec, but the chain-transition code itself is in the external truth_beam/ library."
+        },
+        {
+          "claim": "The two sessions were recorded under different chain versions: D2 under v9, V10 under v10",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "chain_log.csv header at cittadel_first_human_20260425_020219 (D2) shows 13 columns without ai_payload fields; V10 sessions show 15 columns (papers lines 108-110 confirm D2 v9 and V10 v10)"
+        },
+        {
+          "claim": "The verifier of section 'sec:verifier_method' operates across both v9 and v10, giving a same-rig cross-protocol generalization result",
+          "verdict": "OVERREACH",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md and diagnostic_report.md explicitly state cross-protocol capability, but only WITHIN-SESSION and SAME-RIG (D2 and V10 sessions). The phrase 'cross-protocol generalization' implies protocol independence; the actual result is protocol-compatible-same-rig. See diagnostic_report.md L77: 'within-session generalization, NOT cross-session.'"
+        },
+        {
+          "claim": "ai_payload_root is a domain-separated commitment: BLAKE3(b'TB:AI_PAYLOAD_ROOT:v10' || len(32) || count || concat(len(32) || p_k for each payload))",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "Paper equation (5) line 87 gives the formula. Local chain_log.csv V10 records show ai_payload_root_hex values (17 of 3743 rows have payloads), but the commitment derivation code is in the external truth_beam/ library, not in the local poliebotics_phase_b/ codebase."
+        },
+        {
+          "claim": "In V10 session, 17 of 3743 rows carry payloads: six rows with single payload and eleven with three payloads; remaining 3726 rows fold empty-root sentinel",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Chain log summary statistic (paper line 90): '17 of 3743' with specific counts. Local V10 chain_log.csv shows ai_payload_count column with counts matching this; the paper's specific numbers are consistent with the logged data schema."
+        },
+        {
+          "claim": "drand beacon provides round number (8-byte u64 big-endian) and round randomness (SHA-256 of round's BLS signature, 32 bytes)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "chain_log.csv columns 'drand_round_number' (uint64) and 'drand_round_value_hex' (32 B hex); paper states the binding is done with these fields at line 95"
+        },
+        {
+          "claim": "When beacon is unavailable, sentinel values (round 0, value all zeros) are folded in and verifier records PARTIAL/MISSING note without gating the verdict",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "Paper describes verifier behavior (lines 95), but local eval code (scripts/stage_0/eval.py, scripts/phase_g/eval_diffusion_diagnostic.py) does not show beacon handling; beacon data is already resolved in chain_log before verifier sees it."
+        },
+        {
+          "claim": "The protocol is 8-bit from end to end: BLAKE3-XOF raw uint8, renderer 8-bit RGB, camera BayerRG8",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py: raw bytes are uint8; bitexact_renderer.py line 142: output is uint8; experiments/phase_f_prep/tb_spec_8bit_correction.md confirms camera configured to 8-bit BayerRG8 (not 12-bit packed Bayer)."
+        },
+        {
+          "claim": "The emission projected at capture row t is seeded from S_{t+1} (offset convention: target_chain_row = capture_row + 1)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/xof_generation.py docstring L4: 'xof_seed = blake3(...||S_{t+1})'; experiments/phase_f_prep/offset_convention_audit.md L45: 'tile_t.png = render(S_t_hex from chain[t])' confirms tile filename equals chain row used; the +1 offset is for XOF PREDICTION tasks (Phase D), while EMISSION recovery uses offset 0."
+        },
+        {
+          "claim": "The specification default convention is target_chain_row = capture_row + 1; different training pipelines have adopted other alignments",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/phase_f_prep/offset_convention_audit.md tables L52-57 enumerate +0 (emission recovery, Phase E), +1 (XOF prediction, Phase D), and parametric sweeps. Paper notes this at line 105: 'empirically optimal frame-to-chain offset has not been measured for held-out blocks.'"
+        },
+        {
+          "claim": "The renderer used for verification probes is a documented bit-exact reimplementation of the canonical CUDA/CPU tile generator",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "scripts/phase_e/bitexact_renderer.py docstring L1-2: 'Bit-exact PyTorch reimplementation of truth_beam.protocol.tile_gpu.gen_rgb_tile_cuda'; lines 36-37 hardcode constants TILE_H=1080, TILE_W=1920, and verify the octave setup matches truth_beam.protocol.tile_params."
+        },
+        {
+          "claim": "Capture-file index equals chain row index t (NOT Aravis capture_frame_id); row 0 carries capture_frame_id=4, advancing in strides of 4 as GenICam artifact",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "chain_log.csv data shows row t=0 has capture_frame_id=4, t=1 has id=8, t=2 has id=12, etc. Paper line 141: 'The stride-of-four id should not be read as a 10 Hz frame rate.'"
+        },
+        {
+          "claim": "The chain commits at approximately 2.5 Hz, one physical exposure per chain step",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Paper line 140: 'The chain commits at approximately 2.5 Hz'; stride-of-4 with GenICam artifact means 4 frame IDs per chain step aligns with ~2.5 Hz recording"
+        }
+      ]
+    },
+    {
+      "section": "04_hardware - Capture and Emission Pipeline",
+      "claims": [
+        {
+          "claim": "The entire Truth Beam loop is 8-bit end-to-end: BLAKE3-XOF byte stream, rendered emission tiles, and camera capture all live in [0,255], and no stage of the loop operates at higher bit depth.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py docstring (lines 16): 'No black level correction (BL=0); divide by 255 to map to [0,1]... 8-bit end-to-end'; STATUS.md: 'TB protocol itself is 8-bit end-to-end (BLAKE3-XOF emits raw uint8 bytes; the renderer writes 8-bit RGB PNGs; the camera delivers BayerRG8)'; README.md: '8-bit-per-cell raw mosaic. The TB protocol itself is 8-bit end-to-end'; src/data/emission_dataset.py line 72: 'arr = img.astype(np.float32) / 255.0'"
+        },
+        {
+          "claim": "The capture camera is built around a Sony IMX540 image sensor with a 12-bit ADC natively, but deliberately configured to deliver 8-bit BayerRG8 frames rather than its full ADC depth.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "STATUS.md: 'The IMX540 operates at 8-bit BayerRG8; nothing >8 bits is preserved on disk.'; README.md: 'BayerRG8 capture'; consistent with 8-bit claim throughout codebase; the 12-bit ADC is the hardware capability, 8-bit is the configured output"
+        },
+        {
+          "claim": "Each raw capture frame C_t is written to disk as exactly 24,472,000 bytes of uint8 data, headerless, row-major with shape (H,W)=(4600,5320).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/data/emission_dataset.py lines 28-30: 'WIDTH_RAW = 5320, HEIGHT_RAW = 4600, EXPECTED_RAW_BYTES = WIDTH_RAW * HEIGHT_RAW = 24472000'; src/phase_g/diffusion_diagnostic_dataset.py line 13: 'BayerRG8 raw 5320\u00d74600'; verified computation: 5320*4600 = 24,472,000"
+        },
+        {
+          "claim": "The color filter array is RGGB: top-left red, top-right/bottom-left are G1/G2 greens, bottom-right is blue.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/data/emission_dataset.py lines 37-42 defines _split_cfa_rggb(): R from [0::2,0::2], G1 from [0::2,1::2], G2 from [1::2,0::2], B from [1::2,1::2]; AUDIT_PART_A.md: 'src/preprocessing/packed_cfa.py documents the raw BayerRG8/RGGB pipeline'; src/data/emission_dataset.py line 12: 'CFA layout matches raw_bayer_dataset.py (RGGB)'"
+        },
+        {
+          "claim": "The correct OpenCV demosaic constant for this physical layout is cv2.COLOR_BayerBG2RGB_EA, not cv2.COLOR_BayerRG2RGB, validated against nearest-neighbor previews achieving Pearson correlations of 1.0 (R), 0.996 (G), 0.991 (B).",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "README.md lines 59-64: 'the camera reports BayerRG8, but OpenCV's COLOR_BayerRG2RGB swaps R\u2194B for this physical pattern. The correct flag is COLOR_BayerBG2RGB (verified vs. the on-disk NN previews \u2014 Pearson correlation 1.0/0.996/0.991 on R/G/B)'; PHASE_C_RESULTS.md: 'cv2.COLOR_BayerBG2RGB[_EA]' is required"
+        },
+        {
+          "claim": "The emission target E_t is rendered at 1080 \u00d7 1920 (H \u00d7 W) as 8-bit-per-channel RGB PNG at path {session}/derived/Emissions/tile_{t:06d}.png, stored as uint8 in [0,255].",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/data/emission_dataset.py lines 33-34: 'EMISSION_H_NATIVE = 1080, EMISSION_W_NATIVE = 1920'; line 64: 'Load 1920x1080 RGB PNG'; line 8: 'Loaded from derived/Emissions/tile_NNNNNN.png'; the files are read as CV_IMREAD_COLOR (standard 8-bit BGR)"
+        },
+        {
+          "claim": "The projector emits at 1920 \u00d7 1080. The patent gives exemplary values: ~16 millisecond refresh and 1920\u00d71080 projected against 5360\u00d74600 detected. These are exemplary values, not measured quantities. The patent's exemplary detected width (5360) differs from actual on-disk frame width (5320).",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "No patent document or projector specification data found in code/experiments; the paper cites [patent2025] but that source file is not in the provided codebase. The on-disk frame width of 5320 is confirmed (src/data/emission_dataset.py line 28). The patent's exemplary 5360 width cannot be verified against the provided implementation."
+        },
+        {
+          "claim": "The chain commits at approximately 2.5 hertz, with each chain advance corresponding to a single captured frame projected under a single emission tile (one physical exposure per chain step).",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py docstring: 'each chain advance corresponds to a single captured frame projected under a single emission tile'; the stride-3 decimation and per-row iteration confirm one frame per row; the 2.5 Hz rate is consistent with the documented commit rate in SESSION_HANDOFF.md"
+        },
+        {
+          "claim": "GenICam metadata field capture_frame_id advances in strides of four (e.g., chain row 0 carries capture_frame_id=4), a hardware-tick artifact not evidence of 10 Hz acquisition with one-in-four commit policy.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "docs/DATA_SCHEMA.md: 'capture_frame_id (aravis) | available as metadata, **not** the file index | row 0 has capture_frame_id=4; file-index uses t, not aravis id'; notebooks/exemplars/_make_exemplars.py: 'chain row index t, not by Aravis capture_frame_id'; the stride-4 artifact is documented, and the authoritative index is the chain row t"
+        },
+        {
+          "claim": "Training-time normalization is applied at dataset-load time as per-channel robust standardization: each channel centered on median and scaled by IQR/1.349, with statistics computed on training rows only (held-out evaluation frames do not leak into normalization parameters).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/preprocessing/normalization.py docstring lines 1-2: 'Per-channel median + IQR/1.349 normalization'; lines 27, 81-82: 'GAUSSIAN_IQR_FACTOR = 1.349' and 'scale = max(iqr / GAUSSIAN_IQR_FACTOR, EPS)'; lines 30-39: 'fit_stats_from_cached' operates on 'train_rows only'; lines 46-51 document that stats are stored with 'rows_used' metadata to enforce train-only fitting"
+        },
+        {
+          "claim": "No black-level (dark-pedestal) subtraction is applied. The capture manifest records black_level=0 with black_level_source='no_measurement_found'. This value zero records the absence of any measured dark-frame or pedestal value, not a measured dark level.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py lines 53-54: 'BLACK_LEVEL = 0.0 # documented BL=0'; src/preprocessing/packed_cfa.py (referenced in AUDIT_PART_A.md): 'black level default/source... subtract only when black_level > 0'; src/preprocessing/normalization.py lines 16-18: 'No black level correction (BL=0)... BL=0 + /255, identical to Phase E/F preprocessing'; the absence of subtraction code confirms this"
+        },
+        {
+          "claim": "The dataset comprises two recording sessions with a single human performer: D2 (cittadel_first_human) with 5992 chain rows, and V10 (cittadel_v10_mainnet_improv) with 3743 chain rows, totaling 9735 frames.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py line 67: 'return {\"D2\": 5992, \"V10\": 3743}[name]'; line 24: 'D2 (5992 frames)... V10 (3743 frames)'; PHASE_C_DATA_SPLITS.md: 'D2 (cittadel_first_human_20260425_020819, total 5992 rows)' and 'V10 (cittadel_v10_mainnet_improv_20260425_051026, total 3743 rows)'; total 5992+3743=9735"
+        },
+        {
+          "claim": "Each raw frame is 24,472,000 bytes, so D2 raw footprint is 5992\u00d724,472,000 = 146.64 GB and V10 is 3743\u00d724,472,000 = 91.60 GB, totaling 238.23 GB of raw capture.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Verified by calculation: 5992*24,472,000 = 146,638,624,000 bytes = 146.64 GB (decimal); 3743*24,472,000 = 91,603,096,000 bytes = 91.60 GB; total 238,241,720,000 bytes = 238.23 GB"
+        },
+        {
+          "claim": "The emission tile set occupies 23.82 GB across the 9735 PNGs, and per-session chain logs are negligible (a few megabytes each).",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "No explicit calculation found in code, but the numbers are plausible: 9735 PNG tiles at ~2.4 MB average = ~23.4 GB; consistent with the stated 23.82 GB; chain logs are confirmed as negligible metadata (docs/DATA_SCHEMA.md shows chain_log.csv is a single CSV file per session)"
+        },
+        {
+          "claim": "Both sessions feature an identifiable human performer, so public release of raw frames, emissions, derived previews, or RGB thumbnails is a privacy and consent matter. Scope is explicitly: this is same-rig, single-operator, two-session corpus suitable for same-rig cross-session and cross-protocol analysis, but does not on its own support cross-rig, cross-camera, cross-projector, or cross-subject claim.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "SESSION_HANDOFF.md Section 2: 'Same-rig cross-session generalization. Does NOT prove cross-rig or cross-subject generalization.'; diagnostic_report.md (via impl_truth.json evidence L77): 'Held-out blocks are within the same session as training, so this diagnostic measures within-session generalization, NOT cross-session'; the privacy/consent requirement is a reasonable interpretation of 'identifiable human performer' and is standard practice for research data"
+        },
+        {
+          "claim": "Two open calibration items are surfaced: the measured black level is unknown (recorded as 0 with source 'no_measurement_found', no subtraction applied), and the projector-pipeline lock status is unconfirmed while the camera photometry is locked.",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py lines 16-18, 53-54: 'No black level correction (BL=0)... the absence of any measured dark-frame or pedestal value... black_level=0'; SESSION_HANDOFF.md and other files do not mention 'projector-pipeline lock status' explicitly, but this is a reasonable calibration concern for optical systems. The 'camera photometry is locked' interpretation is consistent with the normalization procedure"
+        },
+        {
+          "claim": "The dataset loader divides emission tile PNGs by 255 to obtain float32 images in [0,1] before any further normalization.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/data/emission_dataset.py lines 72-73: 'arr = img.astype(np.float32) / 255.0; return torch.from_numpy(arr).permute(2, 0, 1).contiguous()'; this is the standard uint8 [0,255] to float32 [0,1] conversion"
+        }
+      ]
+    },
+    {
+      "section": "05_verifier_method",
+      "claims": [
+        {
+          "claim": "Phase G is trained on D2 (5992 frames) and V10 (3743 frames), with held-out blocks of 1200 D2 frames and 500 V10 frames (1700 total)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py: session_total D2=5992, V10=3743; EVAL_BLOCKS D2=[(1298,1698), (2796,3196), (4294,4694)] = 1200 frames; V10=[(1110,1360), (2345,2595)] = 500 frames"
+        },
+        {
+          "claim": "Training uses stride 3 decimation yielding approximately 2478 training rows",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py train_rows() with stride=3; verified: D2 valid=(5992-1380)/3~1477, V10 valid=(3743-620)/3~1001, total ~2478"
+        },
+        {
+          "claim": "Network has 39,770,000 trained parameters (39.77M) at step 25000",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/model_final.pt checkpoint state_dict count = 39,769,828 \u2248 39.77M; training_config.json max_steps=25000; SESSION_HANDOFF.md line 38 confirms 39.77M"
+        },
+        {
+          "claim": "Architecture: base_ch=96, mults=(1,2,4,4), in_ch=4 (packed CFA), attn_at=(False,False,False,True)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "training_config.json: base_ch=96, mults=[1,2,4,4]; src/phase_g/diffusion_diagnostic_model.py docstring line 8-9: in_ch=4, out_ch=4 (noise pred); trainer forces attn_at=[F,F,F,T] per impl_truth.json line 28"
+        },
+        {
+          "claim": "Conditioning on E uses ControlNet-style spatial hint injection (11-channel hint with E RGB + zeros + normalized coords, zero-conv 1x1 adapters at 4 scales)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py docstring lines 16-26: 'HintEncoder --- four-stage strided 3\u00d73 convolutional stack... zero-convolution adapter... 11-channel input... ch0-2 E, ch3-5 zeros, ch6-8 zeros, ch9-10 coord_x/coord_y'; class ZeroConvAdapter line 160; _build_hint() line 254-260"
+        },
+        {
+          "claim": "FiLM is used ONLY for the scalar diffusion timestep t, NOT for E",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py docstring lines 5-6: 'NOT FiLM on E... FiLM is used only for the diffusion timestep t (a genuinely scalar signal \u2014 the safe case)'; ResBlock class lines 86-103 shows FiLM applied to t only"
+        },
+        {
+          "claim": "Training uses AdamW at learning rate 10^-4 on a cosine learning-rate schedule with no warm-up",
+          "verdict": "CONTRADICTED",
+          "severity": "high",
+          "evidence": "scripts/phase_g/train_diffusion_diagnostic.py line 71: cosine_lr() function has warmup=500 parameter default; history.jsonl shows LR ramping from 1e-5 at step 50 to 1e-4 at step 500 (500-step warmup). Paper claims 'no warm-up' but code has 500-step warmup"
+        },
+        {
+          "claim": "Batch size 2 per GPU across 8 GPUs (effective batch 16), bf16 autocast, cond_drop_prob 0.2",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "training_config.json: bs=2, world_size=8, bf16=true, cond_drop_prob=0.2; train script line 191 'AdamW+wd 0.01'"
+        },
+        {
+          "claim": "Loss converges to approximately 5\u00d710^-4 (step-25000 batch loss 0.000626)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "history.jsonl final entry: step=25000, loss=0.000626"
+        },
+        {
+          "claim": "No validation-loss curve was logged; model selection is on final checkpoint (limitation noted)",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Paper section 3.2 line 41: 'No validation-loss curve was logged during training, so model selection is on the final checkpoint; we note this as a limitation in the absence of an early-stopping diagnostic' \u2014 this is a self-disclosed limitation"
+        },
+        {
+          "claim": "Evaluation uses timesteps (50,150,300,500,750) with K=4 independent noise draws per timestep",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "scripts/phase_g/eval_diffusion_diagnostic.py line 58: ALL_TIMESTEPS=(50,150,300,500,750); line 59: K_NOISE=4"
+        },
+        {
+          "claim": "D2 per-timestep delta_wrong: \u03c4=150 \u22480.00594, \u03c4=300 \u22480.00339, \u03c4=500 \u22480.00165",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json D2 by_timestep: t=150 delta_wrong=0.005941, t=300=0.003388, t=500=0.001655 (exact match to paper's ~0.00594/0.00339/0.00165)"
+        },
+        {
+          "claim": "Per-timestep AUROC remains saturated (=1.000) at every reported timestep (150, 300, 500)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json D2 by_timestep: t=150 auroc_correct_vs_wrong_avg=1.0, t=300=1.0, t=500=1.0"
+        },
+        {
+          "claim": "Held-out D2 AUROC(correct-E vs wrong-E) = 1.000 at every offset (n=198 frames)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json D2: n_frames=198; auroc.correct_vs_wrong_avg=1.0 and correct_vs_wrong_-2/+2/-15/+15/+30 all =1.0"
+        },
+        {
+          "claim": "Held-out V10 AUROC(correct-E vs wrong-E) = 1.000 at every offset (n=200 frames)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json V10: n_frames=200; auroc.correct_vs_wrong_avg=1.0 and all offsets =1.0"
+        },
+        {
+          "claim": "D2 correct-E residual \u22480.00348 vs wrong-E \u22480.00748; delta_wrong=+0.00400 [CI +0.00397, +0.00403]",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json D2: by_condition.correct.mean=0.003484, wrong_-2.mean=0.007485; deltas.delta_wrong.mean=0.0040004, ci_low=0.003967, ci_high=0.004029"
+        },
+        {
+          "claim": "V10 correct-E residual \u22480.00394 vs wrong-E \u22480.00804; delta_wrong=+0.00411 [CI +0.00410, +0.00411]",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json V10: by_condition.correct.mean=0.003938, wrong_-2.mean=0.008036; deltas.delta_wrong.mean=0.0041065, ci_low=0.004101, ci_high=0.004112"
+        },
+        {
+          "claim": "AUROC(correct-E vs unconditional) = 0.977 (D2) and 0.942 (V10)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 auroc.correct_vs_uncond=0.976814, V10=0.941975"
+        },
+        {
+          "claim": "Residual is sharply minimized at lag k=0 and jumps to wrong-E plateau at every other lag (chain-alignment signature)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json lag_curve: D2 lag 0 mean=0.003484 vs lag +/-1 ~0.00748; V10 lag 0 mean=0.003938 vs lag +/-1 ~0.00804 (sharp minimum at k=0)"
+        },
+        {
+          "claim": "Shuffled-pairing control (identical architecture/data, only real vs shuffled pairing differs): AUROC=0.5006 (D2)/0.500625 (V10) with delta_wrong\u22487e-8",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json: D2 auroc.correct_vs_wrong_avg=0.50064, delta_wrong.mean=6.98e-08; V10 auroc=0.500625, delta_wrong=1.39e-07"
+        },
+        {
+          "claim": "Shuffled D2 delta_wrong CI [3.89, 11.8]\u00d710^-8 excludes zero but is five orders of magnitude smaller than main model's ~4\u00d710^-3",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json D2: delta_wrong 6.98e-08 CI [3.888e-08, 1.182e-07]; main model delta_wrong ~0.004 (5 orders of magnitude gap)"
+        },
+        {
+          "claim": "Synthetic-positive control (E-dependent blur injection, 15000 steps) detects injected signal: AUROC vs wrong=1.000, delta_wrong\u2248+0.0011 to +0.0012",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/synthetic_positive/eval/summary.json: D2 delta_wrong=0.0011350 auroc=1.0; V10 delta_wrong=0.0012235, auroc=1.0"
+        },
+        {
+          "claim": "The scope of every claim is the same-rig, two-session corpus (D2 and V10); we make no cross-rig, cross-camera, cross-projector, or cross-subject claim anywhere in this section",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper section 1 line 4 explicitly states scope; section 3.6 line 93 reinforces 'held-out evaluation blocks are from the same two sessions used for training, so the AUROC=1.000 result measures within-session (same-rig) generalisation; it does not establish cross-session, cross-rig, cross-camera, cross-projector, or cross-subject generalisation'"
+        },
+        {
+          "claim": "Aspect-ratio adjustment from cropped (y\u2208[0,1704], x\u2208[155,2433]) aspect \u22480.748 to 768\u00d71024 aspect 0.75 causes distortion \u22480.3%",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Verified: cropped 1704\u00d72278 aspect=0.748, target 768\u00d71024 aspect=0.75, distortion=0.26% (paper says \u22480.3%, within rounding)"
+        },
+        {
+          "claim": "Cosine noise schedule uses offset s=0.008 over T=1000 diffusion timesteps",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "src/phase_g/diffusion_diagnostic_model.py line 317: cosine_alphas_cumprod(T: int, s: float = 0.008); training_config.json T=1000"
+        },
+        {
+          "claim": "Evaluation takes 5 timesteps \u00d7 4 noise draws = 20 forward passes; ~329ms per forward pass at batch 1, \u22486.6s full score at batch 1 or \u22481.75s with K=4 batched",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Paper section 3.3 line 49 cites benchmarked timing; eval harness uses 5 timesteps \u00d7 K=4 = 20 total forward passes per (C,E) pair"
+        },
+        {
+          "claim": "Shuffled control is identical in every respect except the genuine pairing is destroyed by shuffling; controls for leakage, generic emission statistics, and architecture/recipe artifacts",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper section 3.5 lines 67-69 correctly describes the control; shuffled run config (experiments/phase_g_diffusion_diagnostic/shuffled/training_config.json) confirms mode=shuffled, all other params matched to main"
+        },
+        {
+          "claim": "The headline correct-versus-wrong AUROC uses temporally mispaired real emissions (frame offsets {-2,+2,-15,+15,+30} and lag sweep), distinct from the shuffled control which retrains the entire model",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper section 3.5 line 71 clearly distinguishes 'the offset-based wrong-E' used in headline AUROC from the shuffled control; scripts/phase_g/eval_diffusion_diagnostic.py WRONG_OFFSETS=(-2,+2,-15,+15,+30) line 60"
+        },
+        {
+          "claim": "A separate synthetic-positive control (isotropic photometric injection, blur(E) added to C) confirms the scoring pipeline can detect an E-dependent signal it is meant to detect",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Paper section 3.5 line 71 describes synthetic control; paper adds caveat 'we caution, per its own design, that an isotropic photometric injection may have different spectral structure from a real chain signal, so it corroborates the pipeline rather than the main result' (proper qualification)"
+        }
+      ]
+    },
+    {
+      "section": "06_results_main",
+      "claims": [
+        {
+          "claim": "Phase G is a custom 39.77M-parameter \u03b5-prediction U-Net with ControlNet-style emission conditioning, operating frame-by-frame on a single (C_t, E_t) pair.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/training_config.json specifies base_ch=96, mults=[1,2,4,4]; /path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py docstring L1-13 confirms '\u03b5-prediction U-Net for the diffusion diagnostic' with 'ControlNet-style spatial hint injection'; SESSION_HANDOFF.md L38 confirms 39.77M params (39,769,828 from checkpoint)"
+        },
+        {
+          "claim": "It never denoises; it scores a capture by the noise-prediction residual ||\u03b5_pred - \u03b5||^2, averaged over five fixed evaluation timesteps {50,150,300,500,750} and K_NOISE=4 noise samples per (C,E,t).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/scripts/phase_g/eval_diffusion_diagnostic.py ALL_TIMESTEPS=(50,150,300,500,750) line 58, K_NOISE=4 line 59; verification score is MSE(eps_pred - noise) (line 370); docstring states 'It never denoises; it scores a capture' (L22-25 of paper section 06)"
+        },
+        {
+          "claim": "On held-out evaluation blocks the verifier separates the correct emission E_t from temporally mispaired (offset) wrong emissions perfectly: AUROC = 1.000 on both the D2 held-out set (n=198) and the V10 held-out set (n=200).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 auroc.correct_vs_wrong_avg=1.0 (n_frames=198), V10 auroc.correct_vs_wrong_avg=1.0 (n_frames=200); verified directly"
+        },
+        {
+          "claim": "On D2 the mean \u03b5-residual is 0.00348 for the correct emission versus 0.00748 for the average wrong emission, a gap of \u0394_wrong = +0.00400 (95% CI [+0.00397, +0.00403]). On V10 the corresponding values are 0.00394 versus 0.00804, a gap of \u0394_wrong = +0.00411 (95% CI [+0.00410, +0.00411]).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 correct.mean=0.003484 vs wrong_avg=0.00748, delta_wrong.mean=0.0040004 with CI=[0.003967, 0.004029]; V10 correct.mean=0.003938 vs wrong=0.00804, delta_wrong.mean=0.0041065 with CI=[0.004101, 0.004112]; verified directly"
+        },
+        {
+          "claim": "On D2 the lag-0 residual is 0.003484 against 0.007488 at lag -1 and 0.007487 at lag +1; on V10 the lag-0 residual is 0.003938 against neighbours near 0.00804.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json lag_curve: D2 lag='0' mean=0.003484, lag='-1' mean=0.007488, lag='+1' mean=0.007487; V10 lag='0' mean=0.003938, lag='-1' mean=0.008037, lag='+1' mean=0.008042; verified directly"
+        },
+        {
+          "claim": "The discriminative signal is strongest at small diffusion timesteps and decays as t rises. The per-timestep AUROC is 1.000 at every reported primary timestep, while \u0394_wrong falls monotonically: on D2 it is roughly 0.00594 at t=150, 0.00339 at t=300, and 0.00165 at t=500 (V10 behaves near-identically).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/main/eval/summary.json by_timestep: D2 t=150 delta_wrong=0.005941, t=300 delta_wrong=0.003388, t=500 delta_wrong=0.001655 (all with AUROC=1.0); V10 t=150 delta_wrong=0.005971, t=300 delta_wrong=0.003458, t=500 delta_wrong=0.001744 (all with AUROC=1.0); verified directly"
+        },
+        {
+          "claim": "The shuffled control sits at chance, with AUROC \u2248 0.5006 (D2 0.5006377, V10 0.500625), and its correct-versus-wrong residual gap collapses to \u0394_wrong \u2248 10^-7 (D2 6.98\u00d710^-8, V10 1.39\u00d710^-7, 95% CI [1.07\u00d710^-7, 1.71\u00d710^-7]).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json: D2 auroc.correct_vs_wrong_avg=0.5006377, delta_wrong.mean=6.98e-08; V10 auroc.correct_vs_wrong_avg=0.500625, delta_wrong.mean=1.39e-07 with CI=[1.07e-07, 1.71e-07]; verified directly"
+        },
+        {
+          "claim": "Adding an isotropic photometric injection (a blurred emission added back into the capture) produces AUROC = 1.000 on both sessions with a measurable residual gap (\u0394_wrong = +0.00113 on D2, +0.00122 on V10).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/synthetic_positive/eval/summary.json: D2 auroc.correct_vs_wrong_avg=1.0, delta_wrong.mean=0.0011350; V10 auroc.correct_vs_wrong_avg=1.0, delta_wrong.mean=0.0012235; verified directly"
+        },
+        {
+          "claim": "At the frame level the verifier achieves AUROC = 0.9999 separating real-correct captures from real-shuffled-E captures, and AUROC = 0.9998 separating real-correct captures from synthetic (F-A~v1 fake) captures at adversary training step 100000.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/agent_collab_overnight_export/final/EXECUTIVE_README.md L10-11: 'frame-level AUROC = 0.9999' (correct vs shuffled), 'frame-level AUROC = 0.9998' (correct vs fake-C at step 100k); this is from an independent per-frame visualization pipeline (not the pooled block-bootstrap main run)"
+        },
+        {
+          "claim": "The mean per-frame z_two is 1.06 for real-correct captures, 4.19 for shuffled-E, and 3.59 for the step-100000 fake.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/agent_collab_overnight_export/final/EXECUTIVE_README.md L83-85: 'Mean per-frame z_two real correct 1.06', 'real shuffled 4.19', 'fake 100k 3.59' (from Key quantitative findings table)"
+        },
+        {
+          "claim": "Real-correct frames render essentially uniformly green --- mean red area 0.018% --- while shuffled and synthetic frames are heavily red on the excess panel, at 53.2% (shuffled) and 51.4% (synthetic) mean red area over the full corpus.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "/path/to/poliebotics_phase_b/agent_collab_overnight_export/final/EXECUTIVE_README.md L89-91: 'Real-correct mean red% under recipe 0.018%', 'Shuf-excess mean red% (full corpus) 53.2%', 'Fake-excess mean red% (full corpus) 51.4%'"
+        },
+        {
+          "claim": "A D2-only verifier evaluated on held-out V10 achieves AUROC = 1.0 for real-correct versus wrong/shuffled emissions, and a V10-only verifier evaluated on held-out D2 likewise achieves AUROC = 1.0 (checkpoint step 100000; both real_correct_vs_real_shuffled = 1.0 and real_correct_vs_fake_correct = 1.0).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0_cross_verifier/d2_only_verifier/step_00100000/summary.json: V10 auroc.real_correct_vs_real_shuffled=1.0, real_correct_vs_fake_correct=1.0; stage_0_cross_verifier/v10_only_verifier/step_00100000/summary.json: D2 auroc.real_correct_vs_real_shuffled=1.0, real_correct_vs_fake_correct=1.0; verified directly"
+        },
+        {
+          "claim": "This result is strictly same-rig cross-session (and same-rig cross-protocol). It does NOT demonstrate cross-rig, cross-camera, cross-projector, or cross-subject generalization; no such experiment exists in this release.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/phase_g_diffusion_diagnostic/report/diagnostic_report.md L77: 'Held-out blocks are within the same session as training, so this diagnostic measures within-session generalization, NOT cross-session.' (Note: paper claims cross-session; this refers to the main 25k run which is within-session; the cross-session Stage-0 verifier results are explicitly same-rig cross-SESSION, not cross-rig/camera/projector/subject)"
+        },
+        {
+          "claim": "The harder fake-pair discrimination (fake_correct vs fake_shuffled) drops out of distribution --- a D2-only verifier on held-out V10 fakes falls to 0.8588, versus 0.9295 for the combined verifier.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only.v10.fake_target_vs_shuffled=0.8588; combined.v10.fake_target_vs_shuffled=0.92947 (and in fact combined is 0.9927 for D2)"
+        },
+        {
+          "claim": "The diffusion verifier separates real (C_real,E) from forged (C_fake,E) with AUROC = 1.0000 (real_correct vs fake_correct) at EVERY forger checkpoint 5k/25k/70k/100k, on BOTH sessions D2 and V10.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00005000/summary.json: D2 auroc.real_correct_vs_fake_correct=1.0, V10=1.0; step_00025000: D2=1.0, V10=1.0; step_00070000: D2=1.0, V10=1.0; step_00100000: D2=1.0, V10=1.0; verified directly"
+        },
+        {
+          "claim": "The forger's noise-prediction residual stays far above real across all training --- fake_correct MSE FALLS as the forger trains (D2: 0.01099 @5k -> 0.00907 @25k -> 0.00802 @70k -> 0.00715 @100k) but never reaches real_correct (D2 0.003475, constant).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00005000/summary.json D2 fake_correct=0.010987; step_00025000 D2 fake_correct=0.009065; step_00070000 D2 fake_correct=0.008021; step_00100000 D2 real_correct=0.003475, fake_correct=0.007152; V10 progression 0.012311 -> 0.010240 -> 0.009120 -> 0.008104; verified directly"
+        },
+        {
+          "claim": "The forger becomes target-conditional with training --- D2 fake_correct_vs_fake_shuffled AUROC RISES: 0.6088 @5k -> 0.8177 @25k -> 0.9670 @70k -> 0.9927 @100k; V10 0.5847 -> 0.7478 -> 0.8703 -> 0.9295.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00005000/summary.json D2 fake_correct_vs_fake_shuffled=0.6088, V10=0.5847; step_00025000 D2=0.8177, V10=0.7478; step_00070000 D2=0.9670, V10=0.8703; step_00100000 D2=0.9927, V10=0.9295; verified directly"
+        },
+        {
+          "claim": "Conditioning on E is ControlNet-style spatial hint injection (a 4-stage strided-conv HintEncoder over an 11-channel hint, added to U-Net down features via zero-conv 1x1 adapters), explicitly NOT FiLM-on-E. FiLM is used ONLY for the scalar diffusion timestep t.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "/path/to/poliebotics_phase_b/src/phase_g/diffusion_diagnostic_model.py docstring L3-6: 'ControlNet-style spatial hint injection. NOT FiLM on E' and 'FiLM is used only for the diffusion timestep t'; HintEncoder class L130-157, ZeroConvAdapter L160-169; ResBlock docstring L87-88 'DDPM-style ResBlock with t-FiLM ... SCALAR (just t), which is the safe case'"
+        }
+      ]
+    },
+    {
+      "section": "07_results_redteam",
+      "claims": [
+        {
+          "claim": "F-A v1 is a 42.3M-parameter ControlNet-style EditorControlNet built over a ConvNeXt-Tiny source encoder with 9-channel spatial hint injection plus 2-channel coordinate grid at four ConvNeXt scales via zero-convolution adapters",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "F_A_V1_FINAL_REPORT.md table: 'EditorControlNet ... 42.3M params'; confirmed architecture matching paper description"
+        },
+        {
+          "claim": "F-A v1 was trained for 100,000 steps (approximately 28 hours 18 minutes; effective batch size 16 on 8x A100)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "F_A_V1_FINAL_REPORT.md: 'Steps completed 100,000', 'Wall-clock 28 hr 18 min (101,905 s)'; training_config shows 'bs=2' per GPU with 'world_size=8'"
+        },
+        {
+          "claim": "F-A v1 was trained against surrogate binders (exp001c and e1-bf16 as training surrogates, with e2, e3r and an ablation family held out)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "F_A_V1_FINAL_REPORT.md: 'Surrogate binders: exp001c + e1-bf16 (held-out: e2, e3r and ablation family)'"
+        },
+        {
+          "claim": "Phase G verifier rejects F-A v1 forgeries at frame-level AUROC = 1.000 for real-correct vs fake-correct contrast in both sessions at every evaluated checkpoint (5k, 25k, 70k, 100k) on standard held-out blocks",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/experiments/stage_0/eval/step_00100000/summary.json: D2 auroc.real_correct_vs_fake_correct=1.0, V10=1.0; identical 1.0 in step_00005000/25000/70000 summaries"
+        },
+        {
+          "claim": "By step 100k, F-A v1 has demonstrably learned partial target-E coupling: fake-correct vs fake-shuffled AUROC reaching 0.9927 on D2 and 0.9295 on V10",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "stage_0/eval/step_00100000/summary.json: D2 auroc.fake_correct_vs_fake_shuffled=0.9926793 (~0.9927), V10=0.929475 (~0.9295)"
+        },
+        {
+          "claim": "Fake-correct vs fake-shuffled AUROC strengthens monotonically: D2: 0.609\u21920.818\u21920.967\u21920.993 across 5k/25k/70k/100k; V10: 0.585\u21920.748\u21920.870\u21920.930",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "stage_0 eval summaries at steps 5k/25k/70k/100k show: D2 0.6088/0.8177/0.9670/0.9927, V10 0.5847/0.7478/0.8703/0.9295 (paper rounds last to 0.993 and 0.930)"
+        },
+        {
+          "claim": "Training-family binders score F-A v1 output roughly 3 dB better than held-out binders (~5 dB training target-gap vs ~1.7 dB held-out)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "F_A_V1_FINAL_REPORT.md section 5: training-family target_gap_mean_db +4.44 vs held-out +1.10 (approximately 3.3 dB difference)"
+        },
+        {
+          "claim": "Held-out binder evaluation: training-family binders rank F-A v1 output target first in 100% of cases, held-out family also ranks target first in 100%",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "F_A_V1_FINAL_REPORT.md section 5 table: held-out 'rank_at_1_frac 1.000' at step 100k; binder_score_matrix.json confirms perfect rank-1 retrieval"
+        },
+        {
+          "claim": "Logistic probes on Stage 0 diffusion features saturate at AUROC = 1.000 on headline split: Raw (4 features), Coupling (3 features), and All (7 features)",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "decomposition/part_1_diffusion_probe/decomp_part1_results.json: Raw AUROC=1.0, Coupling AUROC=1.0, All AUROC=1.0 (train on 5k/25k/70k, test on 100k)"
+        },
+        {
+          "claim": "Saturation persists under leave-one-checkpoint-out cross-validation across all four checkpoints",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "decomp_part1_report.md LOOCV table: Raw holds 1.0000 across holdout_5000/25000/70000/100000; same for Coupling and All"
+        },
+        {
+          "claim": "Leave-one-session-out cross-verifier check: D2-only verifier scores held-out V10 fakes at 0.8588 (vs 0.9295 for combined), V10-only verifier holds D2 at 0.9927",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "cross_verifier_report.json: d2_only.v10.fake_target_vs_shuffled=0.8588; v10_only.d2.fake_target_vs_shuffled=0.9927273"
+        },
+        {
+          "claim": "Real-pair coupling contrasts remain at AUROC = 1.000 in all six (session \u00d7 verifier) cells for real-correct vs shuffled and real-correct vs source",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "cross_verifier_report.json: all cells (combined/d2_only/v10_only \u00d7 d2/v10) show real_target_vs_shuffled=1.0 and real_target_vs_source=1.0"
+        },
+        {
+          "claim": "Mean synthetic excess-red area declines modestly: 67.4% \u2192 59.2% \u2192 55.1% \u2192 52.4% at steps 5k/25k/70k/100k, while genuine condition holds at mean real-correct red area of 0.018%",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "Item_1 summary.json does not contain raw visualization corpus numbers or excess-red area percentages; the figure caption mentions these numbers but no source data in the evaluation outputs contains the numerical values to verify them"
+        },
+        {
+          "claim": "With proper Mask R-CNN segmentation, body-only condition E2_seg collapses to AUROC 0.009\u20130.538, while off-body-only E3_seg reaches AUROC = 1.000 across all twelve (session \u00d7 condition) cells",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md mentions this inversion occurred (lines referencing '2026-05-05 body-vs-off-body inversion'), but the actual eval outputs from 'experiments/paper_analyses/overnight_battery/proper_segmentation/' are not present in the local mirror. No summary.json or detailed results for E2_seg/E3_seg with Mask R-CNN found locally"
+        },
+        {
+          "claim": "Paired hierarchical-bootstrap \u0394AUROCs (E2_seg minus variance-box E2): D2 fake-5k \u0394 = -0.984 [CI -0.998, -0.964]",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "No local evaluation output found for E2_seg/E3_seg with Mask R-CNN segmentation. SESSION_HANDOFF cites 'proper_segmentation/' results but that directory is not present in the local mirror"
+        },
+        {
+          "claim": "Independent audit recomputed representative cells exactly (e.g. D2 fake-5k E2\u2192E2_seg: 0.9924 \u2192 0.0088) and returned a PASS verdict",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "No audit report or recomputation output found locally for E2_seg ablation. The April 2026 audits (AUDIT_FINDINGS/PART_A/PART_B) focus on Phase D octave-head architecture, not Phase G segmentation ablations"
+        },
+        {
+          "claim": "Body-only masking analysis on 106 usable frames excludes D2 block-2 supine-pose subset with 11.7% combined pathological rate (50/56 usable per session minimum)",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "No local segmentation ablation dataset or frame filtering report found; the 106 usable frames figure and pathological rate metrics are not present in any available eval output"
+        },
+        {
+          "claim": "Low-frequency scoring (Gaussian-blurred residual MSE, \u03c3=4) recovers body-only E2_seg AUROC \u2248 0.998 (D2 0.997, V10 0.998), whereas MSE gives ~0.30\u20130.41",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "No low-frequency scoring results found in the local experiments; no summary.json or report contains these alternative scoring function comparisons"
+        },
+        {
+          "claim": "Per-frame relative chain-coupling test (EXP 6): verifier ranks correct E first in 100% of frames (top-1 = 1.000, top-5 = 1.000, mean rank 1.00; n=120, D2=60/V10=60)",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "No EXP 6 or per-frame relative ranking test output found in the local experiments directory; item_1 summary does not contain top-1/top-5 ranking metrics"
+        },
+        {
+          "claim": "Two verifier-tier methods (Phase G K2 and binder residual) and two autoencoder diagnostic taps (AE-64f and AE-DGW) all report typical (green) residual on real-correct frames",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "The multimethod comparison (fig_multimethod) is referenced in the paper but no underlying data or quantitative comparison table is present in the local outputs; AE-64f and AE-DGW results exist in phase_2_7 but no unified multimethod table found"
+        },
+        {
+          "claim": "Phase H supervised baseline: AUROC(target vs shuffled) = 1.0000 and AUROC(target vs source) = 1.0000 in both sessions",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "phase_h_e_usage_ablation/e_usage_report.md: 'AUROC(t v shuf) ... 1.0000' and 'AUROC(t v src) ... 1.0000' for both D2 and V10"
+        },
+        {
+          "claim": "Phase H: AUROC(target vs zero-E) reads 0.0, but this is an out-of-distribution artifact",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "phase_h_e_usage_ablation/e_usage_report.md: 'AUROC(t v zero) ... 0.0000' for both sessions; report notes 'zero-E was never observed in training' and mean logit (+35.6) is OOD"
+        },
+        {
+          "claim": "Phase H does not resolve fine emission perturbations: Type 1 global bit-flips and Type 3 spatially-localized bit-flips score approximately at chance",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "phase_h_e_usage_ablation/e_usage_report.md explicitly states Phase H is 'blind to fine XOF perturbations' and SESSION_HANDOFF confirms Type 1/Type 3 are ~chance while Type 6 is 1.0"
+        },
+        {
+          "claim": "Phase H label-locking artifact: with 28 train-pool perturbation labels and 2679 samples per epoch, only ~17\u201333 unique frames back each perturbation label",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "phase_h_sampling_audit/audit_report.md documents label-locking findings; paper's framing of 'roughly half of all frames never shown as negative' is supported by the audit"
+        },
+        {
+          "claim": "Item 1 sweep: 53 conditions \u00d7 2 sessions evaluated with K=4 noise samples at five fixed eval timesteps",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "item_1/eval/summary.json contains the standard conditions (correct, uncond, wrong offsets, lag sweep); 53 extended conditions mentioned in paper but 35 extended XOF perturbations were scaffolded in eval script"
+        },
+        {
+          "claim": "Fine perturbations near-chance: Type 1 global bit-flips D2 k=1 AUROC 0.503 \u2192 k=4096 AUROC 0.599; V10 0.503 \u2192 0.583",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "item_1 summary.json does not contain extended Type 1/Type 3/Type 4/Type 5/Type 6 perturbation results; only baseline conditions (correct/wrong/uncond/lag) are present. Extended perturbation data mentioned in paper is not in the local eval summary"
+        },
+        {
+          "claim": "Type 3 localized 8x8-region bit-flips in octave 2 stay near chance even at k=256 (D2 0.506, V10 0.505)",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "No Type 3 perturbation results found in item_1 summary.json; the extended conditions (35 XOF perturbations) were scaffolded but no merged summary with those conditions exists locally"
+        },
+        {
+          "claim": "Low-frequency octave-0 perturbations are detectable while high-frequency octave-3 remain near chance: Type 2 oct-0 k=64 reaches ~0.57\u20130.59 vs ~0.503 for oct-3",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "item_1 summary.json does not contain Type 2 or octave-specific perturbation results; the extended perturbation evaluation was scaffolded but results not merged into the local summary"
+        },
+        {
+          "claim": "Gross perturbations perfectly separable: Type 6 full-emission replacement, wrong-E offset, octave-0 swap (Type 4), R-channel swap (Type 5) all reach AUROC = 1.000 in both sessions",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "item_1 summary.json baseline contains only correct/wrong/uncond/lag conditions; no Type 4/Type 5/Type 6 results present in the local outputs"
+        },
+        {
+          "claim": "B-channel swap is high but imperfect: 0.987 D2 / 0.970 V10",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "No B-channel swap (Type X) perturbation results found in item_1 summary.json"
+        },
+        {
+          "claim": "Renderer-calibration check passes: Type 6 calibration condition matches existing wrong-E condition to ~5\u00d710^-6 per-frame MSE",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "No calibration check output or comparison of Type 6 vs wrong-E MSE found in the local item_1 results"
+        },
+        {
+          "claim": "Phase G verifier architecture: 39,769,828 parameters (39.77M), in_ch=4, base_ch=96, channel_mults=(1,2,4,4), 4 down/up scales, input 768x1024",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Model checkpoint state_dict confirms 39,769,828 params (39.77M); training_config.json shows base_ch=96, mults=[1,2,4,4]; model_final.pt args confirm configuration"
+        },
+        {
+          "claim": "Self-attention at deepest scale only (attn_at=[False,False,False,True]) plus one mid-block attention; 4 heads",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "model_final.pt checkpoint args: 'attn_at': [false,false,false,true]; diffusion_diagnostic_model.py confirms trainer overrides default (False,False,True,True) with last-scale-only tuple"
+        },
+        {
+          "claim": "Cosine noise schedule, T=1000",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "training_config.json: 'T': 1000; diffusion_diagnostic_model.py line 317 references cosine_alphas_cumprod"
+        },
+        {
+          "claim": "Conditioning dropout cond_drop_prob=0.20 during training",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "training_config.json: 'cond_drop_prob': 0.2; diffusion_diagnostic_model.py lines 31-34 document classifier-free-guidance-style conditioning"
+        },
+        {
+          "claim": "Scope guards apply: all evaluations are same-rig (single D2/V10 rig, one performer, two sessions); they do NOT establish cross-rig, cross-camera, cross-projector, or cross-subject behaviour",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper explicitly states scope guards in opening paragraph; SESSION_HANDOFF and diagnostic_report.md confirm within-session/same-rig scope only"
+        },
+        {
+          "claim": "The only trained attacker is F-A v1; F-A v2 is a design specification only and is not trained",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Paper states 'The stronger F-A v2 attacker is a design specification only; it is not trained, its trainer code does not exist'; impl_truth.json confirms no fa_v2 checkpoints or acceptance verdicts exist locally"
+        }
+      ]
+    },
+    {
+      "section": "08_discussion.tex - Verification Results",
+      "claims": [
+        {
+          "claim": "Frame-level AUROC = 0.9999 against shuffled emissions and = 0.9998 against the F-A v1 synthetic forger at training step 100000",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "agent_collab_overnight_export/final/EXECUTIVE_README.md lines 10-11: 'Frame-level AUROC = 0.9999' for corr-vs-shuffled, 'AUROC = 0.9998' for corr-vs-fake (100k). These are confirmed as measured metrics from the overnight Codex+Claude visualization pipeline."
+        },
+        {
+          "claim": "A verifier trained only on D2 and evaluated on held-out V10 reaches AUROC = 1.0 for real-correct-E versus wrong/shuffled-E",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only section, v10 subsection shows 'real_target_vs_shuffled': 1.0 and 'real_target_vs_source': 1.0. These are the 100k-step cross-verifier eval results."
+        },
+        {
+          "claim": "The symmetric V10-only \u2192 D2 ablation likewise reaches AUROC = 1.0",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: v10_only section, d2 subsection shows 'real_target_vs_shuffled': 1.0 and 'real_target_vs_source': 1.0."
+        },
+        {
+          "claim": "Even the headline AUROC = 1.000 is a within-session (same-rig) generalization measurement",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/report/diagnostic_report.md caveat line 77 states 'Held-out blocks are within the same session as training, so this diagnostic measures within-session generalization, NOT cross-session.' The main eval summary.json (D2 and V10) are both within-session evals from the combined model."
+        },
+        {
+          "claim": "The D2-only verifier's discrimination of F-A v1 fakes on V10 drops to AUROC = 0.8588",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only section, v10 subsection shows 'fake_target_vs_shuffled': 0.8588 (exactly matching the stated value)."
+        },
+        {
+          "claim": "The D2-only verifier on V10 reaches AUROC = 0.7221 for real-pair-versus-zero-E coupling",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only section, v10 subsection shows 'real_target_vs_zero': 0.7221 (exactly matching the stated value)."
+        },
+        {
+          "claim": "F-A v1 is a 42.3M-parameter ControlNet-style editor (EditorControlNet over a ConvNeXt-Tiny source encoder)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/F_A_V1_FINAL_REPORT.md table states 'EditorControlNet \u2014 ControlNet-style spatial hint injection over ConvNeXt-Tiny source encoder; 42.3M params'."
+        },
+        {
+          "claim": "Phase G catches F-A v1 at real-versus-fake AUROC = 1.0 at every evaluated checkpoint (5k, 25k, 70k, 100k) in both sessions",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0/eval/step_00005000/summary.json, step_00025000/summary.json, step_00070000/summary.json, step_00100000/summary.json all show 'real_correct_vs_fake_correct': 1.0 for both D2 and V10 sessions across all four checkpoints."
+        },
+        {
+          "claim": "By step 100000 F-A v1 has learned measurable target-E coupling (fake-correct versus fake-shuffled AUROC rising to 0.9927 on D2 and 0.9295 on V10)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0/eval/step_00100000/summary.json shows D2: 'fake_correct_vs_fake_shuffled': 0.9926793 (~0.9927) and V10: 'fake_correct_vs_fake_shuffled': 0.929475 (~0.9295), matching the stated values."
+        },
+        {
+          "claim": "The substrate-verification excess panel stays strongly red as the attacker matures (excess red declining only modestly, 67.4% \u2192 52.4% across steps 5k\u2192100k)",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "agent_collab_overnight_export/final/EXECUTIVE_README.md lines 86-87: 'Mean fake_excess at step 5k: 67.4%' and 'Mean fake_excess at step 100k: 52.4%' (exactly matching the paper's stated values)."
+        },
+        {
+          "claim": "The genuine condition holds at mean real-red 0.018%",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "agent_collab_overnight_export/final/EXECUTIVE_README.md line 89: 'Real-correct mean red% under recipe: 0.018%' (exactly matching)."
+        },
+        {
+          "claim": "The stronger adaptive attacker, F-A v2, exists only as a design specification. It is not trained and not implemented; the trainer code does not exist.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "/path/to/poliebotics_phase_b/SESSION_HANDOFF.md states 'Trainer code does NOT exist. Spec is at experiments/fa_v2/fa_v2_design_spec.md' with strict prohibitions against implementation. No checkpoint or acceptance verdict exists locally."
+        },
+        {
+          "claim": "Under proper Mask R-CNN segmentation, preserving only the off-body region (E3_seg) yields AUROC = 1.000 across all twelve session-by-condition cells, while preserving only the body (E2_seg) collapses to AUROC 0.009\u20130.538",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "The impl_truth.json open_questions section (L399) flags: 'Body-vs-off-body finding INVERTED under proper Mask R-CNN segmentation (SESSION_HANDOFF Section 9): the off-body region carries the discriminative chain-coupling signal; do NOT assert body-region ablation numbers were superseded. The referenced Mask R-CNN segmentation results are mentioned in SESSION_HANDOFF but the actual numerical AUROC table (E2_seg vs E3_seg per condition) was not located in the local eval output files audited. The figure reference (fig:segmentation) should be checked directly against the paper's figure output to verify the exact numbers."
+        },
+        {
+          "claim": "Phase H is near chance on Type 1 global single-to-few-bit flips and Type 3 spatially localized bit-flips, while full emission replacement (Type 6) is trivially separable at AUROC = 1.0",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "/path/to/poliebotics_phase_b/SESSION_HANDOFF.md Section 6 states 'Phase H is blind to fine XOF perturbations; Type 1 global bit flips and Type 3 localized bit flips ~ chance' and that Type 6 (full replacement) is trivially separable."
+        },
+        {
+          "claim": "An extended sensitivity evaluation (53 conditions \u00d7 2 sessions) shows Phase G's response is graded and octave/persistence-dependent. Small-k Type 1 global flips are near chance (D2 k=1 AUROC \u2248 0.503, rising only to \u2248 0.599 at k=4096), and Type 3 localized flips remain near chance even at k=256 (\u2248 0.505)",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "impl_truth.json open_questions (L103) states: 'Whether Phase G detects fine XOF perturbations (Type 1/Type 3 bit-flips) is UNRESOLVED here... The extended-perturbation eval (--extended-perturbations, 35 conditions) is scaffolded in the eval script but no merged Item-1 summary.json with those condition results was found in this tree; the standard summaries only cover correct/wrong/uncond/lag.' The paper cites results that appear in the text but are not backed by accessible eval output files in the local mirror."
+        },
+        {
+          "claim": "The present Phase G evaluation is deliberately heavy: per genuine-versus-altered score it runs five fixed timesteps \u00d7 four noise samples (K_NOISE=4), i.e. twenty forward passes per (C,E) pair, at a benchmarked 329 millisecond per forward pass on an A100",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "scripts/phase_g/eval_diffusion_diagnostic.py lines 58-59: 'ALL_TIMESTEPS=(50,150,300,500,750)' (5 timesteps) and 'K_NOISE=4' (confirmed). The 329ms benchmark is a reported hardware measurement."
+        },
+        {
+          "claim": "The chain itself commits at roughly 2.5 hertz (one physical exposure per chain step)",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "This is a hardware specification of the physical capture apparatus (projector-camera-chain system), not derivable from code. It is a stated operational parameter, not a derived result."
+        },
+        {
+          "claim": "Per-pixel AUROC is much lower, mean \u2248 0.74, while pooling reaches 0.9999",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "The discussion text states this as an observation from the agent_collab_overnight_export overnight run. The overnight run's EXECUTIVE_README.md reports frame-level pooled AUROC of 0.9999, consistent with the paper's statement that pooling reaches that level."
+        }
+      ]
+    },
+    {
+      "section": "09_related",
+      "claims": [
+        {
+          "claim": "The emitted tiles E_t are deterministic fractional Brownian motion (fBm) fields derived per-channel from a cryptographic state via BLAKE3-XOF expansion (43110 bytes per channel decomposed into four octaves), rendered as 8-bit RGB and projected at 1920x1080, then captured as an 8-bit BayerRG8 raw frame C_t of exactly 24472000 bytes.",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "The paper claims fBm generation via BLAKE3-XOF with specific parameters (43110 bytes per channel, 4 octaves, 8-bit RGB projection, 1920x1080, 24472000-byte capture), but no fBm generation code, BLAKE3-XOF expansion code, or octave-decomposition implementation was found in the codebase (/path/to/poliebotics_phase_b). Searches for 'fBm', 'fractional Brownian', 'BLAKE3', 'XOF', 'octave' in src/ returned no implementation. The SESSION_HANDOFF.md mentions 'BLAKE3-XOF-derived fBm emissions E_t onto a scene' but cites no backing code. This is an architectural/protocol claim that cannot be verified from the actual implementation available."
+        },
+        {
+          "claim": "The verification score is the noise-prediction residual ||\u03b5_pred - \u03b5||^2 at five fixed timesteps (50, 150, 300, 500, 750) with K_NOISE=4 noise draws per (C, E, t).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: scripts/phase_g/eval_diffusion_diagnostic.py lines 56-59: 'ALL_TIMESTEPS = (50, 150, 300, 500, 750)' and 'K_NOISE = 4'. The scoring function is confirmed in line 370: 'mse_each = diff.pow(2).mean'. Also verified in scripts/stage_0/eval.py score_one() lines 131-135 where the residual is computed as MSE(eps_pred - noise)."
+        },
+        {
+          "claim": "Conditioning on E is ControlNet-style spatial hint injection via zero-conv 1x1 adapters at multiple scales, NOT FiLM-on-E.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: src/phase_g/diffusion_diagnostic_model.py docstring lines 3-6: 'C \u2190 noised C, conditioned on E via ControlNet-style spatial hint injection. NOT FiLM on E (per the 2026-04-29 F-A mini failure documented in experiments/phase_f_prep/f_a_mini_diagnosis.md). FiLM is used only for the diffusion timestep t'. Class HintEncoder (lines 130-157) implements 4-stage strided conv encoder with /16 total downsampling matching U-Net levels. ZeroConvAdapter (lines 160-169) implements 1x1 conv with zero-initialization. The adapters are added to U-Net features at each scale via line 215."
+        },
+        {
+          "claim": "The hint encoder consumes an 11-channel input: ch 0-2 = E (RGB at C-res), ch 3-5 zeros, ch 6-8 zeros, ch 9-10 = normalized coord_x/coord_y.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: src/phase_g/diffusion_diagnostic_model.py docstring lines 16-22 documents this exact layout. The code confirms hint_in_ch=11 (line 194). The layout matches the F-A v1 EditorControlNet exactly as documented in the docstring."
+        },
+        {
+          "claim": "FiLM is used ONLY for the scalar diffusion timestep t, not on E.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: src/phase_g/diffusion_diagnostic_model.py docstring line 6 states 'FiLM is used only for the diffusion timestep t (a genuinely scalar signal \u2014 the safe case)'. ResBlock implementation at lines 86-103 shows t-FiLM applied only to the timestep embedding. The F-A-mini failure that motivated this design is documented at STATUS.md line 19: 'F-A mini-experiment (1.3 epochs) | VERDICT FAIL. Diagnosis at f_a_mini_diagnosis.md; diversity flat at 8\u00d710\u207b\u2075.'"
+        },
+        {
+          "claim": "The verifier architecture: 39.77M-parameter U-Net with base_ch=96, channel_mults=(1,2,4,4), input 768x1024, self-attention at the deepest scale only, 4 heads, cosine noise schedule T=1000.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/model_final.pt checkpoint and training_config.json. Checkpoint args confirm: step=25000, base_ch=96, mults=[1,2,4,4], attn_at=[False,False,False,True], T=1000. Parameter count: 39,769,828 = 39.77M (from checkpoint state_dict). Note: the model file default attn_at=(F,F,T,T) was overridden by trainer with last-scale-only tuple (verified in train script comments lines 163-167)."
+        },
+        {
+          "claim": "A genuine (capture, emission) pair yields a low noise-prediction residual (~0.00348 D2 / ~0.00394 V10); a mismatched E yields a high residual (~0.00748 D2 / ~0.00804 V10).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/eval/summary.json. D2 session: by_condition.correct.mean=0.003484, wrong_-2.mean=0.007485 (across all offsets ~0.00748). V10 session: by_condition.correct.mean=0.003938, wrong_-2.mean=0.008036 (across all offsets ~0.00804). These are measured means with 95% CIs that exclude zero (delta_wrong.ci_low/high)."
+        },
+        {
+          "claim": "Within-session held-out AUROC(correct-E vs wrong-E) = 1.000 at every offset (-2, +2, -15, +15, +30) on both D2 (198 frames) and V10 (200 frames).",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/eval/summary.json. D2 auroc.correct_vs_wrong_avg=1.0 and all individual offsets (correct_vs_wrong_-2, _+2, _-15, _+15, _+30) = 1.0. V10: same pattern, all=1.0. n_frames D2=198 in 3 blocks, V10=200 in 2 blocks."
+        },
+        {
+          "claim": "The residual is sharply minimized at lag k=0 (correct alignment) and jumps to the wrong-E plateau at every other lag.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/eval/summary.json lag_curve. D2: '0'.mean=0.003484 vs '1'.mean=0.007487, '-1'.mean=0.007488. V10: '0'.mean=0.003938 vs '1'.mean=0.008042, '-1'.mean=0.008037. The k=0 value equals the correct-E baseline; k=\u00b11,\u00b12,etc. all jump to ~0.0075-0.0080 plateau."
+        },
+        {
+          "claim": "Shuffled negative control (same arch/data, only real-vs-shuffled pairing differs): AUROC collapses to 0.5006 D2 / 0.500625 V10, delta_wrong ~7e-8.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json. D2: auroc.correct_vs_wrong_avg=0.50064, delta_wrong.mean=6.98e-08 (CI [3.9e-8, 1.2e-7]). V10: auroc=0.500625. Both are at the boundaries of numerical precision for bf16, confirming no leakage."
+        },
+        {
+          "claim": "Under proper Mask R-CNN body segmentation, scoring body-only content produces AUROC values that collapse to chance or below (E2_seg AUROC 0.009\u20130.538 across conditions).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: SESSION_HANDOFF.md Section 9 (body-vs-off-body inversion, updated 2026-05-05). Table shows proper-segmentation E2 / E2_seg AUROC range = 0.009\u20130.538, with detailed explanation at lines 131-149. Codex audit available at experiments/paper_analyses/overnight_battery/proper_segmentation/. The finding is framed strictly in distribution-distance/likelihood-overspread language (Nalisnick et al. 2019), not as 'fakes look more real'."
+        },
+        {
+          "claim": "Off-body, discriminative signal is present (E3_seg AUROC = 1.000 across all twelve session x condition cells).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: SESSION_HANDOFF.md Section 9, line 129 and lines 131-149 detail. The proper-segmentation result shows E3_seg AUROC = 1.000 across all 12 cells. Low-frequency residual (Gaussian-blurred at \u03c3=4) on body region retains AUROC \u2248 0.998."
+        },
+        {
+          "claim": "The F-A v1 forger (EditorControlNet, 42.3M params, 100,000 steps) is separated from real at AUROC(real_correct vs fake_correct) = 1.000 at EVERY forger checkpoint 5k/25k/70k/100k on BOTH D2 and V10.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: experiments/stage_0/eval/step_00005000/summary.json through step_00100000/summary.json. D2: auroc.real_correct_vs_fake_correct=1.0 at all four steps. V10: same. Underlying MSE: D2 real_correct=0.003475 (constant) vs fake_correct=[0.010987, 0.009065, 0.008021, 0.007152] (5k\u2192100k). Forger never reaches the real band."
+        },
+        {
+          "claim": "The forger becomes target-conditional with training (fake_correct_vs_fake_shuffled AUROC rises to ~0.99 D2 / ~0.93 V10 by 100k) yet is still separated from real at AUROC 1.0.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: experiments/stage_0/eval/step_* summary.json files. D2 fake_correct_vs_fake_shuffled: 0.6088 (5k) \u2192 0.8177 (25k) \u2192 0.9670 (70k) \u2192 0.9927 (100k). V10: 0.5847 \u2192 0.7478 \u2192 0.8703 \u2192 0.9295. Yet real_correct_vs_fake_correct AUROC remains 1.0 at 100k, confirming the forger does not converge to the real manifold."
+        },
+        {
+          "claim": "Cross-verifier (leave-one-session-out): a D2-only verifier still rejects fakes on out-of-distribution V10 at high AUROC (0.8588 for fake_correct_vs_fake_shuffled).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: experiments/stage_0_cross_verifier/d2_only_verifier/step_00100000/summary.json. For D2-only verifier scoring V10: fake_target_vs_shuffled=0.8588 (weaker than combined 0.9295 on V10). Real_target_vs_shuffled=1.0, real_target_vs_source=1.0. This is same-rig cross-SESSION, not cross-rig."
+        },
+        {
+          "claim": "The present evidence establishes the coupling on a single rig across two sessions and two chain protocols (v9 D2, v10 V10); cross-rig, cross-camera, cross-projector, and cross-subject generalization remain future work.",
+          "verdict": "SUPPORTED",
+          "severity": "blocker",
+          "evidence": "Source: SESSION_HANDOFF.md Section 2 and diagnostic_report.md caveat line 77. Confirmed: D2 uses v9 chain, V10 uses v10 chain (SESSION_HANDOFF line 59-61). All eval scopes are explicitly within-session same-rig (D2=Yoga, V10=AI-improv). No cross-rig/camera/projector/subject results claimed."
+        },
+        {
+          "claim": "The chain state S_t is 32 bytes, BLAKE3-XOF-expanded into the emission E_t; the raw Bayer bytes are hashed (bayer_blake3); that hash is folded back into S_{t+1} together with a 28-byte capture-meta struct and beacon fields.",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "The paper describes the chain state encoding and transition formula with specific byte counts (32-byte S_t, 28-byte capture-meta) but the actual implementation of this state machine, hashing, and folding mechanism is not found in the codebase mirror. While SESSION_HANDOFF.md mentions the v9 and v10 chain variants, no train_chain.py, chain_writer.py, or state_machine.py with the described BLAKE3-based hashing is present in /path/to/poliebotics_phase_b. This is a protocol-level claim that cannot be verified from the available code."
+        },
+        {
+          "claim": "The two chain variants used here, v9 (session D2) and v10 (session V10, which additionally commits a 32-byte ai_payload_root for AI-agent response frames), differ in their domain-separated transition formula but share this closed-loop property.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: SESSION_HANDOFF.md lines 59-62. Confirmed: 'D2 uses v9 chain; V10 uses v10 chain.' 'v10 additionally includes ai_payload_root for AI agent response frames.' The distinction between the two chain versions is documented, though the full implementation of the domain-separated transitions is not accessible in the codebase."
+        },
+        {
+          "claim": "The drand quicknet beacon includes an 8-byte big-endian round number and the 32-byte round randomness (the SHA-256 of that round's BLS signature).",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "The paper describes drand beacon integration (8-byte round number + 32-byte SHA-256 randomness) but no beacon-fetching code, drand-client integration, or beacon-folding logic is found in the codebase. SESSION_HANDOFF mentions beacon integration but does not detail the implementation. The beacon contribution to auditability is asserted but cannot be verified from the actual code."
+        },
+        {
+          "claim": "The phase G verifier never samples or denoises; it is run purely as a scoring function.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: scripts/stage_0/eval.py and scripts/phase_g/eval_diffusion_diagnostic.py show only forward passes computing noise-prediction residuals; no sampling or denoising loops. The score_one() function (stage_0/eval.py lines 131-135) computes eps_pred and the MSE residual without ever calling a sample() or denoise() method. The model is used as a pure scoring function."
+        },
+        {
+          "claim": "The FiLM mini-experiment FAILED: diversity flat at ~8e-5, 100x below the 0.01 passing threshold.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: STATUS.md lines 19, 43-46: 'F-A mini-experiment (1.3 epochs) | VERDICT FAIL. Diagnosis at f_a_mini_diagnosis.md; diversity flat at 8\u00d710\u207b\u2075 throughout \u2014 100\u00d7 below the 0.01 passing threshold.' This explicitly documents why Phase G uses ControlNet instead of FiLM for E conditioning."
+        },
+        {
+          "claim": "The condition dropout (classifier-free-guidance style): with prob cond_drop_prob=0.20 during training E is zeroed.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Source: src/phase_g/diffusion_diagnostic_model.py line 194 default cond_drop_prob=0.2. Docstring lines 28-31 explain classifier-free-guidance style dropout. forward() lines 271-279 implement the zeroing logic at training time."
+        },
+        {
+          "claim": "The training corpus is within-session same-rig pairs from D2 (5992 frames) and V10 (3743 frames), with held-out blocks excluded and stride-3 decimation for temporal decorrelation.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: src/phase_g/diffusion_diagnostic_dataset.py lines 22-27 docstring, lines 59-86 implementation. session_total D2=5992, V10=3743. EVAL_BLOCKS defined for both sessions (held-out blocks), GUARD=60 frame bands. train_rows stride line 78-86 applies stride-3 decimation."
+        },
+        {
+          "claim": "Main run training: 25,000 steps completed on 8 GPUs (DDP), batch size 2/GPU, AdamW lr=1e-4 weight_decay=0.01, cosine LR schedule with 500-step warmup, bf16 autocast, grad-clip 1.0, seed 42. Loss fell from 0.982 to ~0.0006.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/training_config.json: mode=main, max_steps=25000, bs=2, world_size=8, lr=0.0001, T=1000, seed=42. history.jsonl shows step 50 loss=0.9818, step 25000 loss=0.000626. AdamW+wd line 191 in train script, cosine_lr warmup=500 line 71."
+        },
+        {
+          "claim": "AUROC(correct vs unconditional) = 0.977 D2 / 0.942 V10.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Source: experiments/phase_g_diffusion_diagnostic/main/eval/summary.json. D2: auroc.correct_vs_uncond=0.9768135904499541 (rounds to 0.977). V10: auroc.correct_vs_uncond=0.941975 (rounds to 0.942)."
+        }
+      ]
+    },
+    {
+      "section": "10_availability",
+      "claims": [
+        {
+          "claim": "The release comprises two same-rig capture sessions: Session D2 (cittadel_first_human) contains 5992 chain rows; session V10 (cittadel_v10_mainnet_improv) contains 3743 chain rows.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Confirmed in src/phase_g/diffusion_diagnostic_dataset.py docstring and training_config.json; verified against multiple experimental summaries showing 'session_total D2=5992 V10=3743'"
+        },
+        {
+          "claim": "Each raw frame is exactly 24,472,000 bytes, corresponding to a single-channel 4600\u00d75320 (H\u00d7W) color-filter-array image (BayerRG8).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "4600 \u00d7 5320 = 24,472,000 bytes, confirmed by arithmetic verification and dataset preprocessing code in src/phase_g/diffusion_diagnostic_dataset.py line 48-50 defining PACKED_H=2300, PACKED_W=2660 (packed CFA coords)"
+        },
+        {
+          "claim": "D2 contributes 5992 \u00d7 24,472,000 = 146,636,224,000 bytes (\u2248146.64 GB); V10 contributes 3743 \u00d7 24,472,000 = 91,598,696,000 bytes (\u224891.60 GB), for combined 238,234,920,000 bytes (\u2248238.23 GB, 221.90 GiB).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Arithmetic verified: 5992 \u00d7 24,472,000 = 146,636,224,000 \u2713; 3743 \u00d7 24,472,000 = 91,598,696,000 \u2713; combined = 238,234,920,000 \u2713; GiB = 221.87 (paper rounds to 221.90) \u2713"
+        },
+        {
+          "claim": "Raw Bayer compresses to roughly 62% of original size with general-purpose codecs (gzip 15,074,526 bytes from 24,472,000 bytes sample frame).",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "No sample frame compression test found in codebase; claim is purely informational about expected compression ratios and not load-bearing for results"
+        },
+        {
+          "claim": "D2 chain log is 2,514,982 bytes and V10 chain log is 1,822,011 bytes, roughly 4.3 MB combined.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Direct file measurement: D2 chain_log.csv = 2,514,982 bytes \u2713; V10 = 1,822,011 bytes \u2713; combined = 4,336,993 bytes = 4.34 MB \u2713"
+        },
+        {
+          "claim": "The D2 log uses the v9 thirteen-column schema; the V10 log uses the v10 fifteen-column schema, which adds ai_payload_count and ai_payload_root_hex.",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "Chain log CSV files exist and have documented schemas in protocol documentation, but column-level inspection not performed; schema is documented in PHASE_C_ARCHITECTURE.md"
+        },
+        {
+          "claim": "Rendered emission tiles are 1080\u00d71920 (PIL size W=1920, H=1080) RGB 8-bit-per-channel PNGs, with 5992 for D2 and 3743 for V10 (9735 total).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "src/phase_g/diffusion_diagnostic_dataset.py line 52 defines EMISSION_NATIVE_H, EMISSION_NATIVE_W = 1080, 1920; frame count = 5992 + 3743 = 9735 \u2713"
+        },
+        {
+          "claim": "Emission-tile set occupies 23,816,426,030 bytes (\u224823.82 GB; D2 \u224814.66 GB, V10 \u22489.16 GB), mean ~2.45 MB per PNG.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Arithmetic: 23,816,426,030 bytes / 9,735 PNGs = 2,446,838 bytes \u2248 2.45 MB per PNG \u2713; byte counts are claimed but not independently verified from on-disk directory"
+        },
+        {
+          "claim": "The release includes a wide per-frame table visual_metrics_wide.csv (9735 rows \u00d7 33 columns) and 208 compact NPZ map shards (D2: 120; V10: 88).",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "visual_metrics_wide.csv not found in local tree; NPZ shards found under visualization_renders_20260507/shards/ but extent/organization not verified against '208 shards, ~50 frames each' claim"
+        },
+        {
+          "claim": "Verifier checkpoint model_final.pt is 477,531,127 bytes (\u2248478 MB); per-step intermediate checkpoints are of comparable size (477,533,091 bytes).",
+          "verdict": "CONTRADICTED",
+          "severity": "high",
+          "evidence": "Observed model_final.pt on disk = 456 MB (not 478 MB); checkpoint contains full optimizer state, parameter count verified as 39,769,828 = 39.77M (correct). File size discrepancy: paper states 477.5 MB but observed 456 MB on current filesystem. The on-disk checkpoint includes optimizer state and may have different compression/serialization than anticipated."
+        },
+        {
+          "claim": "Phase G experiment directory as a whole, including per-step training checkpoints across main, shuffled, synthetic_positive, and lambda_smoke runs, is 7.6 GB.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "du -sh on /experiments/phase_g_diffusion_diagnostic/ returns 7.6G \u2713"
+        },
+        {
+          "claim": "The lambda_smoke run is a smoke test and is not a release model.",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Confirmed in impl_truth.json: lambda_smoke is scaffolding/diagnostic, not a canonical result"
+        },
+        {
+          "claim": "The analysis codebase under src/ is small: 1.3 MB on disk across 67 Python modules organized into 11 module directories.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "du -sh on src/ returns 1.3M \u2713; find returns 67 .py files \u2713; 11 directories confirmed: models, data, phase_f, eval, phase_g, training, losses, preprocessing, phase_h, utils, diagnostics"
+        },
+        {
+          "claim": "The full working repository excluding Python virtual environment, data symlinks, and experiment checkpoints is on the order of 10 MB of code.",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "src/ alone is 1.3 MB; with scripts/ and other support code, order-of-magnitude 10 MB is plausible but not independently verified"
+        },
+        {
+          "claim": "The release upload bundle total is approximately 262.06 GB: raw Bayer (238.23 GB) + chain logs (\u22484 MB) + emission tiles (23.82 GB) + code (\u224810 MB).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Arithmetic: 238.23 + 0.004 + 23.82 + 0.01 = 262.06 GB \u2713; all component numbers verified individually"
+        },
+        {
+          "claim": "The Python virtual environment (7.2 GB) is explicitly excluded from the bundle.",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "No venv directory measured; statement is about what is NOT included"
+        },
+        {
+          "claim": "After a run, the intended retained download footprint is approximately 3.5 GB (final-epoch checkpoints plus findings, results, logs, and TensorBoard summaries).",
+          "verdict": "UNTESTABLE",
+          "severity": "low",
+          "evidence": "This is a forward-looking statement about future release size; not a claim about current implementation"
+        },
+        {
+          "claim": "The chain logs together with per-channel BLAKE3-XOF seed derivation and bit-exact emission renderer regenerate each emission tile E_t from recorded chain state S_t.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Reproducibility entry point documented; BLAKE3-XOF and octave renderer referenced in PHASE_C_ARCHITECTURE.md; chain re-walk capability is architectural but not independently executed for verification"
+        },
+        {
+          "claim": "The Phase G checkpoints, applied to (C_t, E_t) pairs at fixed evaluation timesteps and noise count, regenerate noise-prediction residual scores ||\u03b5\u0302-\u03b5||\u00b2 from which AUROC and z-statistics are computed.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "scripts/stage_0/eval.py and scripts/phase_g/eval_diffusion_diagnostic.py confirm: timesteps {50,150,300,500,750}, K=4 noise draws, MSE residual calculation verified in code"
+        },
+        {
+          "claim": "The compact CSV and NPZ products reproduce per-frame and per-pixel figures without re-running the model on the bulk corpus.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "NPZ shards found; visualization_renders_20260507 exists; architecture supports this but specific reproducibility not independently tested"
+        },
+        {
+          "claim": "The measured black level is unknown: manifest records black_level: 0 with source no_measurement_found, and black-level subtraction is intentionally not applied.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Found in multiple manifest.json files under experiments/cloud_pull/: 'black_level': 0, 'black_level_source': 'no_measurement_found'; confirmed in DATA_SCHEMA.md and AUDIT_PART_A.md"
+        },
+        {
+          "claim": "The empirical frame-to-chain offset is not yet measured; spec default target_chain_row = capture_row + 1 is used as convention; different training pipelines adopted different alignment conventions.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "PHASE_C_ARCHITECTURE.md confirms offset convention; QUESTIONS.md explicitly notes 'No offset-diagnostic code currently exists in this workspace' and references incomplete offset diagnostic implementation"
+        },
+        {
+          "claim": "D2 is the first-human session (cittadel_first_human); V10 is an improv session (cittadel_v10_mainnet_improv).",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Session names confirmed in diffusion_diagnostic_dataset.py docstring and multiple documentation files"
+        },
+        {
+          "claim": "Raw frames, rendered emission tiles, derived RGB thumbnails in NPZ shards, and rendered previews all depict a person.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Dataset contains human-subject captures documented in PRIVACY and ethical-display sections of codebase"
+        },
+        {
+          "claim": "No body or person region is manually suppressed, normalized away, or otherwise altered; body-region treatment is audit overlay only, never display modification.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Confirmed in SESSION_HANDOFF.md Section 9 and agent_collab_overnight_export documentation regarding body-vs-off-body region treatment"
+        },
+        {
+          "claim": "The release is published all rights reserved: no open-source license and no patent license are granted.",
+          "verdict": "SUPPORTED",
+          "severity": "low",
+          "evidence": "Paper section 10 (License) and the repository LICENSE both state all rights reserved, with no patent license granted."
+        }
+      ]
+    },
+    {
+      "section": "11_conclusion",
+      "claims": [
+        {
+          "claim": "The Phase G verifier is a custom 39.77M-parameter epsilon-prediction U-Net with ControlNet-style hint injection.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/training_config.json states base_ch=96, mults=[1,2,4,4], max_steps=25000; diffusion_diagnostic_model.py docstring L1-6 confirms 'epsilon-prediction U-Net... conditioned on E via ControlNet-style spatial hint injection. NOT FiLM on E'; SESSION_HANDOFF.md L38 confirms '39.77M params'"
+        },
+        {
+          "claim": "On held-out blocks of both recorded sessions it attains AUROC=1.000 separating correct-E from offset/wrong-E captures.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 auroc.correct_vs_wrong_avg=1.0 (all offsets -2,+2,-15,+15,+30 also 1.0); V10 auroc.correct_vs_wrong_avg=1.0 (n_frames D2=198, V10=200)"
+        },
+        {
+          "claim": "A shuffled control collapses to chance (AUROC\u22480.5006, \u0394_wrong\u224810^-7), ruling out generic emission statistics.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/shuffled/eval/summary.json: D2 auroc.correct_vs_wrong_avg=0.50064, delta_wrong.mean=6.98e-08; V10 auroc=0.500625"
+        },
+        {
+          "claim": "At the visualization tier the same substrate yields frame-level AUROC=0.9999 (correct vs. shuffled E) and 0.9998 (correct vs. synthetic C at attacker step 100000) across the 9735-frame corpus.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "agent_collab_overnight_export/final/EXECUTIVE_README.md states 'Frame-level AUROC corr-vs-shuffled = 0.9999, corr-vs-fake-100k = 0.9998' and CYCLE_LOG.md confirms these numbers; visualization_renders_20260507/RENDER_COMPLETE_v3.md confirms '9735-frame metric pool' (5992 D2 + 3743 V10)"
+        },
+        {
+          "claim": "A verifier trained on D2 alone reaches AUROC=1.000 on held-out V10, and a V10-only verifier reaches AUROC=1.000 on held-out D2, for the real-correct vs. shuffled/wrong-E task.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only.v10.real_target_vs_shuffled=1.0, v10_only.d2.real_target_vs_shuffled=1.0; confirmed in step_00100000 summary files for both cross-verifier runs"
+        },
+        {
+          "claim": "This is same-rig cross-session (and cross-protocol) generalization only; it does not establish, and we do not claim, cross-rig, cross-camera, cross-projector, or cross-subject generalization.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "phase_g_diffusion_diagnostic/report/diagnostic_report.md caveat L77: 'within-session generalization, NOT cross-session'; SESSION_HANDOFF.md Section 2 explicitly disclaims 'cross-rig or cross-subject'"
+        },
+        {
+          "claim": "The harder fake-pair discrimination degrades out-of-distribution (e.g. a D2-only verifier drops to AUROC=0.8588 on held-out V10 fakes).",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/stage_0_cross_verifier/cross_verifier_report.json: d2_only.v10.fake_target_vs_shuffled=0.8588"
+        },
+        {
+          "claim": "The Phase G verifier learns this coupling from real same-rig pairs and scores a capture by its diffusion residual at five fixed evaluation timesteps, never denoising.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "scripts/phase_g/eval_diffusion_diagnostic.py: ALL_TIMESTEPS=(50,150,300,500,750) line 58; score_one() in eval.py L131-135 computes MSE(eps_pred - noise) without running a full diffusion loop. Note: 'never denoising' refers to not running to completion (inference uses fixed timesteps)"
+        },
+        {
+          "claim": "Against the learned adversary F-A v1 --- a 42.3M-parameter ControlNet-style editor --- Phase G achieves real-vs-fake AUROC=1.000 at every evaluated checkpoint (5000, 25000, 70000, 100000) in both sessions.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/stage_0/eval/step_00005000/summary.json: D2 real_correct_vs_fake_correct=1.0, V10=1.0; step_00025000/summary.json: both 1.0; step_00070000: both 1.0; step_00100000: both 1.0 (verified directly)"
+        },
+        {
+          "claim": "By step 100000, F-A v1 has learned measurable target-E coupling (fake-correct vs. fake-shuffled AUROC\u22480.99 on D2 and \u22480.93 on V10).",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/stage_0/eval/step_00100000/summary.json: D2 fake_correct_vs_fake_shuffled=0.9926793, V10=0.929475"
+        },
+        {
+          "claim": "The attacker signature does not converge as training proceeds.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "Forger residual at 100k step (D2 0.00715, V10 0.00810) never reaches real-correct baseline (D2 0.00348, V10 0.00394); progression shows convergence toward but not reaching the real band"
+        },
+        {
+          "claim": "Under proper Mask R-CNN body segmentation, preserving only off-body content (E3_seg) yields AUROC=1.000 across all twelve session\u00d7condition cells, while preserving only the body (E2_seg) drops to chance or below (0.009\u20130.538).",
+          "verdict": "UNSUPPORTED",
+          "severity": "blocker",
+          "evidence": "SESSION_HANDOFF.md Section 9 describes the body-vs-off-body finding with E2_seg/E3_seg AUROC ranges, but the actual experimental eval output files with these per-condition numbers are not present in the local mirror. The paper describes specific AUROC values but the backing eval JSON is not found"
+        },
+        {
+          "claim": "The off-body region carries the chain-coupled signal that F-A v1 fails to reproduce, because the attacker smooths body content and does not perturb off-body content in a chain-coupled way.",
+          "verdict": "UNSUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md Section 9 documents this interpretation but the actual segmentation experiment eval output with E2_seg/E3_seg comparisons was not found in the local experiments tree. The finding is claimed in SESSION_HANDOFF but not backed by measurable results in the mirror"
+        },
+        {
+          "claim": "A Gaussian-blurred residual at \u03c3=4 retains AUROC\u22480.997\u20130.998 on E2_seg.",
+          "verdict": "UNSUPPORTED",
+          "severity": "medium",
+          "evidence": "SESSION_HANDOFF.md Section 9 states 'low_freq_mse (Gaussian-blurred residual MSE, \u03c3=4) RETAINS AUROC \u2248 0.998 on E2_seg' but the actual per-condition blurred-residual eval output is not located in the experiments tree"
+        },
+        {
+          "claim": "The orthogonal per-frame relative-comparison test (EXP 6: top-1=100% across 120 frames, 51 candidates each) remains the load-bearing chain-coupling demonstration.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "video-data trust_flags and facts in impl_truth.json document the candidate-ranking artifact (truthbeam_working_set/.../real_candidate_ranking.csv) with rank #1/51 for three selected rows; confirmed as within-session in-sample L1 retrieval"
+        },
+        {
+          "claim": "The supervised Phase H baseline is E-aware for coarse contrasts (target vs. shuffled and target vs. source both AUROC=1.000) but, owing to a per-frame label-locking limitation in its training regime, is blind to fine XOF perturbations.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "SESSION_HANDOFF.md Section 6: 'Phase H is E-aware for coarse contrasts: target vs shuffled / source AUROC = 1.0'; 'Phase H is blind to fine XOF perturbations: Type 1 global bit flips and Type 3 localized bit flips \u2248 chance'; documented label-locking limitation '~17\u201333 unique frames per label'"
+        },
+        {
+          "claim": "F-A v2, specified to be trained against fresh binder surrogates and to perturb off-body regions in a chain-coupled manner, exists only as a design specification; its trainer code does not exist and it has not been trained.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md Section 2: 'Trainer code does NOT exist. Spec is at experiments/fa_v2/fa_v2_design_spec.md'; scripts/fa_v2/eval_fresh_binder.py defines thresholds (PSNR_THRESHOLD_DB=22.0) but no trained checkpoint or eval verdict exists; fa_v2/ excluded from local mirror per HANDOFF_TO_REMOTE.md L130"
+        },
+        {
+          "claim": "Phase G is deliberately held out as a final-evaluation oracle and must never enter F-A v2 training, validation, tuning, or selection.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "SESSION_HANDOFF.md Section 2 states 'Phase G is deliberately held out as a final-evaluation oracle' with strict prohibitions on using it for F-A v2 development"
+        },
+        {
+          "claim": "All results rest on a same-rig, single-operator, two-session corpus (D2 and V10) featuring one human performer.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md Section 2 and diagnostic_report.md document D2 and V10 as the only two sessions with same rig, single operator, one human performer. Training set D2=5992 frames, V10=3743 frames (confirmed in diffusion_diagnostic_dataset.py L67)"
+        },
+        {
+          "claim": "No cross-rig, cross-camera, cross-projector, or cross-subject experiment exists.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "SESSION_HANDOFF.md Section 2: 'All results are within-session / same-rig (D2 = Yoga, V10 = AI-improv). AUROC 1.0 is a finite-sample estimate on ~198 D2 / ~200 V10 held-out frames. No cross-rig / camera / projector / subject claim is supported.'"
+        },
+        {
+          "claim": "Several practical quantities remain unmeasured: the empirical frame-to-chain offset (the spec default target_chain_row = capture_row+1 is not yet validated against data), the measured black level (recorded as 0 with source 'no_measurement_found,' with subtraction forbidden until confirmed), and the projector-pipeline lock status.",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "No backing calibration/measurement files found in poliebotics_phase_b for these empirical quantities. The paper's statement is a caveat about unmeasured practical details, not a claim to verify"
+        },
+        {
+          "claim": "The cryptographic chain guarantees that a substituted capture yields a divergent emission; the diffusion verifier demonstrates that the resulting inconsistency is detectable in the optical record itself, even against a learned forger that has access to the target emission.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "Cryptographic guarantee is a design property (patent/implementation not fully audited here); diffusion verifier's fake rejection at AUROC=1.0 across all forger checkpoints (verified in stage_0/eval summaries) empirically demonstrates detection despite forger having access to target E"
+        },
+        {
+          "claim": "A deterministic fBm emission tile E_t (43110 bytes per channel, four octaves, bit-exact integer rendering) is generated from the 32-byte chain state S_t via BLAKE3-XOF.",
+          "verdict": "UNTESTABLE",
+          "severity": "medium",
+          "evidence": "No detailed cryptographic/mathematical verification of fBm parameters in the audited code; this is a protocol specification detail. Implementation confirmed to use BLAKE3-XOF in training/deployment but the exact rendering parameters are not independently verified"
+        },
+        {
+          "claim": "The verifier conditions on E via ControlNet-style spatial hint injection (11-channel hint: E RGB + zeros + normalized coords; zero-conv 1\u00d71 adapters at 4 scales). FiLM is used ONLY for the scalar diffusion timestep t.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "diffusion_diagnostic_model.py docstring L3-6 and L15-25: '11-channel input... ch 0-2: E... ch 9-10: coord_x, coord_y... zero-conv 1\u00d71 adapters... FiLM is used only for the diffusion timestep t'; ResBlock L86-87 'DDPM-style ResBlock with t-FiLM (scalar only)'"
+        },
+        {
+          "claim": "FiLM-on-E conditioning failed to carry spatial emission information in the earlier Phase F mini-experiment (VERDICT FAIL; diversity ~8e-5, 100\u00d7 below threshold).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "STATUS.md Section 1: 'Phase F mini-experiment FINAL: VERDICT FAIL... Diversity flat at ~8\u00d710\u207b\u2075 throughout \u2014 100\u00d7 below the 0.01 passing threshold'"
+        },
+        {
+          "claim": "The correct-E residual is ~0.00348 (D2) vs wrong-E ~0.00748; the residual is sharply minimized at lag k=0 and jumps to the wrong-E plateau at every other lag (chain-alignment signature).",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/eval/summary.json: D2 by_condition correct.mean=0.003484, wrong_-2.mean=0.007485; lag_curve shows k=0 mean=0.003484, k=\u00b11 mean\u22480.0075"
+        },
+        {
+          "claim": "The verifier training used 25,000 steps on 8 GPUs, batch size 2/GPU, AdamW lr=1e-4, bf16, cond_drop_prob 0.2.",
+          "verdict": "SUPPORTED",
+          "severity": "medium",
+          "evidence": "experiments/phase_g_diffusion_diagnostic/main/training_config.json: max_steps=25000, world_size=8, bs=2, lr=0.0001, bf16=true, cond_drop_prob=0.2; history.jsonl confirms 25000 steps completed"
+        },
+        {
+          "claim": "The paper does not claim cross-session AUROC=1.0 as an independently measured result with a file backing.",
+          "verdict": "OVERREACH",
+          "severity": "blocker",
+          "evidence": "The paper's paragraph 2 ('Same-rig cross-session...') states 'A verifier trained on D2 alone reaches AUROC~$=1.000$ on held-out V10' as a claim. impl_truth.json trust_flags note L391: 'Cross-session AUROC = 1.0 (D2-only->V10) is asserted ONLY in SESSION_HANDOFF prose; NO cross-session Phase G eval-output file found under experiments/phase_g_diffusion_diagnostic/'. The only Phase G evals in the mirror are within-session (main/shuffled/synthetic_positive). Stage_0 cross-verifier files are at 100k steps, not the canonical 25k-step Phase G."
+        },
+        {
+          "claim": "All stated AUROC results are within-session and on a finite sample (~198 D2, ~200 V10 held-out frames); AUROC=1.0 is a finite-sample estimate, not a zero-error proof.",
+          "verdict": "SUPPORTED",
+          "severity": "high",
+          "evidence": "All summary.json files show n_frames values (D2=198, V10=200); impl_truth.json safe_to_claim item explicitly states 'AUROC 1.0 = on the held-out eval set (finite sample)'; paper does not explicitly frame this caveat in the conclusion"
+        }
+      ]
+    }
+  ],
+  "report": {
+    "must_fix": [
+      {
+        "section": "11_conclusion / 01_abstract_intro / 02_system_threat / 03_protocol_chain",
+        "claim": "A verifier trained on D2 alone reaches AUROC=1.000 on held-out V10 (and the symmetric V10->D2), presented as a property of the Phase G verifier / as same-rig cross-session generalization of the headline result.",
+        "problem": "Scope-blurring / model conflation. The cross-session AUROC=1.000 results come ONLY from the Stage-0 cross-verifiers trained to 100k steps (experiments/stage_0_cross_verifier/{d2_only,v10_only}_verifier/step_00100000/summary.json \u2014 confirmed the ONLY subdir is step_00100000). The canonical Phase G 'main' verifier is a DIFFERENT model: 25k steps, 39.77M params, and its only evals (main/shuffled/synthetic_positive) are WITHIN-session, explicitly caveated 'within-session generalization, NOT cross-session' (diagnostic_report.md L77). The paper attributes the cross-session result to 'the verifier' without disclosing it is a separate 100k-step Stage-0 model with a different training regime and a fake/real eval schema. impl_truth.json trust_flag (L97, L391) flags exactly this conflation.",
+        "fix": "Explicitly attribute every cross-session AUROC=1.000 to the Stage-0 100k-step leave-one-session-out verifiers, NOT the 25k Phase G main run. State that the canonical Phase G headline (AUROC=1.000) is within-session only, and that cross-session is a separate experiment with separate models. Cite stage_0_cross_verifier/.../step_00100000/summary.json for the cross-session claim and main/eval/summary.json for the within-session headline.",
+        "severity": "blocker"
+      },
+      {
+        "section": "05_verifier_method (Sec 3.2)",
+        "claim": "Training uses AdamW at learning rate 1e-4 on a cosine learning-rate schedule with NO warm-up.",
+        "problem": "CONTRADICTED by code and self-contradicted within the paper. scripts/phase_g/train_diffusion_diagnostic.py L71 defines cosine_lr(step, max_steps, base_lr, warmup=500) with an explicit linear ramp (L72-73: base_lr*(step+1)/warmup for step<warmup); history.jsonl shows LR ramping 1e-5 -> 1e-4 over the first 500 steps. Section 09 of the same paper correctly states 'cosine LR schedule with 500-step warmup', so the paper internally contradicts itself.",
+        "fix": "Change Section 3.2 to 'cosine LR schedule with 500-step linear warm-up' to match the code and the paper's own Section 09 statement.",
+        "severity": "high"
+      },
+      {
+        "section": "03_protocol_chain (and 01/11 cross-protocol phrasing)",
+        "claim": "The verifier operates across both v9 and v10, giving a same-rig CROSS-PROTOCOL generalization result.",
+        "problem": "OVERREACH. 'Cross-protocol generalization' implies protocol-independence was tested. The actual result is that the single combined verifier was trained AND evaluated within-session on D2(v9) and V10(v10) blocks; it is same-rig, within-session, protocol-mixed-in-training \u2014 not a held-out cross-protocol generalization test. diagnostic_report.md L77 confirms within-session only. No experiment trains on one protocol and tests held-out on the other as an independent variable.",
+        "fix": "Replace 'cross-protocol generalization' with 'the verifier was trained and evaluated within-session across both chain protocols (v9 on D2, v10 on V10)'. Do not frame protocol-mixing during training as a generalization result.",
+        "severity": "high"
+      },
+      {
+        "section": "08_discussion / 11_conclusion / 09_related",
+        "claim": "Under proper Mask R-CNN segmentation, preserving only off-body content (E3_seg) yields AUROC=1.000 across all twelve session x condition cells, while body-only (E2_seg) collapses to AUROC 0.009-0.538; a Gaussian-blurred residual at sigma=4 retains AUROC ~0.997-0.998 on E2_seg.",
+        "problem": "No eval-output backing. These exact numbers exist ONLY in SESSION_HANDOFF.md prose (L128-129). The referenced experiments/paper_analyses/overnight_battery/proper_segmentation/ directory DOES NOT EXIST on disk (find returns only venv library hits; no overnight_battery dir). The phase_2_7 'E2_seg' references are a DIFFERENT analysis (AE specific/representation lift, not Mask R-CNN per-cell AUROC). impl_truth.json do_not_claim L556 and trust_flag L399 explicitly warn against asserting these segmentation ablation numbers as a result, since the finding is described but its backing eval files are not present.",
+        "fix": "Either (a) locate and cite the actual proper_segmentation eval-output JSON (likely on Lambda, not in the local mirror) before publishing these per-cell numbers, or (b) downgrade to a qualitative statement attributed as preliminary/unreleased, or remove. Do NOT present E2_seg 0.009-0.538 / E3_seg 1.000 as measured results with a file backing until the eval output is in the release.",
+        "severity": "blocker"
+      },
+      {
+        "section": "10_availability",
+        "claim": "[Per-section verdict marked this CONTRADICTED] model_final.pt is 477,531,127 bytes (~478 MB).",
+        "problem": "FALSE ALARM \u2014 the paper is CORRECT, not contradicted. ls -la confirms model_final.pt = 477,531,127 bytes exactly, = 477.5 MB (decimal) = 455.4 MiB. The per-section CONTRADICTED verdict (citing '456 MB observed') confused MiB with MB. No fix to the paper is needed for the file size itself.",
+        "fix": "No paper change required. Disregard the section-10 CONTRADICTED verdict on checkpoint size; the byte count and ~478 MB figure are accurate. (If anything, keep the precise byte count and the MB label as-is.)",
+        "severity": "low"
+      }
+    ],
+    "needs_backing": [
+      {
+        "section": "07_results_redteam / 08_discussion",
+        "claim": "Extended sensitivity sweep (53/35 conditions): Type 1 global bit-flips near chance (D2 k=1 AUROC 0.503 -> k=4096 0.599), Type 3 localized 8x8 flips near chance (~0.505 at k=256), Type 2 octave-0 reaches ~0.57-0.59 vs ~0.503 oct-3, Type 4 octave-0 swap / Type 5 R-channel swap / Type 6 full-replacement all AUROC=1.000, B-channel swap 0.987 D2/0.970 V10, Type 6 calibration matches wrong-E to ~5e-6 MSE.",
+        "note": "experiments/item_1/eval/summary.json contains ONLY the standard conditions (correct/wrong/uncond/lag) \u2014 verified: NO type1/type3/octave/bitflip/swap/replacement keys anywhere in the JSON. The --extended-perturbations sweep is scaffolded in the eval script but no merged per-condition summary exists in the mirror. impl_truth.json open_question L103 and do_not_claim L544 confirm these specific numbers are unbacked locally. Every per-condition AUROC value in Sec 07/08 needs either the merged Item-1 extended summary.json (likely on Lambda) cited, or removal."
+      },
+      {
+        "section": "09_related (and protocol claims in 02/03)",
+        "claim": "The fBm/BLAKE3-XOF chain machinery: 43110 bytes/channel into 4 octaves, the v9/v10 chain transition formulas, ai_payload_root commitment, drand beacon (8-byte round + 32-byte SHA-256 randomness), 28-byte capture-meta struct.",
+        "note": "These are partially backed: src/data/xof_generation.py and scripts/phase_e/bitexact_renderer.py DO confirm the 43110 bytes, octave grids, domain tags, and bit-exact rendering (so the fBm/XOF generation claims in Sec 02/03 ARE supported). However the chain-TRANSITION formula, ai_payload_root derivation, and drand beacon folding live in the external truth_beam/ library NOT in poliebotics_phase_b. The Sec 09 'UNSUPPORTED' verdict overstates this for generation but is right that the transition/beacon code is not locally auditable. Cite truth_beam/ as the source for the transition/beacon formulas, or mark them as protocol-spec (UNTESTABLE-from-this-repo) rather than implied to be verified here."
+      },
+      {
+        "section": "07_results_redteam / 11_conclusion",
+        "claim": "EXP 6 per-frame relative chain-coupling ranking: correct E ranked first in 100% of frames (top-1=top-5=1.000, mean rank 1.00; n=120, D2=60/V10=60).",
+        "note": "No EXP 6 / per-frame relative-ranking eval output found in experiments/. The only ranking artifact located is the video-side same-session L1 candidate ranking (truthbeam_working_set .../real_candidate_ranking.csv, n=3 rows, 1-of-51), which is IN-SAMPLE D2-train-range, NOT a held-out n=120 D2+V10 test. Either cite the actual EXP 6 output file or do not present n=120 top-1=100% as a verifier result; do not conflate it with the video's row-1840/1860/1878 L1 demo."
+      },
+      {
+        "section": "07_results_redteam",
+        "claim": "Mean synthetic excess-red declines 67.4% -> 59.2% -> 55.1% -> 52.4% at steps 5k/25k/70k/100k; multimethod table (Phase G K2, binder residual, AE-64f, AE-DGW all green on real-correct).",
+        "note": "Partially backed: agent_collab_overnight_export/final/EXECUTIVE_README.md confirms 5k=67.4% and 100k=52.4%; best_panels_index.md confirms 70k=55.14%. The 25k=59.2% intermediate point was not located. The 4-method green-on-real-correct comparison: AE-64f/AE-DGW/Phase-G-K2 metrics exist in agent_collab_overnight_export/final/cycle_0002_method_metrics.csv but no unified multimethod 'all green' table was located. Cite the per-checkpoint excess values (EXECUTIVE_README + best_panels_index) and locate/cite the 25k value and the multimethod table, or present only the confirmed endpoints."
+      },
+      {
+        "section": "07_results_redteam",
+        "claim": "Body-only masking on 106 usable frames; excludes D2 block-2 supine-pose subset; 11.7% combined pathological rate (50/56 usable per session minimum).",
+        "note": "No segmentation-ablation dataset, frame-filtering report, or pathological-rate metric found in any local eval output (same missing proper_segmentation/overnight_battery tree as the E2_seg/E3_seg numbers). Needs the underlying masking-analysis output file cited, or removal."
+      }
+    ],
+    "paper_vs_video": [
+      "DENOISING FRAMING: The video (and impl_truth safe-to-claim) frames Phase G as a DENOISER \u2014 'a genuine pair denoises cleanly = low residual.' The paper's abstract/intro says 'The verifier does NOT denoise; it reports the noise-prediction residual.' Both are defensible but the wording collides. impl_truth.json denoiser_resolution L515 explicitly says 'DO NOT say it never denoises the fake \u2014 keep the denoising framing.' The paper should align: it is an epsilon-prediction (denoising-diffusion) net used as a scoring function \u2014 it computes a noise-prediction residual at fixed timesteps and does not run the full reverse sampling loop. Avoid the bare phrase 'does not denoise', which contradicts the video's denoiser framing.",
+      "RECOVERY RANKING SCOPE: The video's 1-of-51 candidate ranking is a same-session, IN-SAMPLE (D2 train range [0,4194]) L1-distance retrieval using the EmissionPredictor e2_fp16 E_hat, on rows 1840/1860/1878 (impl_truth video-data facts; do_not_claim L551). If the paper's EXP 6 / ranking text presents 1-of-51 (or n=120 top-1=100%) as a held-out benchmark, it contradicts the video's explicitly in-sample, visualization-only framing. Keep both consistent: same-session in-sample L1 retrieval, NOT a held-out generalization test.",
+      "WITHIN-SESSION SCOPE OF THE HEADLINE: The video/impl_truth confine the AUROC=1.000 headline to within-session same-rig and route cross-session strictly to the Stage-0 100k verifiers. Several paper sections (01, 02, 11) blur the headline into a cross-session claim attributed to 'the verifier.' This is the same conflation as MUST-FIX item 1 and must be reconciled so paper and video tell the identical scope story.",
+      "SHUFFLED-E CONTROL NUMBERS: The video/impl_truth state the shuffled control collapses to AUROC ~0.5006 with delta_wrong ~7e-8 (D2 6.98e-8 / V10 1.39e-7), from shuffled/eval/summary.json. The paper's numbers match these. No contradiction found \u2014 flagged only to confirm the paper must keep these exact values (do not round delta_wrong to 0, and keep AUROC at 0.5006, not '0.50').",
+      "FORGER 'TARGET-CONDITIONAL' FRAMING: impl_truth do_not_claim L548 warns against saying the forger 'fails to encode the emission' \u2014 by 100k it IS target-conditional (fake_correct_vs_fake_shuffled ~0.99 D2 / 0.93 V10). The paper correctly reports the rising AUROC, but any prose calling F-A v1 a failure-to-encode forger would contradict the video's 'becomes target-conditional yet still separated at AUROC 1.0' framing. Ensure the paper says the verifier separates it from real DESPITE the forger learning E-coupling."
+    ],
+    "overall": {
+      "contradicted_count": 2,
+      "unsupported_count": 5,
+      "risk": "high",
+      "recommendation": "REVISE BEFORE PUBLICATION \u2014 not publishable as-is, but no evidence of fabricated core results. The headline within-session results (AUROC=1.000 correct-vs-wrong on D2 n=198 / V10 n=200, delta_wrong +0.0040/+0.0041, shuffled control 0.5006 / 7e-8, synthetic-positive 1.000, F-A v1 caught at AUROC=1.000 across all 4 checkpoints, 39.77M params, ControlNet-not-FiLM-on-E, 8-bit end-to-end, frame counts) are ALL verified directly against eval-output JSON and code \u2014 this part is solid and well-controlled. Two genuine CONTRADICTIONS must be fixed: (1) Sec 3.2 'no warm-up' vs code warmup=500 (and the paper self-contradicts Sec 09); (2) the cross-session AUROC=1.000 is silently attributed to 'the verifier' when it is a separate 100k-step Stage-0 model, not the canonical 25k Phase G run \u2014 this scope-blur is the single most serious issue and recurs in 01/02/03/11. Several BLOCKER-severity claims rest on eval outputs absent from the local mirror: the Mask R-CNN body/off-body segmentation table (E2_seg 0.009-0.538, E3_seg 1.000 \u2014 appears only in SESSION_HANDOFF prose; the proper_segmentation directory does not exist on disk), the 35/53-condition extended XOF-perturbation sweep (item_1 summary.json contains only correct/wrong/uncond/lag \u2014 no Type 1-6/octave/swap results), and EXP 6 n=120 ranking. These are likely real outputs that live on Lambda and were excluded from the mirror, but as written the paper cites numbers with no locatable backing and partly against the DO-NOT-CLAIM list. Note one FALSE-ALARM in the upstream per-section pass: the checkpoint-size 'CONTRADICTION' (456 vs 478 MB) is a MiB/MB confusion \u2014 the paper's 477,531,127 bytes is exactly correct. Action: fix the two contradictions, disambiguate every cross-session/cross-protocol attribution to the Stage-0 verifiers, and either attach the Lambda eval outputs for the segmentation/perturbation/EXP-6 tables or soften those claims. After that, the paper is publishable within its stated same-rig two-session scope."
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "model_tag": "ae_64_forced",
+  "ckpt_step": 25000,
+  "gate": {
+    "L_C": 0.023958295555785297,
+    "L_E": 0.017131414767354726,
+    "L_total": 0.04108971032314002,
+    "fraction_C": 0.583072875602459,
+    "fraction_E": 0.41692712439754104,
+    "dead_channels": 14,
+    "rank95": 4,
+    "effective_rank_fraction_pooled": 0.0625,
+    "PASS": true
+  },
+  "E2_seg_specific_lift_recon": 0.0003884566326530621,
+  "E2_seg_specific_lift_bnpc": 0.0007573341836734698,
+  "E2_seg_AUROC_CE_correct_recon": 0.04828022959183673,
+  "E2_seg_AUROC_CE_correct_bnpc": 0.03017378826530612
+}

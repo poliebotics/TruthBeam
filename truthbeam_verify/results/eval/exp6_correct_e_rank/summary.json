@@ -1,0 +1,23 @@
+{
+  "pooled": {
+    "n_frames": 120,
+    "mean_rank": 1.0,
+    "median_rank": 1.0,
+    "top1_acc": 1.0,
+    "top5_acc": 1.0
+  },
+  "D2": {
+    "n_frames": 60,
+    "mean_rank": 1.0,
+    "median_rank": 1.0,
+    "top1_acc": 1.0,
+    "top5_acc": 1.0
+  },
+  "V10": {
+    "n_frames": 60,
+    "mean_rank": 1.0,
+    "median_rank": 1.0,
+    "top1_acc": 1.0,
+    "top5_acc": 1.0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "overall_pass": true,
+  "c_only": false,
+  "verdict_text": "PHASE H USES E (PASS). target/(zero or shuffled) is distinguishable at AUROC \u2265 0.70 in both sessions. Phase H actually consumes the E channels for its decisions. Continue queue uninterrupted.",
+  "thresholds_used": {
+    "pass": 0.7,
+    "c_only": 0.55
+  },
+  "metrics": {
+    "D2": {
+      "n_frames": 100,
+      "mean_logit": {
+        "target": 4.8973046875,
+        "zero": 35.565,
+        "shuffled": -13.67421875,
+        "source": -13.67546875
+      },
+      "std_logit": {
+        "target": 3.555067439559606,
+        "zero": 0.8082542916681609,
+        "shuffled": 4.336876517126662,
+        "source": 3.9809966406579256
+      },
+      "auroc_target_vs_zero": 0.0,
+      "auroc_target_vs_shuffled": 1.0,
+      "auroc_target_vs_source": 0.9999999999999999,
+      "delta_target_minus_zero": -30.6676953125,
+      "delta_target_minus_shuffled": 18.5715234375,
+      "delta_target_minus_source": 18.5727734375,
+      "frac_target_gt_zero": 0.0,
+      "frac_target_gt_shuffled": 1.0,
+      "frac_target_gt_source": 1.0
+    },
+    "V10": {
+      "n_frames": 100,
+      "mean_logit": {
+        "target": 5.198291015625,
+        "zero": 35.75,
+        "shuffled": -14.730625,
+        "source": -13.946875
+      },
+      "std_logit": {
+        "target": 3.1595207607102154,
+        "zero": 0.7794228634059948,
+        "shuffled": 3.9685156919023266,
+        "source": 3.8684003779824807
+      },
+      "auroc_target_vs_zero": 0.0,
+      "auroc_target_vs_shuffled": 1.0,
+      "auroc_target_vs_source": 1.0,
+      "delta_target_minus_zero": -30.551708984375,
+      "delta_target_minus_shuffled": 19.928916015625,
+      "delta_target_minus_source": 19.145166015625,
+      "frac_target_gt_zero": 0.0,
+      "frac_target_gt_shuffled": 1.0,
+      "frac_target_gt_source": 1.0
+    }
+  },
+  "ckpt": "/path/to/poliebotics_phase_b/experiments/phase_h_supervised_baseline/checkpoints/step_00025000.pt",
+  "generated_utc": "2026-05-04T00:46:23Z"
+}

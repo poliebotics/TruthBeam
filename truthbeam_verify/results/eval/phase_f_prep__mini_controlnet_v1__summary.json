@@ -1,0 +1,69 @@
+{
+  "verdict": "PASS",
+  "max_steps": 3000,
+  "elapsed_sec": 3844.1,
+  "final_probe": {
+    "n_sources": 8,
+    "n_targets": 32,
+    "diversity_mean": 0.012503321748226881,
+    "diversity_min": 0.011998985894024372,
+    "diversity_max": 0.012971196323633194,
+    "cfa_delta_from_source_mean": 0.025604671471228357,
+    "visuals_per_source": [
+      {
+        "source_t": 4924,
+        "examples": [
+          {
+            "target_t": 4826,
+            "fake_mean": 0.11648073047399521,
+            "fake_std": 0.08006389439105988
+          },
+          {
+            "target_t": 4829,
+            "fake_mean": 0.11668213456869125,
+            "fake_std": 0.07949041575193405
+          },
+          {
+            "target_t": 4838,
+            "fake_mean": 0.11638016998767853,
+            "fake_std": 0.08013112843036652
+          },
+          {
+            "target_t": 4860,
+            "fake_mean": 0.11635597795248032,
+            "fake_std": 0.08002499490976334
+          }
+        ]
+      },
+      {
+        "source_t": 5053,
+        "examples": [
+          {
+            "target_t": 4826,
+            "fake_mean": 0.11828333139419556,
+            "fake_std": 0.08160985261201859
+          },
+          {
+            "target_t": 4829,
+            "fake_mean": 0.11869268119335175,
+            "fake_std": 0.08268149942159653
+          },
+          {
+            "target_t": 4838,
+            "fake_mean": 0.11846532672643661,
+            "fake_std": 0.08290141820907593
+          },
+          {
+            "target_t": 4860,
+            "fake_mean": 0.11829780787229538,
+            "fake_std": 0.08279235661029816
+          }
+        ]
+      }
+    ],
+    "step": 3000
+  },
+  "n_loss_history_entries": 120,
+  "n_probe_history_entries": 12,
+  "interpretation": "PASS: editor uses E_target \u2014 diversity grew over training. F-A as designed."
+}

@@ -1,0 +1,121 @@
+{
+  "generated_on": "lambda",
+  "ipfs_version": "0.32.1",
+  "add_flags": "--only-hash --recursive --cid-version=1 --raw-leaves --chunker=size-1048576",
+  "r2_bucket": "truthbeam",
+  "verify_note": "Each CID is reproducible: download the unit from r2:truthbeam/<dest>, run 'ipfs add --only-hash --recursive --cid-version=1 --raw-leaves --chunker=size-1048576 <unit>', confirm the CID matches, then pin. The recording sessions additionally carry generator_code_hash=154be9dd75e0586df456a7eae1528b7334a415f3a977a107c91c6b0751bfc540 committed into S_0; recompute with code/recording/verify/verify_generator_hash.py.",
+  "units": {
+    "sessions_d2": {
+      "cid": "bafybeicrssbic35534es3sbwyzhlw7reboh6wy75htmo53ke5mfsphkmwi",
+      "bytes": 249282572059,
+      "files": 17987
+    },
+    "sessions_v10": {
+      "cid": "bafybeier2sfcjrrgw7amne3lwogise6umyeyf6qgivgrmvx3to4vsdsbcm",
+      "bytes": 156873301986,
+      "files": 11279
+    },
+    "models": {
+      "cid": "bafybeihffzc7fn5q3u7tf3k5hqkcpaoozdnx7pdm2lw4fmfwkgfwjnzzpm",
+      "bytes": 8204853522,
+      "files": 30
+    },
+    "code_src_full": {
+      "cid": "bafybeiguoiy24zqup7pp7wkgjjnhoyojuzlabzwizuabgbrbejz4jgun3i",
+      "bytes": 15006523344,
+      "files": 59046
+    },
+    "evidence_paper_analyses": {
+      "cid": "bafybeibrnz5mmz53fz3vw7xpthvaiefm4j4h2yscv2bnhftgorrbjbnnre",
+      "bytes": 109846100174,
+      "files": 22084
+    },
+    "evidence_cross_session_ablation": {
+      "cid": "bafybeibs2xyyyevdnpy2a2rr4yipmpht3iyek6fnlzhpcmty7woydipecq",
+      "bytes": 5733053750,
+      "files": 75
+    },
+    "evidence_phase_e": {
+      "cid": "bafybeibpgty4iu355or6c2d27djkfyudwdc6rz7i3bjiw7ekcr4tvc3t5i",
+      "bytes": 30249778965,
+      "files": 540
+    },
+    "evidence_phase_g_verifier": {
+      "cid": "bafybeibfqaw4wtpzo46a767udltt3vupii66lttrlyiheeajjsffgf2z7a",
+      "bytes": 8123359908,
+      "files": 85
+    },
+    "evidence_phase_h_supervised_baseline": {
+      "cid": "bafybeid6ibcxgh2najibjoyqyth2qhryx57ufnzasfpf27krsnpkndvqba",
+      "bytes": 117777894,
+      "files": 30
+    },
+    "evidence_phase_f": {
+      "cid": "bafybeiebxm5p4uhh5nm5n2dfzpzykecawamlzwmmzhq6pm6lncplygmdmy",
+      "bytes": 21843709089,
+      "files": 72
+    },
+    "evidence_fa_v2": {
+      "cid": "bafybeifpfdgyycg6swe6bj3oonfpn7n3zhikoapjx3vr2znejaevogjvpy",
+      "bytes": 19057156055,
+      "files": 184
+    },
+    "evidence_stage_0_cross_verifier": {
+      "cid": "bafybeieomhoxmevp2rol4pvy2z6rzhtzmktzl6yjvdlfhcie7sahdgjvd4",
+      "bytes": 2181839,
+      "files": 55
+    },
+    "evidence_closure_package": {
+      "cid": "bafybeiavyfm7vqrvg6mbg5sc7p7jg73n34oodvjfyyy6n5aw6ns2atn7ye",
+      "bytes": 275665508,
+      "files": 55
+    }
+  },
+  "pinata_mirrors": {
+    "truth_beam_poliepals_trailer": "QmejyJWognSYn7UhygsHuQzkDK5vY4izU9SsCL785NsHCN",
+    "20241219_050046_TB_h5": "bafybeiaqbbacosf2evzxiezp4jlrbylgrhe7vw6bwfthuq74fh34bi27bq",
+    "20241219_050046": "bafybeibbapmogu2bro3ettoilge6bp5lic3u2mdohvbutgixnee463kmga",
+    "PolieBotics_mp4": "QmP8JDfeBCunq4VQ8f6XUbiLJK55dG9jLav7k5q2HpnmxS",
+    "PolieBotics": "QmQ2BTcVWBEZqL7pBJNsbfjc37AwT18byknVvPmmQwgWZa"
+  },
+  "videos": {
+    "PolieBotics.mp4": "QmP8JDfeBCunq4VQ8f6XUbiLJK55dG9jLav7k5q2HpnmxS",
+    "TruthBeam_Introduction.mp4": "QmbFg3dRqgyJBKBQJ1ung4uz5Z5tBfPq74chngqeoYgUyd",
+    "RealityTransform_OpenPose.mp4": "QmQKkUtjEVBpfFkFHjAdgJxti9WLxUa4JmfeUqk7Ek9d8b",
+    "RealityTransform_Deforum_1.mp4": "QmVBcc5nXeckLMrcucC9nR7b3qDfi7q9rjssKHF4Mwzsiy",
+    "RealityTransform_Deforum_2.mp4": "QmUNwZPaT9L9iTmZftdpCrQWwfNuJvh3Xgx4zWNkvQ6EHf"
+  },
+  "models_public": {
+    "models/verifier/model_final.pt": "QmPthdv3CvW2dyRRYJ7Aqgvwc5qN5D2ujLRVr8e1wWMoAY",
+    "models/fa_v1_forger/f_a_v1_step_00100000.pt": "QmZ97QmXWugpWJaCdaUaApht3Uf3RcGjMsNp86gFtpxbeP"
+  },
+  "dataset_examples": {
+    "sessions/d2/Recordings/frame_001336.raw": "QmaunW3VxzNs4z3oBD13PRSbkbABvroJGzWCX2knorKdUJ",
+    "sessions/d2/derived/Emissions/tile_001336.png": "QmbcUJWUmRb63rfqQAjE7aKNGhifRJ1JDVnkx5Lu3eEiMr"
+  },
+  "patent_filings": {
+    "_note": "Reality Kernel patent family, CIDv0 (== Pinata). Description + drawings per filing, each individually pinned. Full citation block, SHA-256s and BibTeX in reality_kernel/CITING.md.",
+    "WO2025-046153A2_Methods_and_Apparatus_for_Projector_Camera_Systems.pdf": "QmbguWqss4tC6CP3cBsaFrDp6DifgqkEpHg65cPfxSV3XB",
+    "PIGMIE_Filing1_Description_v0_38.pdf": "QmNwUZiiFMcVhrDcMsZ7U5WTKtgTmnF8FiE4hfGZUKQTbb",
+    "PIGMIE_Filing1_Drawings_v0_38.pdf": "QmbDv3YRaLdMNcCJaX81MoaSxBh5ukFxHypBQFCNXQszvp",
+    "PIGMIE_Filing2_Description_v42.pdf": "QmZuLRUTCBXEDb2SPr91Hi5qCay6EpeXCS13CmLHmUS6h6",
+    "PIGMIE_Filing2_Drawings_v42.pdf": "QmPS8bWrRRpDMHbVPbScRcihA6ixRtNyYqqHKtgDMqq89e"
+  },
+  "repos_snapshot": {
+    "_note": "v0 of `git archive HEAD | ipfs add -r` (no .git); recompute from the release tag at push, since the manifest's own presence changes the tree",
+    "truthbeam_public": {
+      "cid": "QmZpJYSVyFEgmxu1YkWtP2LRvacp8TbzPxKCtbLgXQcAFc",
+      "commit": "05cf287"
+    },
+    "poliebotics_work": {
+      "cid": "QmU8ZH9t8d6cvFWypQDzhqAnmYFRmVQg9PHsued6tMa6ms",
+      "commit": "b3c658c"
+    },
+    "poliepals_repo": {
+      "cid": "QmSEZNDrb78zBD2wDv9mu7P1KtdKqn4AksVhzpWYi2nkp4",
+      "commit": "75584c6"
+    }
+  },
+  "verify_note_videos": "videos/models/examples are CIDv0 (default `ipfs add`, == Pinata). Verify any file: `ipfs add --only-hash -Q <file>` must equal the listed CID. All videos/models/examples listed here are PINNED on Pinata \u2014 retrievable via any IPFS gateway by CID.",
+  "pinned_on_pinata": true
+}

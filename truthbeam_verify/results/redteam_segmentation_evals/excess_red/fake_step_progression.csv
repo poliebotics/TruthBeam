@@ -1,0 +1,10 @@
+attacker_step,mean_fake_excess_red_pct
+5000,67.37
+25000,59.19
+70000,55.14
+100000,52.35
+# Mean synthetic excess-red area (percent of pixels above the full-corpus
+# p99.9 floor at margin 0.5) over the 9,735-frame corpus, scoring the same
+# captures against F-A v1 forgeries from successive training checkpoints.
+# Source: substrate-verification visualization run (cycle_0007 fake-step
+# progression panel, 2026-05-09); quoted in whitepaper §7 as 67.4/59.2/55.1/52.4.

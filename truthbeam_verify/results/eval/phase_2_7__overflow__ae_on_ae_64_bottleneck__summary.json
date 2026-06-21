@@ -1,0 +1,7 @@
+{
+  "model_tag": "ae_on_ae_64_bottleneck",
+  "v3_step": 15000,
+  "ae_64_step": 50000,
+  "n_eval_cells": 3180,
+  "mean_E2_seg_specific_lift": 0.004103443877551021
+}

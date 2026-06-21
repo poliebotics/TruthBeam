@@ -1,0 +1,49 @@
+{
+  "policy_version": "operator_corrected_2026-05-05",
+  "policy_text": "Combined pathological rate <10% \u2192 PROCEED clean; 10\u201325% \u2192 PROCEED with caveat; >25% \u2192 STOP. Per-session minimum \u226540 usable frames.",
+  "total_frames": 120,
+  "by_session_classification": {
+    "D2": {
+      "clean": 45,
+      "pathological_no_mask": 7,
+      "fragmented_resolved": 5,
+      "pathological_too_small": 3
+    },
+    "V10": {
+      "pathological_no_mask": 3,
+      "clean": 54,
+      "fragmented_resolved": 2,
+      "pathological_too_small": 1
+    }
+  },
+  "final_n_per_session": {
+    "D2": 50,
+    "V10": 56
+  },
+  "combined_pathological_count": 14,
+  "combined_pathological_rate_pct": 11.6667,
+  "per_session_min": 50,
+  "dropped_per_session": {
+    "D2": [
+      1396,
+      1430,
+      2860,
+      2877,
+      2894,
+      2945,
+      2962,
+      2996,
+      4341,
+      4409
+    ],
+    "V10": [
+      1140,
+      1153,
+      1191,
+      1197
+    ]
+  },
+  "gate": "PROCEED_WITH_CAVEAT",
+  "caveat": "D2 block 2 (rows 2796-3196) shows elevated pathological rate (30%) \u2014 likely Mask R-CNN under-performs on supine/horizontal yoga poses (less represented in COCO training). V10 block 2 (rows 2345-2595) shows 0% pathological. Scope of proper-segmentation analysis excludes the D2 block 2 supine-pose subset.",
+  "_supersedes": "earlier phase2_gate.json that hit a spec error (\u2265100 per session unreachable since subset is 60 per session by construction)"
+}

@@ -19,7 +19,7 @@
   "claims": [
     {
       "id": "auroc",
-      "claim": "AUROC = 1.0000 separating real captures from F-A v1 forged captures (Path A — a logistic-regression probe on the Stage-0 diffusion-verifier scores).",
+      "claim": "AUROC = 1.0000 separating correct vs wrong emissions (Path A).",
       "tool": "code",
       "size": "~2 MB (scores)",
       "how": "bash download.sh scores ; then run code/verifier/scripts/decomposition_part_1.py",
