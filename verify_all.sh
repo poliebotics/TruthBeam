@@ -30,7 +30,7 @@ echo " gateway: $GATEWAY"
 echo "=================================================================="
 mkdir -p "$WORK"; cd "$WORK"
 
-echo; echo "[0/3] isolated Python environment..."
+echo; echo "[0/4] isolated Python environment..."
 python3 -m venv .venv
 # shellcheck disable=SC1091
 . .venv/bin/activate
@@ -38,7 +38,7 @@ pip install -q --upgrade pip >/dev/null
 pip install -q numpy scikit-learn py_ecc blake3 >/dev/null
 echo "      deps: numpy, scikit-learn, py_ecc, blake3 installed."
 
-echo; echo "[1/3] Path A — recompute the headline AUROC from public scores..."
+echo; echo "[1/4] Path A — recompute the headline AUROC from public scores..."
 for ck in 00005000 00025000 00070000 00100000; do
   for s in d2 v10; do
     mkdir -p "stage_0_eval/step_$ck"
@@ -49,7 +49,7 @@ done
 python3 "$REPO/code/verifier/scripts/decomposition_part_1.py" \
   --stage-0-root stage_0_eval --out out --seed 0 | tee pathA.log
 
-echo; echo "[2/3] Temporal — fetch session metadata, verify RSK + drand..."
+echo; echo "[2/4] Temporal — fetch session metadata, verify RSK + drand..."
 for s in d2 v10; do
   mkdir -p "$s"
   for f in manifest.json anchor_txs.csv chain_log.csv; do

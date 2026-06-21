@@ -93,7 +93,7 @@ Verification: offline (structural — reconstructable per pulse).
 > **Update (2026-06-20):** for the two released sessions (D2, V10) these online time-bound
 > checks have been performed and pass — RSK mainnet anchor blocks and the final-root tx confirmed
 > on-chain, drand quicknet rounds BLS-verified, commit rate ~2.5 Hz. See
-> [`../../TEMPORAL_VERIFICATION.md`](../../TEMPORAL_VERIFICATION.md).
+> [`../../../TEMPORAL_VERIFICATION.md`](../../../TEMPORAL_VERIFICATION.md).
 
 
 ### RSK timestamp-corroborated session-open time
