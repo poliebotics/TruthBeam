@@ -1,0 +1,107 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Motivation: tamper-evident recording}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The emit / detect / transform loop}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Verification by diffusion residual}{4}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Scope and honest limitations}{4}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Contributions}{5}{subsection.1.5}%
+\contentsline {section}{\numberline {2}System Overview and Threat Model}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}System overview: a chain-coupled projector--camera loop}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}What a verifier observes}{6}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Threat model}{7}{subsection.2.3}%
+\contentsline {paragraph}{Forge-under-known-$E_{\mathrm {target}}$.}{7}{section*.3}%
+\contentsline {paragraph}{Tamper.}{7}{section*.4}%
+\contentsline {paragraph}{Within-attack contrasts used for evaluation.}{7}{section*.5}%
+\contentsline {subsection}{\numberline {2.4}Trust assumptions}{8}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}What ``verification'' means here}{8}{subsection.2.5}%
+\contentsline {section}{\numberline {3}The Truth Beam Protocol \& Cryptographic Chain}{9}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Overview and notation}{9}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Per-channel BLAKE3-XOF seed derivation}{9}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Per-channel 43{,}110-byte expansion into fBm octaves}{9}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Bit-exact emission-tile rendering}{10}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Chain-state evolution and tamper-evidence}{10}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Protocol versions: v9 and v10}{11}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.7}drand beacon binding}{11}{subsection.3.7}%
+\contentsline {subsection}{\numberline {3.8}8-bit end-to-end data path}{11}{subsection.3.8}%
+\contentsline {subsection}{\numberline {3.9}Frame-to-chain offset convention}{12}{subsection.3.9}%
+\contentsline {subsection}{\numberline {3.10}Chain-log schema}{12}{subsection.3.10}%
+\contentsline {section}{\numberline {4}Capture and Emission Pipeline}{13}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Sensor and bit depth}{13}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Raw frame format and color filter array}{13}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Emission tiles and projection}{14}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Commit rate and the \texttt {capture\_frame\_id} stride artifact}{14}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Normalization and black-level handling}{14}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Dataset inventory}{14}{subsection.4.6}%
+\contentsline {paragraph}{Scope and privacy.}{15}{section*.8}%
+\contentsline {section}{\numberline {5}Verification Methodology}{15}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Network architecture}{16}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}ControlNet-style emission conditioning}{16}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Diffusion objective and forward process}{16}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Training corpus and optimisation}{17}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Residual-energy scoring}{17}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}The shuffled-E control}{18}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}Unconditional reference and multi-method cross-checks}{19}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Scope and limitations of the methodology}{20}{subsection.5.8}%
+\contentsline {section}{\numberline {6}Results I: Learnable Chain-Coupling, Verifier Accuracy and Generalization}{20}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Headline verifier accuracy}{21}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}The coupling signal is real, not an emission-statistics or architecture artifact}{22}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Frame-level separability on the full corpus}{22}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Same-rig cross-session and cross-protocol generalization}{23}{subsection.6.4}%
+\contentsline {paragraph}{Scope of the generalization claim.}{23}{section*.17}%
+\contentsline {subsection}{\numberline {6.5}Summary}{25}{subsection.6.5}%
+\contentsline {section}{\numberline {7}Results II: Adversarial Red-Team, Off-Body Coupling, and the Supervised Baseline}{25}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Stage 0: a learned forger (F-A v1) is caught at every checkpoint}{26}{subsection.7.1}%
+\contentsline {paragraph}{Probe saturation and decomposition deferral.}{28}{section*.18}%
+\contentsline {paragraph}{Cross-verifier robustness.}{28}{section*.19}%
+\contentsline {subsection}{\numberline {7.2}Attacker non-convergence under continued training}{28}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Where the discriminative signal lives: off-body, not on-body}{28}{subsection.7.3}%
+\contentsline {paragraph}{The variance-box reading and its failure.}{28}{section*.21}%
+\contentsline {paragraph}{The proper-segmentation reading inverts the conclusion.}{29}{section*.22}%
+\contentsline {paragraph}{Interpretation: likelihood overspread, not ``fakes look more real.''}{29}{section*.24}%
+\contentsline {paragraph}{The body signal is not absent --- it is at low spatial frequency.}{30}{section*.25}%
+\contentsline {paragraph}{The relative-comparison test is unaffected and remains load-bearing.}{30}{section*.26}%
+\contentsline {paragraph}{Multi-method agreement on genuine captures.}{31}{section*.27}%
+\contentsline {subsection}{\numberline {7.4}A supervised baseline (Phase H): coarse-aware, fine-blind}{31}{subsection.7.4}%
+\contentsline {paragraph}{It is emission-aware for coarse contrasts.}{31}{section*.28}%
+\contentsline {paragraph}{It is blind to fine XOF perturbations.}{31}{section*.29}%
+\contentsline {paragraph}{The blindness is partly a label-locking artifact.}{31}{section*.30}%
+\contentsline {subsection}{\numberline {7.5}Item 1: fine-grained perturbation sensitivity of the diffusion verifier}{31}{subsection.7.5}%
+\contentsline {section}{\numberline {8}Discussion: Scope, Limitations \& Future Work}{32}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Scope: same-rig, two-session, single-subject}{32}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}The strong adaptive attacker is future work}{33}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Supervised baseline blindness to fine perturbations}{34}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Emissions are recoverable from the chain hash, and why this needs a bit-exact renderer}{35}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Privacy and consent of human-subject captures}{35}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}Future work}{35}{subsection.8.6}%
+\contentsline {paragraph}{Strong adaptive red-team (F-A v2).}{36}{section*.31}%
+\contentsline {paragraph}{Cross-rig and cross-subject studies.}{36}{section*.32}%
+\contentsline {paragraph}{Toward real-time verification.}{36}{section*.33}%
+\contentsline {section}{\numberline {9}Related Work}{36}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Structured light and active illumination}{37}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Media provenance and cryptographic content signing}{37}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Diffusion models as anomaly and likelihood detectors}{38}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Conditioning the verifier on the emission}{38}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Verifiable distributed randomness}{39}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}Positioning}{39}{subsection.9.6}%
+\contentsline {section}{\numberline {10}Data, Code \& Reproducibility}{39}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Scope of the release}{39}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Raw capture frames}{40}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Chain logs}{40}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Rendered emission tiles}{40}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}Derived analysis products}{41}{subsection.10.5}%
+\contentsline {subsection}{\numberline {10.6}Verifier checkpoints}{41}{subsection.10.6}%
+\contentsline {subsection}{\numberline {10.7}Source code}{41}{subsection.10.7}%
+\contentsline {subsection}{\numberline {10.8}Reproducibility entry points}{41}{subsection.10.8}%
+\contentsline {subsection}{\numberline {10.9}Human-subject captures and privacy}{42}{subsection.10.9}%
+\contentsline {subsection}{\numberline {10.10}License}{42}{subsection.10.10}%
+\contentsline {section}{\numberline {11}Conclusion}{42}{section.11}%
+\contentsline {subsection}{\numberline {11.1}What is established}{43}{subsection.11.1}%
+\contentsline {paragraph}{A near-perfect chain-coupling verifier.}{43}{section*.34}%
+\contentsline {paragraph}{Same-rig cross-session and cross-protocol generalization.}{43}{section*.35}%
+\contentsline {paragraph}{F-A v1 is detected under the released evaluation.}{43}{section*.36}%
+\contentsline {paragraph}{The discriminative coupling is localized off-body.}{43}{section*.37}%
+\contentsline {paragraph}{Scoring-function and sensitivity structure.}{44}{section*.38}%
+\contentsline {subsection}{\numberline {11.2}What remains open}{44}{subsection.11.2}%
+\contentsline {paragraph}{The adaptive attacker.}{44}{section*.39}%
+\contentsline {paragraph}{Cross-rig generalization.}{44}{section*.40}%
+\contentsline {paragraph}{Calibration and protocol details.}{44}{section*.41}%
+\contentsline {subsection}{\numberline {11.3}Relation to the patent}{44}{subsection.11.3}%

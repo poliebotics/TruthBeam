@@ -1,0 +1,119 @@
+\begin{thebibliography}{10}
+
+\bibitem{c2pa}
+{Coalition for Content Provenance and Authenticity}.
+\newblock {C2PA} technical specification.
+\newblock \url{https://c2pa.org/specifications/}, 2024.
+
+\bibitem{geng2011}
+Jason Geng.
+\newblock Structured-light {3D} surface imaging: a tutorial.
+\newblock {\em Advances in Optics and Photonics}, 3(2):128--160, 2011.
+
+\bibitem{gerstner2022active}
+Candice~R. Gerstner and Hany Farid.
+\newblock Detecting real-time deep-fake videos using active illumination.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR) Workshops}, pages 53--60, 2022.
+
+\bibitem{he2017maskrcnn}
+Kaiming He, Georgia Gkioxari, Piotr Doll{\'a}r, and Ross Girshick.
+\newblock Mask {R-CNN}.
+\newblock In {\em Proceedings of the IEEE International Conference on Computer
+  Vision (ICCV)}, 2017.
+
+\bibitem{ho2020ddpm}
+Jonathan Ho, Ajay Jain, and Pieter Abbeel.
+\newblock Denoising diffusion probabilistic models.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2020.
+
+\bibitem{patent2025}
+Cathal~Ryan Hynes.
+\newblock Methods and apparatus for projector camera systems.
+\newblock International Patent Application WO 2025/046153 A2
+  (PCT/EP2024/080780), March 2025.
+\newblock Priority IE 2023/0359 (30 Aug 2023), IE 2023/0365 (31 Aug 2023);
+  filed 30 Oct 2024; published 6 Mar 2025.
+
+\bibitem{liu2022convnext}
+Zhuang Liu, Hanzi Mao, Chao-Yuan Wu, Christoph Feichtenhofer, Trevor Darrell,
+  and Saining Xie.
+\newblock A {ConvNet} for the 2020s.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, 2022.
+
+\bibitem{loshchilov2019adamw}
+Ilya Loshchilov and Frank Hutter.
+\newblock Decoupled weight decay regularization.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2019.
+
+\bibitem{lukas2006prnu}
+Jan Luk{\'a}{\v s}, Jessica Fridrich, and Miroslav Goljan.
+\newblock Digital camera identification from sensor pattern noise.
+\newblock {\em IEEE Transactions on Information Forensics and Security},
+  1(2):205--214, 2006.
+
+\bibitem{mittal2024gotcha}
+Govind Mittal, Chinmay Hegde, and Nasir Memon.
+\newblock {GOTCHA}: Real-time video deepfake detection via challenge-response.
+\newblock In {\em Proceedings of the IEEE European Symposium on Security and
+  Privacy (EuroS\&P)}, 2024.
+
+\bibitem{nalisnick2019}
+Eric Nalisnick, Akihiro Matsukawa, Yee~Whye Teh, Dilan Gorur, and Balaji
+  Lakshminarayanan.
+\newblock Do deep generative models know what they don't know?
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2019.
+
+\bibitem{nicholdhariwal2021}
+Alexander~Quinn Nichol and Prafulla Dhariwal.
+\newblock Improved denoising diffusion probabilistic models.
+\newblock In {\em Proceedings of the International Conference on Machine
+  Learning (ICML)}, 2021.
+
+\bibitem{blake3}
+Jack O'Connor, Jean-Philippe Aumasson, Samuel Neves, and Zooko Wilcox-O'Hearn.
+\newblock {BLAKE3}: One function, fast everywhere.
+\newblock Specification and reference implementation, 2020.
+\newblock \url{https://github.com/BLAKE3-team/BLAKE3}.
+
+\bibitem{pappu2002}
+Ravikanth Pappu, Ben Recht, Jason Taylor, and Neil Gershenfeld.
+\newblock Physical one-way functions.
+\newblock {\em Science}, 297(5589):2026--2030, 2002.
+
+\bibitem{perez2018film}
+Ethan Perez, Florian Strub, Harm de~Vries, Vincent Dumoulin, and Aaron
+  Courville.
+\newblock {FiLM}: Visual reasoning with a general conditioning layer.
+\newblock In {\em Proceedings of the AAAI Conference on Artificial
+  Intelligence}, 2018.
+
+\bibitem{drandbeacon}
+{The drand contributors / League of Entropy}.
+\newblock drand: A distributed randomness beacon daemon.
+\newblock \url{https://drand.love}, 2020.
+
+\bibitem{yu2024diffforensics}
+Zeqin Yu, Jiangqun Ni, Yuzhen Lin, Haoyi Deng, and Bin Li.
+\newblock {DiffForensics}: Leveraging diffusion prior to image forgery
+  detection and localization.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, pages 12765--12774, 2024.
+
+\bibitem{zhang2023controlnet}
+Lvmin Zhang, Anyi Rao, and Maneesh Agrawala.
+\newblock Adding conditional control to text-to-image diffusion models.
+\newblock In {\em Proceedings of the IEEE/CVF International Conference on
+  Computer Vision (ICCV)}, 2023.
+
+\bibitem{zheng2020edpuf}
+Yue Zheng, Xiaojin Zhao, Takashi Sato, Yuan Cao, and Chip-Hong Chang.
+\newblock {Ed-PUF}: Event-driven physical unclonable function for camera
+  authentication in reactive monitoring system.
+\newblock {\em IEEE Transactions on Information Forensics and Security}, 2020.
+
+\end{thebibliography}

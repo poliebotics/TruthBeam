@@ -1,0 +1,359 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{patent2025}
+\citation{blake3}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{3}{Introduction}{section.1}{}}
+\newlabel{sec:intro@cref}{{[section][1][]1}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation: tamper-evident recording}{3}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}The emit / detect / transform loop}{3}{subsection.1.2}\protected@file@percent }
+\citation{drandbeacon}
+\citation{zhang2023controlnet}
+\citation{nicholdhariwal2021}
+\citation{ho2020ddpm}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Verification by diffusion residual}{4}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Scope and honest limitations}{4}{subsection.1.4}\protected@file@percent }
+\citation{he2017maskrcnn}
+\citation{nalisnick2019}
+\citation{blake3}
+\citation{patent2025}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Contributions}{5}{subsection.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}System Overview and Threat Model}{5}{section.2}\protected@file@percent }
+\newlabel{sec:system_threat}{{2}{5}{System Overview and Threat Model}{section.2}{}}
+\newlabel{sec:system_threat@cref}{{[section][2][]2}{[1][5][]5}{}{}{}}
+\citation{drandbeacon}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}System overview: a chain-coupled projector--camera loop}{6}{subsection.2.1}\protected@file@percent }
+\newlabel{sec:system_threat:overview}{{2.1}{6}{System overview: a chain-coupled projector--camera loop}{subsection.2.1}{}}
+\newlabel{sec:system_threat:overview@cref}{{[subsection][1][2]2.1}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}What a verifier observes}{6}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:system_threat:observable}{{2.2}{6}{What a verifier observes}{subsection.2.2}{}}
+\newlabel{sec:system_threat:observable@cref}{{[subsection][2][2]2.2}{[1][6][]6}{}{}{}}
+\citation{zhang2023controlnet}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces System overview and per-frame decision. Six audited-safe high-signal captures (three D2 yoga, three V10), each shown as a triple: the raw camera capture $C$, the emitted chain-coupled pattern $E$ that was projected, and the substrate-verification residual map. The verification map answers one question per frame---is this capture consistent with the recorded chain-coupled emission? Green indicates consistency; red indicates an anomalous (un-coupled) region. Calibrated against real-correct $E$ frames per session; green where the robust $z$ lies below threshold, red above; the excess panel is $z_{\mathrm  {two}}$ minus the per-pixel p99.9 floor at margin~0.5; $\sigma =0.0$ (paper detail). Frames are drawn from the \num {9733} body-safe pool ($\text  {body\_red} < 0.5\%$); no manual body suppression is applied.}}{7}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:overview}{{1}{7}{System overview and per-frame decision. Six audited-safe high-signal captures (three D2 yoga, three V10), each shown as a triple: the raw camera capture $C$, the emitted chain-coupled pattern $E$ that was projected, and the substrate-verification residual map. The verification map answers one question per frame---is this capture consistent with the recorded chain-coupled emission? Green indicates consistency; red indicates an anomalous (un-coupled) region. Calibrated against real-correct $E$ frames per session; green where the robust $z$ lies below threshold, red above; the excess panel is $z_{\mathrm {two}}$ minus the per-pixel p99.9 floor at margin~0.5; $\sigma =0.0$ (paper detail). Frames are drawn from the \num {9733} body-safe pool ($\text {body\_red} < 0.5\%$); no manual body suppression is applied}{figure.caption.2}{}}
+\newlabel{fig:overview@cref}{{[figure][1][]1}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Threat model}{7}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:system_threat:threat}{{2.3}{7}{Threat model}{subsection.2.3}{}}
+\newlabel{sec:system_threat:threat@cref}{{[subsection][3][2]2.3}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Forge-under-known-$E_{\mathrm  {target}}$.}{7}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tamper.}{7}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Within-attack contrasts used for evaluation.}{7}{section*.5}\protected@file@percent }
+\citation{patent2025}
+\citation{blake3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Trust assumptions}{8}{subsection.2.4}\protected@file@percent }
+\newlabel{sec:system_threat:trust}{{2.4}{8}{Trust assumptions}{subsection.2.4}{}}
+\newlabel{sec:system_threat:trust@cref}{{[subsection][4][2]2.4}{[1][7][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}What ``verification'' means here}{8}{subsection.2.5}\protected@file@percent }
+\newlabel{sec:system_threat:verification}{{2.5}{8}{What ``verification'' means here}{subsection.2.5}{}}
+\newlabel{sec:system_threat:verification@cref}{{[subsection][5][2]2.5}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}The Truth Beam Protocol \& Cryptographic Chain}{9}{section.3}\protected@file@percent }
+\newlabel{sec:protocol_chain}{{3}{9}{The Truth Beam Protocol \& Cryptographic Chain}{section.3}{}}
+\newlabel{sec:protocol_chain@cref}{{[section][3][]3}{[1][8][]9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Overview and notation}{9}{subsection.3.1}\protected@file@percent }
+\newlabel{subsec:pc_overview}{{3.1}{9}{Overview and notation}{subsection.3.1}{}}
+\newlabel{subsec:pc_overview@cref}{{[subsection][1][3]3.1}{[1][9][]9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Per-channel BLAKE3-XOF seed derivation}{9}{subsection.3.2}\protected@file@percent }
+\newlabel{subsec:pc_seed}{{3.2}{9}{Per-channel BLAKE3-XOF seed derivation}{subsection.3.2}{}}
+\newlabel{subsec:pc_seed@cref}{{[subsection][2][3]3.2}{[1][9][]9}{}{}{}}
+\newlabel{eq:pc_seed}{{1}{9}{Per-channel BLAKE3-XOF seed derivation}{equation.1}{}}
+\newlabel{eq:pc_seed@cref}{{[equation][1][]1}{[1][9][]9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Per-channel 43{,}110-byte expansion into fBm octaves}{9}{subsection.3.3}\protected@file@percent }
+\newlabel{subsec:pc_octaves}{{3.3}{9}{Per-channel 43{,}110-byte expansion into fBm octaves}{subsection.3.3}{}}
+\newlabel{subsec:pc_octaves@cref}{{[subsection][3][3]3.3}{[1][9][]9}{}{}{}}
+\newlabel{eq:pc_octaves}{{2}{9}{Per-channel 43{,}110-byte expansion into fBm octaves}{equation.2}{}}
+\newlabel{eq:pc_octaves@cref}{{[equation][2][]2}{[1][9][]9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Bit-exact emission-tile rendering}{10}{subsection.3.4}\protected@file@percent }
+\newlabel{subsec:pc_render}{{3.4}{10}{Bit-exact emission-tile rendering}{subsection.3.4}{}}
+\newlabel{subsec:pc_render@cref}{{[subsection][4][3]3.4}{[1][10][]10}{}{}{}}
+\newlabel{eq:pc_render}{{3}{10}{Bit-exact emission-tile rendering}{equation.3}{}}
+\newlabel{eq:pc_render@cref}{{[equation][3][]3}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Chain-state evolution and tamper-evidence}{10}{subsection.3.5}\protected@file@percent }
+\newlabel{subsec:pc_chain}{{3.5}{10}{Chain-state evolution and tamper-evidence}{subsection.3.5}{}}
+\newlabel{subsec:pc_chain@cref}{{[subsection][5][3]3.5}{[1][10][]10}{}{}{}}
+\newlabel{eq:pc_v9}{{4}{10}{Chain-state evolution and tamper-evidence}{equation.4}{}}
+\newlabel{eq:pc_v9@cref}{{[equation][4][]4}{[1][10][]10}{}{}{}}
+\citation{drandbeacon}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Protocol versions: v9 and v10}{11}{subsection.3.6}\protected@file@percent }
+\newlabel{subsec:pc_versions}{{3.6}{11}{Protocol versions: v9 and v10}{subsection.3.6}{}}
+\newlabel{subsec:pc_versions@cref}{{[subsection][6][3]3.6}{[1][11][]11}{}{}{}}
+\newlabel{eq:pc_v10}{{5}{11}{Protocol versions: v9 and v10}{equation.5}{}}
+\newlabel{eq:pc_v10@cref}{{[equation][5][]5}{[1][11][]11}{}{}{}}
+\newlabel{eq:pc_airoot}{{6}{11}{Protocol versions: v9 and v10}{equation.6}{}}
+\newlabel{eq:pc_airoot@cref}{{[equation][6][]6}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}drand beacon binding}{11}{subsection.3.7}\protected@file@percent }
+\newlabel{subsec:pc_drand}{{3.7}{11}{drand beacon binding}{subsection.3.7}{}}
+\newlabel{subsec:pc_drand@cref}{{[subsection][7][3]3.7}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}8-bit end-to-end data path}{11}{subsection.3.8}\protected@file@percent }
+\newlabel{subsec:pc_8bit}{{3.8}{11}{8-bit end-to-end data path}{subsection.3.8}{}}
+\newlabel{subsec:pc_8bit@cref}{{[subsection][8][3]3.8}{[1][11][]11}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Chain-log schema. The first 13 columns are common to v9 (D2) and v10 (V10); the final two columns (marked v10) are present only in the v10 log. One comment line (\texttt  {\# session\_iso\_utc=...}) and one header row precede the records.}}{12}{table.caption.6}\protected@file@percent }
+\newlabel{tab:pc_chainlog}{{1}{12}{Chain-log schema. The first 13 columns are common to v9 (D2) and v10 (V10); the final two columns (marked v10) are present only in the v10 log. One comment line (\texttt {\# session\_iso\_utc=...}) and one header row precede the records}{table.caption.6}{}}
+\newlabel{tab:pc_chainlog@cref}{{[table][1][]1}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9}Frame-to-chain offset convention}{12}{subsection.3.9}\protected@file@percent }
+\newlabel{subsec:pc_offset}{{3.9}{12}{Frame-to-chain offset convention}{subsection.3.9}{}}
+\newlabel{subsec:pc_offset@cref}{{[subsection][9][3]3.9}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.10}Chain-log schema}{12}{subsection.3.10}\protected@file@percent }
+\newlabel{subsec:pc_schema}{{3.10}{12}{Chain-log schema}{subsection.3.10}{}}
+\newlabel{subsec:pc_schema@cref}{{[subsection][10][3]3.10}{[1][12][]12}{}{}{}}
+\citation{blake3}
+\citation{patent2025}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Capture and Emission Pipeline}{13}{section.4}\protected@file@percent }
+\newlabel{sec:hardware}{{4}{13}{Capture and Emission Pipeline}{section.4}{}}
+\newlabel{sec:hardware@cref}{{[section][4][]4}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Sensor and bit depth}{13}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:hardware:sensor}{{4.1}{13}{Sensor and bit depth}{subsection.4.1}{}}
+\newlabel{sec:hardware:sensor@cref}{{[subsection][1][4]4.1}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Raw frame format and color filter array}{13}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:hardware:raw}{{4.2}{13}{Raw frame format and color filter array}{subsection.4.2}{}}
+\newlabel{sec:hardware:raw@cref}{{[subsection][2][4]4.2}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Emission tiles and projection}{14}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:hardware:emission}{{4.3}{14}{Emission tiles and projection}{subsection.4.3}{}}
+\newlabel{sec:hardware:emission@cref}{{[subsection][3][4]4.3}{[1][13][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Commit rate and the \texttt  {capture\_frame\_id} stride artifact}{14}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:hardware:rate}{{4.4}{14}{Commit rate and the \texttt {capture\_frame\_id} stride artifact}{subsection.4.4}{}}
+\newlabel{sec:hardware:rate@cref}{{[subsection][4][4]4.4}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Normalization and black-level handling}{14}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:hardware:norm}{{4.5}{14}{Normalization and black-level handling}{subsection.4.5}{}}
+\newlabel{sec:hardware:norm@cref}{{[subsection][5][4]4.5}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Dataset inventory}{14}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:hardware:dataset}{{4.6}{14}{Dataset inventory}{subsection.4.6}{}}
+\newlabel{sec:hardware:dataset@cref}{{[subsection][6][4]4.6}{[1][14][]14}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Per-session capture inventory. Raw frame size is exact ($4600\times 5320\times \SI {1}{byte}$); raw totals are decimal gigabytes ($10^9$\,B). Both sessions are complete: one raw capture and one emission tile per chain row.}}{15}{table.caption.7}\protected@file@percent }
+\newlabel{tab:hw_inventory}{{2}{15}{Per-session capture inventory. Raw frame size is exact ($4600\times 5320\times \SI {1}{byte}$); raw totals are decimal gigabytes ($10^9$\,B). Both sessions are complete: one raw capture and one emission tile per chain row}{table.caption.7}{}}
+\newlabel{tab:hw_inventory@cref}{{[table][2][]2}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Scope and privacy.}{15}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Verification Methodology}{15}{section.5}\protected@file@percent }
+\newlabel{sec:verifier_method}{{5}{15}{Verification Methodology}{section.5}{}}
+\newlabel{sec:verifier_method@cref}{{[section][5][]5}{[1][15][]15}{}{}{}}
+\citation{zhang2023controlnet}
+\citation{ho2020ddpm}
+\citation{nicholdhariwal2021}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Network architecture}{16}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}ControlNet-style emission conditioning}{16}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Diffusion objective and forward process}{16}{subsection.5.3}\protected@file@percent }
+\citation{loshchilov2019adamw}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Training corpus and optimisation}{17}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Residual-energy scoring}{17}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Distributional evidence for chain-coupling. Per-pixel $z_{\text  {two}}$ log-density across \num {9735} frames for four conditions: real-correct (baseline), real-shuffled $E$, synthetic $C$ at training step 5k, and step 100k. Real-correct mass concentrates at $z<5$; shuffled and synthetic conditions carry heavy right tails. The discriminative substrate signal is the rightward-shifted tail above the p99.9 percentile. $z_{\text  {two}}$ is a robust $z$-score against the per-session correct-$E$ reference; percentile markers (p95, p99.5, p99.9) are drawn from the full-\num {9735} corpus.}}{18}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:zhist}{{2}{18}{Distributional evidence for chain-coupling. Per-pixel $z_{\text {two}}$ log-density across \num {9735} frames for four conditions: real-correct (baseline), real-shuffled $E$, synthetic $C$ at training step 5k, and step 100k. Real-correct mass concentrates at $z<5$; shuffled and synthetic conditions carry heavy right tails. The discriminative substrate signal is the rightward-shifted tail above the p99.9 percentile. $z_{\text {two}}$ is a robust $z$-score against the per-session correct-$E$ reference; percentile markers (p95, p99.5, p99.9) are drawn from the full-\num {9735} corpus}{figure.caption.9}{}}
+\newlabel{fig:zhist@cref}{{[figure][2][]2}{[1][17][]18}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}The shuffled-E control}{18}{subsection.5.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Empirical CDF of $z_{\text  {two}}$ (full corpus, $n=\num {9735}$). Left: full range; right: zoom to $z\in [0,8]$ showing tail separation. The real-correct ECDF reaches $0.95$ at $z=3.0$, while shuffled and synthetic conditions reach $0.95$ only at substantially higher $z$. The horizontal gap between curves at any percentile is the per-pixel separation margin. Per-session reference; percentile markers from the full-\num {9735} corpus.}}{19}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:ecdf}{{3}{19}{Empirical CDF of $z_{\text {two}}$ (full corpus, $n=\num {9735}$). Left: full range; right: zoom to $z\in [0,8]$ showing tail separation. The real-correct ECDF reaches $0.95$ at $z=3.0$, while shuffled and synthetic conditions reach $0.95$ only at substantially higher $z$. The horizontal gap between curves at any percentile is the per-pixel separation margin. Per-session reference; percentile markers from the full-\num {9735} corpus}{figure.caption.10}{}}
+\newlabel{fig:ecdf@cref}{{[figure][3][]3}{[1][18][]19}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Unconditional reference and multi-method cross-checks}{19}{subsection.5.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Spatial footprint of the substrate signature. Top: per-pixel mean $z_{\text  {two}}$ across \num {9735} frames for real-correct (mean $1.06$), real-shuffled ($4.19$), and synthetic-100k ($3.59$) conditions. Bottom: pairwise differences (shuffled $-$ correct, synthetic $-$ correct, shuffled $-$ synthetic). The shuffled-minus-correct and synthetic-minus-correct maps localise the substrate-detection footprint to the frame regions most informative for verification, concentrated away from the central subject. Computed over the full \num {9735}-frame corpus with per-session references; no per-frame normalization.}}{20}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:atypicality}{{4}{20}{Spatial footprint of the substrate signature. Top: per-pixel mean $z_{\text {two}}$ across \num {9735} frames for real-correct (mean $1.06$), real-shuffled ($4.19$), and synthetic-100k ($3.59$) conditions. Bottom: pairwise differences (shuffled $-$ correct, synthetic $-$ correct, shuffled $-$ synthetic). The shuffled-minus-correct and synthetic-minus-correct maps localise the substrate-detection footprint to the frame regions most informative for verification, concentrated away from the central subject. Computed over the full \num {9735}-frame corpus with per-session references; no per-frame normalization}{figure.caption.11}{}}
+\newlabel{fig:atypicality@cref}{{[figure][4][]4}{[1][19][]20}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Scope and limitations of the methodology}{20}{subsection.5.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Results I: Learnable Chain-Coupling, Verifier Accuracy and Generalization}{20}{section.6}\protected@file@percent }
+\newlabel{sec:results_main}{{6}{20}{Results I: Learnable Chain-Coupling, Verifier Accuracy and Generalization}{section.6}{}}
+\newlabel{sec:results_main@cref}{{[section][6][]6}{[1][20][]20}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Multi-method agreement on genuine captures. Two audited-safe real-correct frames (D2 row 4819, V10 row 3174) scored by four methods: Phase~G K2 and Binder e2 (verifier-tier) and AE-64f tap A and AE-DGW dec5 (labelled \textsc  {diagnostic}, not verifier-tier). All four report typical (green) residual on these genuine frames. Each method uses its own per-session reference with common thresholds within the panel; display is clipped; quantitative claims rest on the results reported in the text, not on this display. The AE methods are shown for cross-checking only and are not used as verifiers because they exhibit weak coupling-specificity.}}{21}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:multimethod}{{5}{21}{Multi-method agreement on genuine captures. Two audited-safe real-correct frames (D2 row 4819, V10 row 3174) scored by four methods: Phase~G K2 and Binder e2 (verifier-tier) and AE-64f tap A and AE-DGW dec5 (labelled \textsc {diagnostic}, not verifier-tier). All four report typical (green) residual on these genuine frames. Each method uses its own per-session reference with common thresholds within the panel; display is clipped; quantitative claims rest on the results reported in the text, not on this display. The AE methods are shown for cross-checking only and are not used as verifiers because they exhibit weak coupling-specificity}{figure.caption.12}{}}
+\newlabel{fig:multimethod@cref}{{[figure][5][]5}{[1][19][]21}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Headline verifier accuracy}{21}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:results_main_headline}{{6.1}{21}{Headline verifier accuracy}{subsection.6.1}{}}
+\newlabel{sec:results_main_headline@cref}{{[subsection][1][6]6.1}{[1][21][]21}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}The coupling signal is real, not an emission-statistics or architecture artifact}{22}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:results_main_control}{{6.2}{22}{The coupling signal is real, not an emission-statistics or architecture artifact}{subsection.6.2}{}}
+\newlabel{sec:results_main_control@cref}{{[subsection][2][6]6.2}{[1][22][]22}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Frame-level separability on the full corpus}{22}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:results_main_framelevel}{{6.3}{22}{Frame-level separability on the full corpus}{subsection.6.3}{}}
+\newlabel{sec:results_main_framelevel@cref}{{[subsection][3][6]6.3}{[1][22][]22}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Same-rig cross-session and cross-protocol generalization}{23}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:results_main_generalization}{{6.4}{23}{Same-rig cross-session and cross-protocol generalization}{subsection.6.4}{}}
+\newlabel{sec:results_main_generalization@cref}{{[subsection][4][6]6.4}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Scope of the generalization claim.}{23}{section*.17}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Substrate verification at a glance. Fourteen representative captures, each shown as raw camera frame $C$, the emitted chain-coupled pattern $E$, and the per-pixel substrate-verification map (Phase~G robust $z$-residual; green~$=$~typical of a genuine chain-coupled capture, red~$=$~anomalous). Real-correct frames render essentially uniformly green; substrate-altered conditions (shuffled or synthetic $E$) render heavily red. All maps use a common per-session reference (full-\num {9735}-frame p95/p99.9 floors, robust-$z$), identical thresholds across all panels, and no per-frame normalization or body suppression. This figure is illustrative; quantitative claims are reported in \Cref  {fig:roc} and \Cref  {fig:zhist}.}}{24}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:hero}{{6}{24}{Substrate verification at a glance. Fourteen representative captures, each shown as raw camera frame $C$, the emitted chain-coupled pattern $E$, and the per-pixel substrate-verification map (Phase~G robust $z$-residual; green~$=$~typical of a genuine chain-coupled capture, red~$=$~anomalous). Real-correct frames render essentially uniformly green; substrate-altered conditions (shuffled or synthetic $E$) render heavily red. All maps use a common per-session reference (full-\num {9735}-frame p95/p99.9 floors, robust-$z$), identical thresholds across all panels, and no per-frame normalization or body suppression. This figure is illustrative; quantitative claims are reported in \Cref {fig:roc} and \Cref {fig:zhist}}{figure.caption.13}{}}
+\newlabel{fig:hero@cref}{{[figure][6][]6}{[1][23][]24}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Main result. (A)~Hero composite of substrate-verification maps for genuine vs.\ substrate-altered captures. (B)~Attacker-maturity progression: the same captured frame scored against synthetic emissions from adversary training steps 5k--100k; the verification map stays strongly red at every maturity, i.e.\ the substrate signature does not converge as the attacker trains. (C)~$z_{\text  {two}}$ density across \num {9735} frames per condition. (D)~Frame-level ROC and per-frame mean-$z$ distributions. Frame-level AUROC~$=0.9999$ (correct vs.\ shuffled $E$) and AUROC~$=0.9998$ (correct vs.\ synthetic $E$ at step 100k) on this corpus. All maps use per-session references and full-\num {9735} percentile floors with common thresholds within each paired panel; AUROC values reflect rank-order separability between conditions on the evaluated frame set, not a deployed operating point.}}{25}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:main_results}{{7}{25}{Main result. (A)~Hero composite of substrate-verification maps for genuine vs.\ substrate-altered captures. (B)~Attacker-maturity progression: the same captured frame scored against synthetic emissions from adversary training steps 5k--100k; the verification map stays strongly red at every maturity, i.e.\^^Mthe substrate signature does not converge as the attacker trains. (C)~$z_{\text {two}}$ density across \num {9735} frames per condition. (D)~Frame-level ROC and per-frame mean-$z$ distributions. Frame-level AUROC~$=0.9999$ (correct vs.\ shuffled $E$) and AUROC~$=0.9998$ (correct vs.\^^Msynthetic $E$ at step 100k) on this corpus. All maps use per-session references and full-\num {9735} percentile floors with common thresholds within each paired panel; AUROC values reflect rank-order separability between conditions on the evaluated frame set, not a deployed operating point}{figure.caption.14}{}}
+\newlabel{fig:main_results@cref}{{[figure][7][]7}{[1][23][]25}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Summary}{25}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:results_main_summary}{{6.5}{25}{Summary}{subsection.6.5}{}}
+\newlabel{sec:results_main_summary@cref}{{[subsection][5][6]6.5}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Results II: Adversarial Red-Team, Off-Body Coupling, and the Supervised Baseline}{25}{section.7}\protected@file@percent }
+\newlabel{sec:results_redteam}{{7}{25}{Results II: Adversarial Red-Team, Off-Body Coupling, and the Supervised Baseline}{section.7}{}}
+\newlabel{sec:results_redteam@cref}{{[section][7][]7}{[1][25][]25}{}{}{}}
+\citation{zhang2023controlnet}
+\citation{liu2022convnext}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Frame-level separability. Left: ROC computed at the frame level, where each frame is one observation and the score is the mean $z_{\text  {two}}$ over all pixels, giving AUROC = 0.9999 for correct vs.\ shuffled $E$ and AUROC = 0.9998 for correct vs.\ synthetic $E$ at training step \num {100000}. Right: per-frame mean-$z_{\text  {two}}$ distributions for the three conditions ($n=\num {9735}$ each), with the real-correct mode near $z=1.06$ and the shuffled ($4.19$) and synthetic-\num {100000} ($3.59$) modes well separated from it. Per-session reference; AUROC reflects rank-order separability between conditions on this corpus, not a fixed-threshold field deployment.}}{26}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:roc}{{8}{26}{Frame-level separability. Left: ROC computed at the frame level, where each frame is one observation and the score is the mean $z_{\text {two}}$ over all pixels, giving AUROC = 0.9999 for correct vs.\ shuffled $E$ and AUROC = 0.9998 for correct vs.\ synthetic $E$ at training step \num {100000}. Right: per-frame mean-$z_{\text {two}}$ distributions for the three conditions ($n=\num {9735}$ each), with the real-correct mode near $z=1.06$ and the shuffled ($4.19$) and synthetic-\num {100000} ($3.59$) modes well separated from it. Per-session reference; AUROC reflects rank-order separability between conditions on this corpus, not a fixed-threshold field deployment}{figure.caption.15}{}}
+\newlabel{fig:roc@cref}{{[figure][8][]8}{[1][23][]26}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Stage 0: a learned forger (F-A v1) is caught at every checkpoint}{26}{subsection.7.1}\protected@file@percent }
+\newlabel{sec:redteam_stage0}{{7.1}{26}{Stage 0: a learned forger (F-A v1) is caught at every checkpoint}{subsection.7.1}{}}
+\newlabel{sec:redteam_stage0@cref}{{[subsection][1][7]7.1}{[1][26][]26}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Quantitative summary and display recipe. Left: headline metrics --- frame-level AUROC $0.9999$ (vs.\ shuffled) and $0.9998$ (vs.\ synthetic at step \num {100000}); mean per-frame $z_{\text  {two}}$ of $1.06$ (real-correct), $4.19$ (shuffled), $3.59$ (synthetic-\num {100000}); mean synthetic excess red\% declining $67.4 \rightarrow 52.4$ across training steps \num {5000}\,$\rightarrow $\,\num {100000}; mean real-correct red\% $0.018\%$; \num {9733}/\num {9735} body-safe frames. Right: the Phase~G K2 display recipe (green\_floor $=$ p95 $= 3.025$, red\_floor $=$ p99.9 $= 27.13$, scale\_floor $=$ p5 of $1.4826\cdot \mathrm  {MAD}$, excess\_margin $0.5$, $\gamma = 0.65$, $K=2$, per-session reference). All thresholds derived from full-\num {9735} percentiles; common thresholds within paired panels; no body suppression; AE/AE-DGW labeled DIAGNOSTIC.}}{27}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:quant_table}{{9}{27}{Quantitative summary and display recipe. Left: headline metrics --- frame-level AUROC $0.9999$ (vs.\ shuffled) and $0.9998$ (vs.\ synthetic at step \num {100000}); mean per-frame $z_{\text {two}}$ of $1.06$ (real-correct), $4.19$ (shuffled), $3.59$ (synthetic-\num {100000}); mean synthetic excess red\% declining $67.4 \rightarrow 52.4$ across training steps \num {5000}\,$\rightarrow $\,\num {100000}; mean real-correct red\% $0.018\%$; \num {9733}/\num {9735} body-safe frames. Right: the Phase~G K2 display recipe (green\_floor $=$ p95 $= 3.025$, red\_floor $=$ p99.9 $= 27.13$, scale\_floor $=$ p5 of $1.4826\cdot \mathrm {MAD}$, excess\_margin $0.5$, $\gamma = 0.65$, $K=2$, per-session reference). All thresholds derived from full-\num {9735} percentiles; common thresholds within paired panels; no body suppression; AE/AE-DGW labeled DIAGNOSTIC}{figure.caption.16}{}}
+\newlabel{fig:quant_table@cref}{{[figure][9][]9}{[1][23][]27}{}{}{}}
+\citation{he2017maskrcnn}
+\@writefile{toc}{\contentsline {paragraph}{Probe saturation and decomposition deferral.}{28}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-verifier robustness.}{28}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Attacker non-convergence under continued training}{28}{subsection.7.2}\protected@file@percent }
+\newlabel{sec:redteam_progression}{{7.2}{28}{Attacker non-convergence under continued training}{subsection.7.2}{}}
+\newlabel{sec:redteam_progression@cref}{{[subsection][2][7]7.2}{[1][28][]28}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Where the discriminative signal lives: off-body, not on-body}{28}{subsection.7.3}\protected@file@percent }
+\newlabel{sec:redteam_offbody}{{7.3}{28}{Where the discriminative signal lives: off-body, not on-body}{subsection.7.3}{}}
+\newlabel{sec:redteam_offbody@cref}{{[subsection][3][7]7.3}{[1][28][]28}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{The variance-box reading and its failure.}{28}{section*.21}\protected@file@percent }
+\citation{nalisnick2019}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Attacker non-convergence (red-team). For a single captured frame $C$ and a single per-session reference, the synthetic emission is taken from F-A~v1 training steps 5k, 25k, 70k, and 100k. The substrate-verification excess panel remains strongly red at every step (mean excess red area $67.4 \to 59.2 \to 55.1 \to 52.4\%$), while the genuine condition holds at mean real-correct red area $0.018\%$. Residual coverage decreases only modestly as the attacker matures, indicating the chain-coupled signature does not converge under continued training of this attacker (F-A~v1). Green floor $=$ full-\num {9735} p95, red floor $=$ p99.9, excess margin $0.5$, common thresholds across all steps; no per-frame normalization.}}{29}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:attacker_progression}{{10}{29}{Attacker non-convergence (red-team). For a single captured frame $C$ and a single per-session reference, the synthetic emission is taken from F-A~v1 training steps 5k, 25k, 70k, and 100k. The substrate-verification excess panel remains strongly red at every step (mean excess red area $67.4 \to 59.2 \to 55.1 \to 52.4\%$), while the genuine condition holds at mean real-correct red area $0.018\%$. Residual coverage decreases only modestly as the attacker matures, indicating the chain-coupled signature does not converge under continued training of this attacker (F-A~v1). Green floor $=$ full-\num {9735} p95, red floor $=$ p99.9, excess margin $0.5$, common thresholds across all steps; no per-frame normalization}{figure.caption.20}{}}
+\newlabel{fig:attacker_progression@cref}{{[figure][10][]10}{[1][28][]29}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{The proper-segmentation reading inverts the conclusion.}{29}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Interpretation: likelihood overspread, not ``fakes look more real.''}{29}{section*.24}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Where the discriminative signal lives: off-body, not on-body (segmentation ablation, frame D2 row 1634). Top row: debayered capture $C$, Mask R-CNN person mask (green overlay), and $C$ under the body-only ablation E2$_{\mathrm  {seg}}$ (body kept, off-body replaced with per-channel inside-mask mean). Bottom row: E2$_{\mathrm  {seg}}$ per-pixel residual field, E3$_{\mathrm  {seg}}$ (off-body-only) residual field, and their signed contrast. Under proper Mask R-CNN segmentation, preserving only off-body content (E3$_{\mathrm  {seg}}$) yields AUROC $=1.000$ across all conditions, while preserving only the body (E2$_{\mathrm  {seg}}$) drops to chance or below (D2 fake AUROC $0.009$--$0.024$; $E$-perturbation $\approx 0.54$). This overturns an earlier variance-box reading and shows Phase~G's discrimination on F-A~v1 fakes resides in the off-body region. Scope caveat: analysis is over \num {106} usable frames and excludes the D2 block-2 supine-pose subset that Mask R-CNN segments unreliably ($11.7\%$ combined pathological rate; per-session minimum 50/56 usable).}}{30}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:segmentation}{{11}{30}{Where the discriminative signal lives: off-body, not on-body (segmentation ablation, frame D2 row 1634). Top row: debayered capture $C$, Mask R-CNN person mask (green overlay), and $C$ under the body-only ablation E2$_{\mathrm {seg}}$ (body kept, off-body replaced with per-channel inside-mask mean). Bottom row: E2$_{\mathrm {seg}}$ per-pixel residual field, E3$_{\mathrm {seg}}$ (off-body-only) residual field, and their signed contrast. Under proper Mask R-CNN segmentation, preserving only off-body content (E3$_{\mathrm {seg}}$) yields AUROC $=1.000$ across all conditions, while preserving only the body (E2$_{\mathrm {seg}}$) drops to chance or below (D2 fake AUROC $0.009$--$0.024$; $E$-perturbation $\approx 0.54$). This overturns an earlier variance-box reading and shows Phase~G's discrimination on F-A~v1 fakes resides in the off-body region. Scope caveat: analysis is over \num {106} usable frames and excludes the D2 block-2 supine-pose subset that Mask R-CNN segments unreliably ($11.7\%$ combined pathological rate; per-session minimum 50/56 usable)}{figure.caption.23}{}}
+\newlabel{fig:segmentation@cref}{{[figure][11][]11}{[1][29][]30}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{The body signal is not absent --- it is at low spatial frequency.}{30}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The relative-comparison test is unaffected and remains load-bearing.}{30}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multi-method agreement on genuine captures.}{31}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}A supervised baseline (Phase H): coarse-aware, fine-blind}{31}{subsection.7.4}\protected@file@percent }
+\newlabel{sec:redteam_phaseh}{{7.4}{31}{A supervised baseline (Phase H): coarse-aware, fine-blind}{subsection.7.4}{}}
+\newlabel{sec:redteam_phaseh@cref}{{[subsection][4][7]7.4}{[1][31][]31}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{It is emission-aware for coarse contrasts.}{31}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{It is blind to fine XOF perturbations.}{31}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The blindness is partly a label-locking artifact.}{31}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Item 1: fine-grained perturbation sensitivity of the diffusion verifier}{31}{subsection.7.5}\protected@file@percent }
+\newlabel{sec:redteam_item1}{{7.5}{31}{Item 1: fine-grained perturbation sensitivity of the diffusion verifier}{subsection.7.5}{}}
+\newlabel{sec:redteam_item1@cref}{{[subsection][5][7]7.5}{[1][31][]31}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion: Scope, Limitations \& Future Work}{32}{section.8}\protected@file@percent }
+\newlabel{sec:discussion}{{8}{32}{Discussion: Scope, Limitations \& Future Work}{section.8}{}}
+\newlabel{sec:discussion@cref}{{[section][8][]8}{[1][32][]32}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Scope: same-rig, two-session, single-subject}{32}{subsection.8.1}\protected@file@percent }
+\newlabel{sec:discussion:scope}{{8.1}{32}{Scope: same-rig, two-session, single-subject}{subsection.8.1}{}}
+\newlabel{sec:discussion:scope@cref}{{[subsection][1][8]8.1}{[1][32][]32}{}{}{}}
+\citation{nalisnick2019}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}The strong adaptive attacker is future work}{33}{subsection.8.2}\protected@file@percent }
+\newlabel{sec:discussion:adaptive}{{8.2}{33}{The strong adaptive attacker is future work}{subsection.8.2}{}}
+\newlabel{sec:discussion:adaptive@cref}{{[subsection][2][8]8.2}{[1][33][]33}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Supervised baseline blindness to fine perturbations}{34}{subsection.8.3}\protected@file@percent }
+\newlabel{sec:discussion:baseline}{{8.3}{34}{Supervised baseline blindness to fine perturbations}{subsection.8.3}{}}
+\newlabel{sec:discussion:baseline@cref}{{[subsection][3][8]8.3}{[1][34][]34}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Emissions are recoverable from the chain hash, and why this needs a bit-exact renderer}{35}{subsection.8.4}\protected@file@percent }
+\newlabel{sec:discussion:regeneration}{{8.4}{35}{Emissions are recoverable from the chain hash, and why this needs a bit-exact renderer}{subsection.8.4}{}}
+\newlabel{sec:discussion:regeneration@cref}{{[subsection][4][8]8.4}{[1][34][]35}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.5}Privacy and consent of human-subject captures}{35}{subsection.8.5}\protected@file@percent }
+\newlabel{sec:discussion:privacy}{{8.5}{35}{Privacy and consent of human-subject captures}{subsection.8.5}{}}
+\newlabel{sec:discussion:privacy@cref}{{[subsection][5][8]8.5}{[1][35][]35}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.6}Future work}{35}{subsection.8.6}\protected@file@percent }
+\newlabel{sec:discussion:future}{{8.6}{35}{Future work}{subsection.8.6}{}}
+\newlabel{sec:discussion:future@cref}{{[subsection][6][8]8.6}{[1][35][]35}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Strong adaptive red-team (F-A v2).}{36}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-rig and cross-subject studies.}{36}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Toward real-time verification.}{36}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Related Work}{36}{section.9}\protected@file@percent }
+\newlabel{sec:related}{{9}{36}{Related Work}{section.9}{}}
+\newlabel{sec:related@cref}{{[section][9][]9}{[1][36][]36}{}{}{}}
+\citation{patent2025}
+\citation{geng2011}
+\citation{gerstner2022active}
+\citation{mittal2024gotcha}
+\citation{c2pa}
+\citation{lukas2006prnu}
+\citation{blake3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Structured light and active illumination}{37}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Media provenance and cryptographic content signing}{37}{subsection.9.2}\protected@file@percent }
+\citation{ho2020ddpm}
+\citation{nicholdhariwal2021}
+\citation{yu2024diffforensics}
+\citation{nalisnick2019}
+\citation{he2017maskrcnn}
+\citation{nalisnick2019}
+\citation{zhang2023controlnet}
+\citation{perez2018film}
+\citation{drandbeacon}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Diffusion models as anomaly and likelihood detectors}{38}{subsection.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Conditioning the verifier on the emission}{38}{subsection.9.4}\protected@file@percent }
+\citation{nalisnick2019}
+\citation{pappu2002}
+\citation{zheng2020edpuf}
+\citation{patent2025}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.5}Verifiable distributed randomness}{39}{subsection.9.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.6}Positioning}{39}{subsection.9.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Data, Code \& Reproducibility}{39}{section.10}\protected@file@percent }
+\newlabel{sec:availability}{{10}{39}{Data, Code \& Reproducibility}{section.10}{}}
+\newlabel{sec:availability@cref}{{[section][10][]10}{[1][39][]39}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Scope of the release}{39}{subsection.10.1}\protected@file@percent }
+\newlabel{sec:availability:scope}{{10.1}{39}{Scope of the release}{subsection.10.1}{}}
+\newlabel{sec:availability:scope@cref}{{[subsection][1][10]10.1}{[1][39][]39}{}{}{}}
+\citation{drandbeacon}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Raw capture frames}{40}{subsection.10.2}\protected@file@percent }
+\newlabel{sec:availability:raw}{{10.2}{40}{Raw capture frames}{subsection.10.2}{}}
+\newlabel{sec:availability:raw@cref}{{[subsection][2][10]10.2}{[1][40][]40}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Chain logs}{40}{subsection.10.3}\protected@file@percent }
+\newlabel{sec:availability:chainlogs}{{10.3}{40}{Chain logs}{subsection.10.3}{}}
+\newlabel{sec:availability:chainlogs@cref}{{[subsection][3][10]10.3}{[1][40][]40}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.4}Rendered emission tiles}{40}{subsection.10.4}\protected@file@percent }
+\newlabel{sec:availability:emissions}{{10.4}{40}{Rendered emission tiles}{subsection.10.4}{}}
+\newlabel{sec:availability:emissions@cref}{{[subsection][4][10]10.4}{[1][40][]40}{}{}{}}
+\citation{blake3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.5}Derived analysis products}{41}{subsection.10.5}\protected@file@percent }
+\newlabel{sec:availability:derived}{{10.5}{41}{Derived analysis products}{subsection.10.5}{}}
+\newlabel{sec:availability:derived@cref}{{[subsection][5][10]10.5}{[1][40][]41}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.6}Verifier checkpoints}{41}{subsection.10.6}\protected@file@percent }
+\newlabel{sec:availability:checkpoints}{{10.6}{41}{Verifier checkpoints}{subsection.10.6}{}}
+\newlabel{sec:availability:checkpoints@cref}{{[subsection][6][10]10.6}{[1][41][]41}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.7}Source code}{41}{subsection.10.7}\protected@file@percent }
+\newlabel{sec:availability:code}{{10.7}{41}{Source code}{subsection.10.7}{}}
+\newlabel{sec:availability:code@cref}{{[subsection][7][10]10.7}{[1][41][]41}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.8}Reproducibility entry points}{41}{subsection.10.8}\protected@file@percent }
+\newlabel{sec:availability:repro}{{10.8}{41}{Reproducibility entry points}{subsection.10.8}{}}
+\newlabel{sec:availability:repro@cref}{{[subsection][8][10]10.8}{[1][41][]41}{}{}{}}
+\citation{patent2025}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.9}Human-subject captures and privacy}{42}{subsection.10.9}\protected@file@percent }
+\newlabel{sec:availability:privacy}{{10.9}{42}{Human-subject captures and privacy}{subsection.10.9}{}}
+\newlabel{sec:availability:privacy@cref}{{[subsection][9][10]10.9}{[1][42][]42}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.10}License}{42}{subsection.10.10}\protected@file@percent }
+\newlabel{sec:availability:license}{{10.10}{42}{License}{subsection.10.10}{}}
+\newlabel{sec:availability:license@cref}{{[subsection][10][10]10.10}{[1][42][]42}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Conclusion}{42}{section.11}\protected@file@percent }
+\newlabel{sec:conclusion}{{11}{42}{Conclusion}{section.11}{}}
+\newlabel{sec:conclusion@cref}{{[section][11][]11}{[1][42][]42}{}{}{}}
+\citation{blake3}
+\citation{ho2020ddpm}
+\citation{nicholdhariwal2021}
+\citation{zhang2023controlnet}
+\citation{he2017maskrcnn}
+\citation{nalisnick2019}
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}What is established}{43}{subsection.11.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{A near-perfect chain-coupling verifier.}{43}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Same-rig cross-session and cross-protocol generalization.}{43}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{F-A v1 is detected under the released evaluation.}{43}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The discriminative coupling is localized off-body.}{43}{section*.37}\protected@file@percent }
+\citation{patent2025}
+\citation{blake3}
+\citation{drandbeacon}
+\@writefile{toc}{\contentsline {paragraph}{Scoring-function and sensitivity structure.}{44}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}What remains open}{44}{subsection.11.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The adaptive attacker.}{44}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-rig generalization.}{44}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Calibration and protocol details.}{44}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.3}Relation to the patent}{44}{subsection.11.3}\protected@file@percent }
+\bibstyle{plain}
+\bibdata{refs}
+\bibcite{c2pa}{1}
+\bibcite{geng2011}{2}
+\bibcite{gerstner2022active}{3}
+\bibcite{he2017maskrcnn}{4}
+\bibcite{ho2020ddpm}{5}
+\bibcite{patent2025}{6}
+\bibcite{liu2022convnext}{7}
+\bibcite{loshchilov2019adamw}{8}
+\bibcite{lukas2006prnu}{9}
+\bibcite{mittal2024gotcha}{10}
+\bibcite{nalisnick2019}{11}
+\bibcite{nicholdhariwal2021}{12}
+\bibcite{blake3}{13}
+\bibcite{pappu2002}{14}
+\bibcite{perez2018film}{15}
+\bibcite{drandbeacon}{16}
+\bibcite{yu2024diffforensics}{17}
+\bibcite{zhang2023controlnet}{18}
+\bibcite{zheng2020edpuf}{19}
+\gdef \@abspage@last{46}
