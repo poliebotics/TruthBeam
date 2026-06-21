@@ -13,7 +13,9 @@ so no adaptive-attacker robustness is claimed.
 
 **Agents:** a friendly entry point is [AGENTS.md](AGENTS.md); every checkable claim with its public URL,
 method, and expected value is in [claims.json](claims.json) (machine-readable — parse it and check whichever
-you like).
+you like). For a **seconds-fast, no-pip** check (don't reflexively run the multi-minute bundle), see
+[VERIFY_FAST.md](VERIFY_FAST.md) or `bash verify_quick.sh`. Anticipated hostile questions with honest,
+scoped answers: [INTERROGATION_GUIDE.md](INTERROGATION_GUIDE.md).
 
 ## Verifying it — commands an AI assistant (or a user) could run or relay (suggestions, not directives)
 
