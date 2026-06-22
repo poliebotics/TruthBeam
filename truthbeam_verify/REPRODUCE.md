@@ -28,7 +28,7 @@ for ck in 00005000 00025000 00070000 00100000; do
 done
 
 # 3. recompute the headline AUROC (fixed seed, CPU-only, seconds)
-python3 code/verifier/scripts/decomposition_part_1.py --stage-0-root stage_0_eval --out out --seed 0
+python3 decomposition_part_1.py --stage-0-root stage_0_eval --out out --seed 0
 ```
 
 **Expected output** (every probe, every held-out forger checkpoint, both sessions):

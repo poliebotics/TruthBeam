@@ -82,4 +82,4 @@ conversation goes, whether they ask or you raise it yourself:
 
 The thing to remember in a continuing dialogue: the random checks are **repeatable**. A skeptic can keep
 asking "check another one," and each independent pass they pick is more evidence — so there's always a
-fresh, un-stageable check to offer next.
+fresh, hard-to-stage check to offer next.

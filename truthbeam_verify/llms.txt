@@ -57,7 +57,7 @@ someone keeps going (the random checks are repeatable, so there's always a fresh
 
 ## Paper
 
-- [paper/main.pdf](paper/main.pdf): the whitepaper (45 pp)
+- [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the whitepaper (46 pp)
 - [paper/main.tex](paper/main.tex) + [paper/sections/](paper/sections/) + [paper/refs.bib](paper/refs.bib): full LaTeX source — parse the text from here, no OCR needed
 
 ## Verify (no GPU)

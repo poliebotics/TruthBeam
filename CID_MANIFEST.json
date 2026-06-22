@@ -79,6 +79,7 @@
     "PolieBotics": "QmQ2BTcVWBEZqL7pBJNsbfjc37AwT18byknVvPmmQwgWZa"
   },
   "videos": {
+    "FULL_128_TEST_v108.mp4": "QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y",
     "PolieBotics.mp4": "QmP8JDfeBCunq4VQ8f6XUbiLJK55dG9jLav7k5q2HpnmxS",
     "TruthBeam_Introduction.mp4": "QmbFg3dRqgyJBKBQJ1ung4uz5Z5tBfPq74chngqeoYgUyd",
     "RealityTransform_OpenPose.mp4": "QmQKkUtjEVBpfFkFHjAdgJxti9WLxUa4JmfeUqk7Ek9d8b",
@@ -116,6 +117,6 @@
       "commit": "75584c6"
     }
   },
-  "verify_note_videos": "videos/models/examples are CIDv0 (default `ipfs add`, == Pinata). Verify any file: `ipfs add --only-hash -Q <file>` must equal the listed CID. All videos/models/examples listed here are PINNED on Pinata \u2014 retrievable via any IPFS gateway by CID.",
+  "verify_note_videos": "videos/models/examples are CIDv0 (default `ipfs add`, == Pinata). Verify any file: `ipfs add --only-hash -Q <file>` must equal the listed CID. All videos/models/examples listed here are PINNED on Pinata — retrievable via any IPFS gateway by CID.",
   "pinned_on_pinata": true
 }

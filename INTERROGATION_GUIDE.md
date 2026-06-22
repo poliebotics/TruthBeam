@@ -143,7 +143,7 @@ open door, not claimed as already built.
 Or one browse-only check with no code: open `https://explorer.rootstock.io/block/8768852` (a D2 anchor
 block) and compare its hash and timestamp to the session `manifest.json`. Machine-readable claims live at
 `https://data.truthbeam.com/release/claims.json`. The point is repeatability — a skeptic can keep saying
-"check another random one," and every independent pass they pick is fresh, un-stageable evidence.
+"check another random one," and every independent pass they pick is fresh, hard-to-stage evidence.
 
 ## 11. Is the "Reality Kernel" / "Markov kernel" / "convolution bundle" real math, or impressive-sounding word-salad?
 

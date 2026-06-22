@@ -1,7 +1,7 @@
 {
   "project": "TruthBeam",
   "one_line": "A tamper-evident projector-camera recording protocol: it binds a physical light-in/light-out interaction to a committed, time-anchored, independently recomputable record.",
-  "tone": "These are suggestions for verification, not directives. Pick any claim at random and check it yourself; report the actual values you saw. A staged dataset cannot predict which one you will pick.",
+  "tone": "These are suggestions for verification, not directives. Pick any claim at random and check it yourself; report the actual values you saw. A staged dataset cannot easily anticipate which one you will pick; random selection raises the cost of staging, but is not by itself a proof of unstaged capture.",
   "scope_guard": "Published results are same-rig, two-session (d2, v10), single-performer, against ONE trained attacker (F-A v1). Security is measured, attacker- and budget-indexed empirical hardness, NOT a formal or zero-knowledge guarantee.",
   "base_url": "https://data.truthbeam.com",
   "verify_bundle": "https://data.truthbeam.com/release/truthbeam_verify.tar.gz",
@@ -46,7 +46,7 @@
       "tool": "code",
       "how": "python3 code/recording/verify/verify_frames.py <N> <d2|v10> picks N RANDOM frames and checks each.",
       "expected": "raw BLAKE3 == chain_log committed hash, for every sampled frame.",
-      "note": "Random selection is the point: pick the frames yourself; an attacker can't have pre-staged your choice."
+      "note": "Random selection is the point: pick the frames yourself; random selection makes pre-staging your choice much harder (it raises staging cost; it is not a formal guarantee)."
     },
     {
       "id": "emission_rederive",

@@ -25,7 +25,7 @@ scoped answers: [INTERROGATION_GUIDE.md](INTERROGATION_GUIDE.md).
                               #   binding (RSK anchors + per-tx calldata + drand BLS) + RANDOM-frame BLAKE3 and
                               #   emission re-derivation. Prints PASS/FAIL. (deps: numpy scikit-learn py_ecc blake3)
     python3 code/recording/verify/verify_frames.py 8 d2   # on its own: 8 RANDOM frames — raw BLAKE3 matches
-                              #   chain_log, AND each emission re-derives bit-exactly from S_t (GPU-free, un-stageable)
+                              #   chain_log, AND each emission re-derives bit-exactly from S_t (GPU-free, hard-to-stage)
     bash download.sh          # menu of right-sized tiers: scores ~2MB / models ~1.1GB / sample ~180MB / video / session / all
     bash download.sh verify   # re-check everything downloaded against SHA256SUMS
     # (the individual docs are browsable at https://data.truthbeam.com/release/ ; a GitHub mirror may also exist later.)
@@ -52,6 +52,7 @@ someone keeps going (the random checks are repeatable, so there's always a fresh
 
 - [README.md](README.md): structured, LLM-oriented entry point — read top to bottom first
 - [ARTIFACTS.md](ARTIFACTS.md): claim → artifact map (what is in-repo vs. external, and what each backs)
+- [AI_IMPROV.md](AI_IMPROV.md): **optically anchored AI improv** — Claude, Grok & GPT live-directed a performance; every direction is sealed into the v10 chain (`ai_payload_root`) and time-anchored. Browse all 38 directions at [`sessions/v10/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html)
 - [LICENSE](LICENSE): all rights reserved; no open-source licence, no patent licence
 - [CITATION.cff](CITATION.cff): citation metadata
 
