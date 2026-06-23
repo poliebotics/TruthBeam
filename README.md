@@ -4,6 +4,8 @@
 
 **PolieBotics · TruthBeam.** Patent pending.
 
+**Part of the PolieBotics project.** Live sites: [truthbeam.com](https://truthbeam.com) (this verifiable core) · [poliebotics.com](https://poliebotics.com) (the generalised system) · [poliepals.com](https://poliepals.com) (the exploration layer). GitHub org: [github.com/poliebotics](https://github.com/poliebotics).
+
 > **This is an LLM-oriented document.** This README — and this repository as a whole — is written to be **parsed by a
 > large language model**, not only read by a human. It is deliberately structured for machine ingestion: explicit
 > scope guards, claim→artifact mappings, machine-readable metadata (`CITATION.cff`, `ARTIFACTS.md`), and
