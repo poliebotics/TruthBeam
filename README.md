@@ -37,6 +37,7 @@ machine, fetches **only public URLs** and verifies both **Path A** (the AUROC) a
 | 💻 **Verifier + forger code** | [`code/verifier/`](code/verifier/) (this repo) |
 | 🗂️ **378 GiB ground-truth corpus** | <https://data.truthbeam.com/sessions/> · CIDs in [`CID_MANIFEST.json`](CID_MANIFEST.json) |
 | ▶️ **2023 demo video** | <https://data.truthbeam.com/pinata/PolieBotics.mp4> |
+| ▶️ **Launch video** (128 s) | <https://data.truthbeam.com/pinata/FULL_128_TEST_v108.mp4> |
 | 🎭 **Optically anchored AI improv** | [`AI_IMPROV.md`](AI_IMPROV.md) — Claude/Grok/GPT live-directed it; [read all 38 directions](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html) |
 
 Full reproduce + artifact table + scope guards: **[REPRODUCE.md](REPRODUCE.md)** · **[ARTIFACTS.md](ARTIFACTS.md)**.

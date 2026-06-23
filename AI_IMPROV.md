@@ -1,12 +1,14 @@
 # Optically Anchored AI Improv
 
+▶️ **Watch the launch video** (128 s): <https://data.truthbeam.com/pinata/FULL_128_TEST_v108.mp4> · IPFS `QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y`
+
 In the **V10** recording session, a human performer — **Qathal**, dressed all in white — stood inside a Truth Beam projector–camera loop and followed directions he had never heard before. The directions were improvised, live, by four AI agents: **Claude, Grok, and two OpenAI models** (labeled `claude`, `grok`, `pro`, and `thinking` on-chain). Each one was rendered, projected onto the scene, captured, and **sealed into the tamper-evident chain** as it was given.
 
 So this isn't a recording of AI *text*. It's a recording of **AI-directed human performance, anchored to physical light and public time** — something you can replay, read, and *verify*: proof of what the AI said, and when it entered the record — bound to the same capture the performer was moving inside, un-forgeable after the fact.
 
 ## What happened in the room
 
-Seventeen moments, across the session. The agents built a world out of nothing and asked the performer to live in it — and they did it with real care:
+Sixteen moments, across the session. The agents built a world out of nothing and asked the performer to live in it — and they did it with real care:
 
 > **claude —** *"raise one hand and press your palm flat against the projection light, as if testing whether it's warm."*
 >

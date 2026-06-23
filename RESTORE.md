@@ -116,6 +116,7 @@ Pinata-pinned media (content-addressed; live on the IPFS network via Pinata, mir
 | 20241219_050046_TB.h5 | `bafybeiaqbbacosf2evzxiezp4jlrbylgrhe7vw6bwfthuq74fh34bi27bq` |
 | 20241219_050046 | `bafybeibbapmogu2bro3ettoilge6bp5lic3u2mdohvbutgixnee463kmga` |
 | PolieBotics.mp4 | `QmP8JDfeBCunq4VQ8f6XUbiLJK55dG9jLav7k5q2HpnmxS` |
+| FULL_128_TEST_v108.mp4 (launch video) | `QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y` |
 | PolieBotics | `QmQ2BTcVWBEZqL7pBJNsbfjc37AwT18byknVvPmmQwgWZa` |
 
 ---

@@ -113,6 +113,7 @@ same idea to the full corpus.
 | **Ground-truth corpus** (raw + tiles, sessions D2/V10) | <https://data.truthbeam.com/sessions/> · CIDs in [`CID_MANIFEST.json`](CID_MANIFEST.json) | ~378 GiB |
 | **2023 demonstration video** | <https://data.truthbeam.com/pinata/PolieBotics.mp4> · on IPFS | — |
 | **Truth Beam — Introduction** | <https://data.truthbeam.com/pinata/TruthBeam_Introduction.mp4> | 64 s |
+| **Launch video** | <https://data.truthbeam.com/pinata/FULL_128_TEST_v108.mp4> | 128 s |
 
 Forger checkpoint URLs in full:
 - <https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00005000.pt>
