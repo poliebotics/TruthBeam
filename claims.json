@@ -13,16 +13,16 @@
     "drand_round_time_seconds": "1692803367 + (round - 1) * 3"
   },
   "sessions": {
-    "d2": { "anchor_txs": 161, "anchor_txs_breakdown": "160 state-pulse + 1 final-root", "anchor_blocks": [8768852, 8768945], "path": "https://data.truthbeam.com/sessions/d2/" },
+    "d2": { "anchor_txs": 161, "anchor_txs_breakdown": "160 state-pulse + 1 final-root", "anchor_blocks": [8768852, 8768945], "frames": 5992, "path": "https://data.truthbeam.com/sessions/d2/" },
     "v10": { "anchor_txs": 102, "anchor_txs_breakdown": "101 state-pulse + 1 final-root", "anchor_blocks": [8769289, 8769357], "frames": 3743, "path": "https://data.truthbeam.com/sessions/v10/" }
   },
   "claims": [
     {
       "id": "auroc",
-      "claim": "AUROC = 1.0000 separating real captures from F-A v1 forged captures (Path A — a logistic-regression probe on the Stage-0 diffusion-verifier scores).",
+      "claim": "AUROC = 1.0000 on the same-rig, two-session, single-performer held-out test, separating real captures from F-A v1 forged captures (Path A - a logistic-regression probe on the Stage-0 diffusion-verifier scores); a finite-sample estimate, not adaptive or general deepfake robustness.",
       "tool": "code",
       "size": "~2 MB (scores)",
-      "how": "bash download.sh scores ; then run code/verifier/scripts/decomposition_part_1.py",
+      "how": "bash download.sh scores ; python3 code/verifier/scripts/decomposition_part_1.py --stage-0-root tb_download/models/repro/stage_0_eval --out out --seed 0",
       "expected": "1.0000",
       "scope": "same-rig, F-A v1; a stated floor, not 'deepfakes solved'."
     },
@@ -64,9 +64,9 @@
     }
   ],
   "what_it_does_NOT_prove": [
-    "The semantic truth of whatever scene was staged in front of the camera — only that THIS ordered light-in/light-out record existed within the anchored time window and has not been altered.",
-    "Generalisation to other rigs / cameras / projectors — untested; that is the stated open problem.",
-    "Anything cryptographically unconditional — the hardness is empirical and attacker-indexed."
+    "The semantic truth of whatever scene was staged in front of the camera - only that THIS ordered capture record existed within the anchored time window and has not been altered; the physical light-in/light-out reading is the separately measured layer.",
+    "Generalisation to other rigs / cameras / projectors - untested; that is the stated open problem.",
+    "Anything cryptographically unconditional - the hardness is empirical and attacker-indexed."
   ],
   "related": {
     "umbrella": "https://data.poliebotics.com/",

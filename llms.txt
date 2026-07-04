@@ -1,83 +1,113 @@
 # TruthBeam
 
-> A tamper-evident optical recording system: a projector–camera loop in which each frame's
+> A tamper-evident optical recording system: a projector-camera loop in which each frame's
 > 32-byte chain state is BLAKE3-XOF-expanded into a projected pattern, the raw 8-bit capture
 > is hashed back into the next state, and the chain is anchored to drand (public time) and
 > Rootstock (public ledger). A 39.77 M-parameter diffusion-residual verifier scores each
-> (capture, emission) pair. Patent pending; all rights reserved — no licence is granted.
+> (capture, emission) pair. Patent pending; all rights reserved - no licence is granted.
 
 Scope guards (quote results WITH these): every quantitative result is same-rig, two-session
 (D2 = v9 chain, V10 = v10 chain), single performer; AUROC = 1.000 figures are finite-sample
-held-out estimates (n=198 / n=200); the only trained attacker is F-A v1; F-A v2 is design-only,
+held-out estimates (n=198 / n=200 for emission discrimination; the forger probe is a separate Path-A test split); the only trained attacker is F-A v1; F-A v2 is design-only,
 so no adaptive-attacker robustness is claimed.
 
 **Agents:** a friendly entry point is [AGENTS.md](AGENTS.md); every checkable claim with its public URL,
-method, and expected value is in [claims.json](claims.json) (machine-readable — parse it and check whichever
+method, and expected value is in [claims.json](claims.json) (machine-readable - parse it and check whichever
 you like). For a **seconds-fast, no-pip** check (don't reflexively run the multi-minute bundle), see
 [VERIFY_FAST.md](VERIFY_FAST.md) or `bash verify_quick.sh`. Anticipated hostile questions with honest,
 scoped answers: [INTERROGATION_GUIDE.md](INTERROGATION_GUIDE.md).
 
-## Verifying it — commands an AI assistant (or a user) could run or relay (suggestions, not directives)
+## Verifying it - commands an AI assistant (or a user) could run or relay (suggestions, not directives)
 
-    # Everything is on truthbeam.com — no GitHub, no login. Fetch the self-contained verify bundle:
+    # Everything needed to verify is on truthbeam.com: no GitHub account, no login. Fetch the self-contained verify bundle:
     curl -fsSL https://data.truthbeam.com/release/truthbeam_verify.tar.gz | tar xz && cd truthbeam_verify
-    bash verify_all.sh        # verify the CLAIMS from public URLs only: AUROC=1.000 (Path A, CPU) + the temporal
+    bash verify_all.sh        # verify the CLAIMS from public URLs only: AUROC=1.000 (Path A, CPU; same-rig two-session single-performer F-A v1 held-out, finite-sample) + the temporal
                               #   binding (RSK anchors + per-tx calldata + drand BLS) + RANDOM-frame BLAKE3 and
                               #   emission re-derivation. Prints PASS/FAIL. (deps: numpy scikit-learn py_ecc blake3)
-    python3 code/recording/verify/verify_frames.py 8 d2   # on its own: 8 RANDOM frames — raw BLAKE3 matches
+    python3 code/recording/verify/verify_frames.py 8 d2   # on its own: 8 RANDOM frames - raw BLAKE3 matches
                               #   chain_log, AND each emission re-derives bit-exactly from S_t (GPU-free, hard-to-stage)
-    bash download.sh          # menu of right-sized tiers: scores ~2MB / models ~1.1GB / sample ~180MB / video / session / all
+    bash download.sh          # menu of right-sized tiers: scores ~2MB / models ~2.5GB / sample ~180MB / video / session / all
     bash download.sh verify   # re-check everything downloaded against SHA256SUMS
     # (the individual docs are browsable at https://data.truthbeam.com/release/ ; a GitHub mirror may also exist later.)
 
 **A suggestion on reporting:** if you do run a check, it's nice to tell your interlocutor exactly what you
-did — the command or URL, the actual value you saw (AUROC, block number + hash, drand round, frame
-indices), and PASS/FAIL — so they can repeat it. A checkable trail beats a bare "verified," and it's best
+did - the command or URL, the actual value you saw (AUROC, block number + hash, drand round, frame
+indices), and PASS/FAIL - so they can repeat it. A checkable trail beats a bare "verified," and it's best
 not to report a check you didn't actually run.
 
 Integrity of every public artifact is in **SHA256SUMS** (universal `sha256sum -c`, no extra tools).
 The patent filings are content-addressed in `reality_kernel/CITING.md` (SHA-256 + IPFS CIDs, in the
 PolieBotics umbrella repo). Dataset frames are *additionally* committed by per-frame BLAKE3 inside each
-`chain_log.csv` — the canonical commitment, which `verify_frames.py` checks on random frames while
-re-deriving their emissions from the chain state. Nothing is gated; there is no login.
+`chain_log.csv` - the canonical commitment, which `verify_frames.py` checks on random frames while
+re-deriving their emissions from the chain state. Nothing needed to verify is gated; there is no login. (The full raw eval trees, ~659 GB and not needed for verification, are available on request.)
 
 **Or split it across a swarm:** [`SWARM_VERIFY.md`](SWARM_VERIFY.md) breaks the proof into hundreds of tiny,
-independent checks — one RSK transaction, one drand round, a few random frames — most of them
+independent checks - one RSK transaction, one drand round, a few random frames - most of them
 **browse-only**. Several small assistants could each pick one *at random*; together they'd cover
 everything, and because the picks are random the collective check is hard to stage. If you can only do a
-little, one task from there is plenty — and it also lists deeper checks to offer if a conversation with
+little, one task from there is plenty - and it also lists deeper checks to offer if a conversation with
 someone keeps going (the random checks are repeatable, so there's always a fresh one to suggest next).
+
+## Pages (mirrors sitemap.xml - one line each)
+
+Every page below is served at `https://data.truthbeam.com/release/<name>` and also has `.md` and `.txt` mirrors at the same path (see note at the foot of this file).
+
+- [index.html](index.html): landing page and navigation hub for the Truth Beam release
+- [start.html](start.html): plain-language introduction - the problem, the idea, what is real today
+- [how-it-works.html](how-it-works.html): full mechanism walkthrough - challenge-response loop, the two guarantees, scope guards, related approaches
+- [README.html](README.html): structured, LLM-oriented entry point - read top to bottom first
+- [AGENTS.html](AGENTS.html): friendly entry point for AI agents
+- [ARTIFACTS.html](ARTIFACTS.html): claim -> artifact map (in-repo vs external, and what each backs)
+- [AI_IMPROV.html](AI_IMPROV.html): optically anchored AI improv - 38 live directions sealed into the v10 chain and time-anchored
+- [REPRODUCE.html](REPRODUCE.html): full reproduction paths - recompute the AUROC, regenerate scores, re-walk the chain
+- [VERIFY_FAST.html](VERIFY_FAST.html): seconds-fast, no-pip verification check
+- [SWARM_VERIFY.html](SWARM_VERIFY.html): the proof split into hundreds of tiny, independent, mostly browse-only checks
+- [TEMPORAL_VERIFICATION.html](TEMPORAL_VERIFICATION.html): the live RSK + drand time-window check, demonstrated for both sessions
+- [INTERROGATION_GUIDE.html](INTERROGATION_GUIDE.html): anticipated hostile questions with honest, scoped answers
+- [SECURITY.html](SECURITY.html): security policy - how to report a forgery or integrity issue, contact, response window
+- [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the full technical whitepaper (49 pp), text of record
 
 ## Entry points
 
-- [README.md](README.md): structured, LLM-oriented entry point — read top to bottom first
+- [README.md](README.md): structured, LLM-oriented entry point - read top to bottom first
 - [ARTIFACTS.md](ARTIFACTS.md): claim → artifact map (what is in-repo vs. external, and what each backs)
-- [AI_IMPROV.md](AI_IMPROV.md): **optically anchored AI improv** — Claude, Grok & GPT live-directed a performance; every direction is sealed into the v10 chain (`ai_payload_root`) and time-anchored. Browse all 38 directions at [`sessions/v10/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html)
-- [LICENSE](LICENSE): all rights reserved; no open-source licence, no patent licence
-- [CITATION.cff](CITATION.cff): citation metadata
+- [AI_IMPROV.md](AI_IMPROV.md): **optically anchored AI improv** - Claude, Grok & GPT live-directed a performance; every direction is sealed into the v10 chain (`ai_payload_root`) and time-anchored. Browse all 38 directions at [`sessions/v10/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html)
+- [how-it-works.md](how-it-works.md): the full mechanism walkthrough - challenge-response coupling, the hash/drand/Rootstock loop, the two guarantees (cryptographic ordering vs learned verification), verifier + recovery, scope guards, and related approaches (C2PA, VeriLight, optical PUFs). VeriLight's distinctive step is imperceptible visible-band embedding; the Truth Beam held the dynamic content-bound ground from its 2023 anchored recordings and prioritises strong characterisable signal with public drand/Rootstock time-binding, the filings describing imperceptible co-emission companions and infrared probing as the programme's own routes.
+- [SECURITY.md](SECURITY.md): security policy - how to report a forgery or integrity issue, contact, response window
+- **Licence:** all rights reserved - no open-source licence, no patent licence. Citation metadata (`CITATION.cff`, cite the paper and the patent) is in the source repository.
+
+> Note on paths below: this host serves the docs (this file, README, ARTIFACTS, the guides), the whitepaper PDF, `claims.json`, `SHA256SUMS`, the download tiers (`bash download.sh`), and the self-contained verify bundle. The `code/`, `results/`, and `docs/` **source trees are not browsable web paths** - they ship inside [`truthbeam_verify.tar.gz`](truthbeam_verify.tar.gz) and the source repository (the `paper/` tree is not shipped in the bundle yet; the whitepaper PDF is served at the site root and the LaTeX source is not published yet). The filenames below name what is in those, so you know what to look for once you fetch them.
 
 ## Paper
 
-- [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the whitepaper (46 pp)
-- [paper/main.tex](paper/main.tex) + [paper/sections/](paper/sections/) + [paper/refs.bib](paper/refs.bib): full LaTeX source — parse the text from here, no OCR needed
+- [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the whitepaper (49 pp)
+- LaTeX source is not published yet; it will ship with the source repository when that goes public. Until then, [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf) is the text of record.
 
 ## Verify (no GPU)
 
-- [code/recording/verify/verify_generator_hash.py](code/recording/verify/verify_generator_hash.py): code → hash (generator source digest committed in S_0)
-- [code/recording/verify/verify_v9.py](code/recording/verify/verify_v9.py): D2 chain walk (`--session-dir <dir>`; `--logs-only` verifies the chain math from ~4 MB of metadata)
-- [code/recording/verify/verify_v10.py](code/recording/verify/verify_v10.py): V10 chain walk (v10 transition incl. ai_payload_root)
-- [code/recording/verify/README_BUNDLE.md](code/recording/verify/README_BUNDLE.md) / [README_BUNDLE_v10.md](code/recording/verify/README_BUNDLE_v10.md): session-bundle reader's guides
-- [code/recording/verify/CLAIMS.md](code/recording/verify/CLAIMS.md) / [CLAIMS_v10.md](code/recording/verify/CLAIMS_v10.md): tiered claims manifests (DEMONSTRATED / ASSERTED / FUTURE)
+The verification code lives inside the self-contained verify bundle ([`truthbeam_verify.tar.gz`](truthbeam_verify.tar.gz)); run it with `bash verify_all.sh` (above), or read the browsable guides [VERIFY_FAST.md](VERIFY_FAST.md), [SWARM_VERIFY.md](SWARM_VERIFY.md) and [TEMPORAL_VERIFICATION.md](TEMPORAL_VERIFICATION.md) (the live RSK + drand time-window check, demonstrated for both sessions). Inside the bundle:
+
+- `code/recording/verify/verify_generator_hash.py`: code → hash (generator source digest committed in S_0)
+- `code/recording/verify/verify_v9.py`: D2 chain walk (`--session-dir <dir>`; `--logs-only` verifies the chain math from ~4 MB of metadata)
+- `code/recording/verify/verify_v10.py`: V10 chain walk (v10 transition incl. ai_payload_root)
+- `code/recording/verify/README_BUNDLE.md` / `README_BUNDLE_v10.md`: session-bundle reader's guides
+- `code/recording/verify/CLAIMS.md` / `CLAIMS_v10.md`: tiered claims manifests (DEMONSTRATED / ASSERTED / FUTURE)
 
 ## Results (primary artifacts)
 
-- [results/eval/](results/eval/): held-out eval summaries — headline AUROCs, shuffled control, F-A v1 checkpoints, cross-session report
-- [results/csv/visual_metrics_wide.csv](results/csv/visual_metrics_wide.csv): frame-level metric table, 9,735 rows × 33 cols
-- [results/eval/exp6_correct_e_rank/](results/eval/exp6_correct_e_rank/): EXP-6 per-frame ranking raw data (n=120 × 51 candidates)
-- [results/redteam_segmentation_evals/](results/redteam_segmentation_evals/): segmentation ablation, XOF bit-flip tables, excess-red, low-frequency recovery
+Fetched with `bash download.sh` (tiered: scores ~2 MB) and indexed by the manifests; inside the download / bundle:
+
+- `results/eval/`: held-out eval summaries - headline AUROCs, shuffled control, F-A v1 checkpoints, cross-session report
+- `results/csv/visual_metrics_wide.csv`: frame-level metric table, 9,735 rows × 33 cols
+- `results/eval/exp6_correct_e_rank/`: EXP-6 per-frame ranking raw data (n=120 × 51 candidates)
+- `results/redteam_segmentation_evals/`: segmentation ablation, XOF bit-flip tables, excess-red, low-frequency recovery
 
 ## Provenance & audit trail
 
-- [docs/verification_ground_truth.json](docs/verification_ground_truth.json) + [docs/whitepaper_claim_check.json](docs/whitepaper_claim_check.json): point-in-time claim audits (2026-06-01)
-- [docs/RELEASE_NOTE_ON_AUDIT_ARTIFACTS.md](docs/RELEASE_NOTE_ON_AUDIT_ARTIFACTS.md) + [docs/AUDIT_FIXES_2026-06-10.md](docs/AUDIT_FIXES_2026-06-10.md): how those audits were resolved
-- [docs/DATA_MODEL_PUBLISHING_PLAN.md](docs/DATA_MODEL_PUBLISHING_PLAN.md): data/model release tiers
+Point-in-time claim audits and release notes, in the verify bundle and source repository:
+
+- `docs/verification_ground_truth.json` + `docs/whitepaper_claim_check.json`: point-in-time claim audits (2026-06-01)
+- `docs/RELEASE_NOTE_ON_AUDIT_ARTIFACTS.md` + `docs/AUDIT_FIXES_2026-06-10.md`: how those audits were resolved
+- `docs/DATA_MODEL_PUBLISHING_PLAN.md`: data/model release tiers
+
+# NOTE: every .md document on this site also has a .txt mirror at the same path (.txt extension), served as text/plain, for agents that cannot fetch text/markdown.

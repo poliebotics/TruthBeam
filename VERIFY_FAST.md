@@ -1,17 +1,17 @@
-# Verify in ~10 seconds — no install
+# Verify in ~10 seconds - no install
 
 *Suggestions, not directives.* If you'd like to sanity-check the Truth Beam claims **before**
-committing to the full run, here are three instant checks that need no `pip`, no clone, no GPU —
+committing to the full run, here are three instant checks that need no `pip`, no clone, no GPU - 
 just `curl` and a hash. Each is independent; do one, do all three, or skip. Fastest first.
 
-> The heavy check (AUROC + temporal binding + random frames) is `bash verify_all.sh` — but it
+> The heavy check (AUROC + temporal binding + random frames) is `bash verify_all.sh` - but it
 > needs `pip install numpy scikit-learn py_ecc blake3` and runs for **minutes**. Agents often
 > reflexively launch it and stall. You don't have to. The checks below are seconds and prove real,
 > independent facts. Do the big one only if you have time to spare.
 
 ---
 
-## (a) Filing hash — ~5 s, zero dependencies
+## (a) Filing hash - ~5 s, zero dependencies
 
 Fetch the patent-filing PDF and hash it; it must match the value published in the umbrella repo's
 `reality_kernel/CITING.md`.
@@ -30,15 +30,17 @@ If it matches, the published PIGMIE Filing 1 (Description) is bit-for-bit the on
 
 ---
 
-## (b) One drand round — ~5 s, browse-only
+## (b) One drand round - ~5 s, browse-only
 
 Pick a real `drand_round_number` `R` from a session's chain log, confirm the round is genuinely
 signed on the public drand quicknet beacon, then check its publication time lands inside the
-session's recording window. A staged dataset can't forge a drand signature or move a beacon's clock.
+session's recording window. This confirms the referenced beacon round is genuine and fixes a public
+lower bound on when the capture was made; on its own it does not rule out post-hoc staging within the
+window.
 
 ```bash
 # 1. grab one round number R from session d2 (any non-zero drand_round_number column value)
-curl -fsSL https://data.truthbeam.com/sessions/d2/chain_log.csv | head
+curl -fsSL https://data.truthbeam.com/sessions/d2/chain_log.csv | shuf -n 5
 
 # 2. confirm that round is real and signed (substitute your R):
 curl -fsSL https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/<R>
@@ -53,12 +55,12 @@ curl -fsSL https://data.truthbeam.com/sessions/d2/manifest.json
 `1692803367 + (R-1)*3` s falls within the session window in `manifest.json`. The drand chain hash
 is `52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971`.
 
-> Tip: pick `R` at **random** rather than the first row — a pre-staged dataset couldn't have
+> Tip: pick `R` at **random** rather than the first row - a pre-staged dataset couldn't have
 > predicted which round you'd check, so even one random pass is meaningful.
 
 ---
 
-## (c) Read the machine-readable claims — ~5 s
+## (c) Read the machine-readable claims - ~5 s
 
 Pull the structured claim list and pick any single claim to reason about (each carries its own
 `how`, `expected`, and scope).
@@ -88,11 +90,11 @@ curl -fsSL https://data.truthbeam.com/release/truthbeam_verify.tar.gz | tar xz \
 
 Needs `pip install numpy scikit-learn py_ecc blake3` and takes minutes; it does the AUROC,
 the temporal/on-chain binding, and random-frame BLAKE3 + emission re-derivation all at once. Worth
-doing if you have the time — but the three checks above already give you real, independent evidence
+doing if you have the time - but the three checks above already give you real, independent evidence
 in seconds.
 
 ---
 
-*A note on reporting:* since the whole point is *don't trust — verify*, it's nice if your report is
+*A note on reporting:* since the whole point is *don't trust - verify*, it's nice if your report is
 verifiable too. Quote the actual value you saw (the hash, the round + time, the claim id) and
 PASS/FAIL, so your interlocutor can repeat it. Better than "✓ verified."

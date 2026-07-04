@@ -6,7 +6,7 @@
 #
 #    ./download.sh                 # menu + sizes
 #    ./download.sh scores          # ~2 MB    Path A inputs (recompute the AUROC)
-#    ./download.sh models          # ~1.1 GB  verifier + F-A v1 forger weights
+#    ./download.sh models          # ~2.5 GB  verifier + F-A v1 forger weights
 #    ./download.sh sample [d2|v10] # ~180 MB  a TASTE: one session metadata +
 #                                  #          8 preview/emission pairs + 2 raw frames
 #    ./download.sh video           # ~640 MB  the hand-made 2023 video (+ 64s intro)
@@ -37,7 +37,7 @@ menu() {
 TruthBeam download helper — you don't need the whole 378 GiB to look.
 
   scores    ~2 MB     Path A inputs — recompute the headline AUROC yourself
-  models    ~1.1 GB   verifier (456 MB) + F-A v1 forger checkpoints
+  models    ~2.5 GB   verifier (478 MB / 455 MiB) + F-A v1 forger checkpoints (484 MiB each)
   sample    ~180 MB   a taste of one session: metadata + 8 preview/emission
                       pairs + 2 raw frames — enough to SEE the data
                       (then: python3 code/recording/verify/verify_frames.py 5 d2)
@@ -58,7 +58,7 @@ scores() {
     get "models/repro/stage_0_eval/step_$ck/stage0_${s}_raw.npz"; done; done
 }
 models() {
-  echo "[models] verifier + forger weights (~1.1 GB)..."
+  echo "[models] verifier + forger weights (~2.5 GB)..."
   get "models/verifier/model_final.pt"
   for ck in 00005000 00025000 00070000 00100000; do get "models/fa_v1_forger/f_a_v1_step_$ck.pt"; done
 }
@@ -87,10 +87,10 @@ session() {
   echo "Mirroring sessions/$s/ ... (Ctrl-C to stop; re-run to resume)"
   # uses the published per-file URL list if present, else the gateway directory walk
   if [ -f "downloads/${s}_files.txt" ]; then
-    ( cd "$OUT" && wget -x -c -i "$OLDPWD/downloads/${s}_files.txt" )
+    ( cd "$OUT" && wget -x -nH -c -i "$OLDPWD/downloads/${s}_files.txt" )
   else
     echo "Per-file list downloads/${s}_files.txt not found next to this script."
-    echo "Get it from the PolieBotics umbrella repo (DOWNLOADS.md) and: wget -x -c -i ${s}_files.txt"
+    echo "Get it from the PolieBotics umbrella repo (DOWNLOADS.md) and: wget -x -nH -c -i ${s}_files.txt"
   fi
 }
 

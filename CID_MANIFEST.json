@@ -79,12 +79,13 @@
     "PolieBotics": "QmQ2BTcVWBEZqL7pBJNsbfjc37AwT18byknVvPmmQwgWZa"
   },
   "videos": {
-    "FULL_128_TEST_v108.mp4": "QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y",
     "PolieBotics.mp4": "QmP8JDfeBCunq4VQ8f6XUbiLJK55dG9jLav7k5q2HpnmxS",
     "TruthBeam_Introduction.mp4": "QmbFg3dRqgyJBKBQJ1ung4uz5Z5tBfPq74chngqeoYgUyd",
     "RealityTransform_OpenPose.mp4": "QmQKkUtjEVBpfFkFHjAdgJxti9WLxUa4JmfeUqk7Ek9d8b",
     "RealityTransform_Deforum_1.mp4": "QmVBcc5nXeckLMrcucC9nR7b3qDfi7q9rjssKHF4Mwzsiy",
-    "RealityTransform_Deforum_2.mp4": "QmUNwZPaT9L9iTmZftdpCrQWwfNuJvh3Xgx4zWNkvQ6EHf"
+    "RealityTransform_Deforum_2.mp4": "QmUNwZPaT9L9iTmZftdpCrQWwfNuJvh3Xgx4zWNkvQ6EHf",
+    "FULL_128_TEST_v108.mp4": "QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y",
+    "FULL_128_TEST_v123.mp4": "QmXop4XNDqYTNPq8e58aagvztQYBxpocNGjpMZMsQE3Xfd"
   },
   "models_public": {
     "models/verifier/model_final.pt": "QmPthdv3CvW2dyRRYJ7Aqgvwc5qN5D2ujLRVr8e1wWMoAY",
@@ -100,7 +101,10 @@
     "PIGMIE_Filing1_Description_v0_38.pdf": "QmNwUZiiFMcVhrDcMsZ7U5WTKtgTmnF8FiE4hfGZUKQTbb",
     "PIGMIE_Filing1_Drawings_v0_38.pdf": "QmbDv3YRaLdMNcCJaX81MoaSxBh5ukFxHypBQFCNXQszvp",
     "PIGMIE_Filing2_Description_v42.pdf": "QmZuLRUTCBXEDb2SPr91Hi5qCay6EpeXCS13CmLHmUS6h6",
-    "PIGMIE_Filing2_Drawings_v42.pdf": "QmPS8bWrRRpDMHbVPbScRcihA6ixRtNyYqqHKtgDMqq89e"
+    "PIGMIE_Filing2_Drawings_v42.pdf": "QmPS8bWrRRpDMHbVPbScRcihA6ixRtNyYqqHKtgDMqq89e",
+    "PIGMIE_Filing3_Description_v0_2.pdf": "QmTRZQgxYxBXAZmLHMW9uapR2ZxeQbqte6DG8MPGDV8CDL",
+    "PIGMIE_Filing3_Drawings_v0_2.pdf": "QmZZpZ7HdhZfMxAqCVuSVHEQhQV6Qj8jfoL1KhfVVnhuKA",
+    "PIGMIE_Filing3_Abstract_v0_2.pdf": "Qmc1hGWFUY4x9npBKzzwMM6ePZKLvFE23tnSvS1Bhp9x53"
   },
   "repos_snapshot": {
     "_note": "v0 of `git archive HEAD | ipfs add -r` (no .git); recompute from the release tag at push, since the manifest's own presence changes the tree",
@@ -117,6 +121,6 @@
       "commit": "75584c6"
     }
   },
-  "verify_note_videos": "videos/models/examples are CIDv0 (default `ipfs add`, == Pinata). Verify any file: `ipfs add --only-hash -Q <file>` must equal the listed CID. All videos/models/examples listed here are PINNED on Pinata — retrievable via any IPFS gateway by CID.",
+  "verify_note_videos": "videos/models/examples are CIDv0 (default `ipfs add`, == Pinata). Verify any file: `ipfs add --only-hash -Q <file>` must equal the listed CID. All videos/models/examples listed here are PINNED on Pinata - retrievable via any IPFS gateway by CID.",
   "pinned_on_pinata": true
 }
