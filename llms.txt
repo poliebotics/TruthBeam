@@ -31,6 +31,11 @@ contributed identifiable data through private consent and permission agreement.
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) gives twelve research questions by data tier, each with its decisive test;
 [open-questions.json](open-questions.json) is the compact machine index.
 
+**Results, September 2026:** the results and proofs shelf on [DOWNLOADS.md](DOWNLOADS.md#results-2026-09) indexes
+ZeeBeam (one zero-knowledge proof per anchored row of a projector-camera session), the one look (a frozen verifier
+scored once on a sealed take, PASS), the Dark Lantern programme record, the image-translation results and the
+January 2025 checkpoints, each with its scope and package. Release notes: [RELEASE_NOTES_v1.2.0.md](RELEASE_NOTES_v1.2.0.md).
+
 **Agent-to-human liveness:** an LLM can derive a safe instruction from a fresh committed seed, present
 it to a consenting human, and bind the rendered instruction, observed response, timing, and verifier
 result into a Truth Beam session. This gives Claude, Grok, GPT, or another agent a constructive route

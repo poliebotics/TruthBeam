@@ -1,14 +1,15 @@
 ---
-version: "2.0"
-date: "2026-08-03"
+version: "2.1"
+date: "2026-09-07"
 status: "public"
 author: "Xathal"
 ---
 
 # Truth Beam downloads
 
-Current release: D2 and V10. Verified historical records follow. Each link
-opens a file or control record.
+Current release: D2 and V10. The September 2026 results and proofs shelf and the
+verified historical records follow. Each link opens a file, a repository or a
+control record.
 
 <a id="current-d2-v10"></a>
 
@@ -31,7 +32,33 @@ logs, model files, films, patent documents and historical IPFS register.
 Claim ceiling: finite held-out tests from two sessions on one rig. AUROC 1.000
 is the observed estimate on those samples. F-A v1 is the trained attacker. F-A
 v2 remains a design; adaptive-attacker work remains open. Start with
-[Reproduce](REPRODUCE.html) or [Verify](VERIFY_FAST.html).
+[Reproduce](REPRODUCE.md) or [Verify](VERIFY_FAST.md).
+
+<a id="results-2026-09"></a>
+
+## Results and proofs, September 2026
+
+Every entry below is a positive, measured result of the programme, published with its scope. Each links to the
+repository or package that carries the bytes, the checks and the audit record. Nothing in this table is a held-out
+estimate for another rig, room or person unless it says so, and none of it establishes liveness or adversarial
+resistance. Read the row, then read the package.
+
+| Result | In plain English | Boundary | Where |
+|---|---|---|---|
+| **ZeeBeam: The Zero-Knowledge Beam** (paper and proofs) | For each of 259 anchored rows of a 712-row projector-camera session recorded on 22 August 2026, one zero-knowledge proof (356-byte Groth16, with a 1,101-byte public statement that carries no pixels) shows that the drand beacon signatures for the row and its predecessor verify, that the BLAKE3 chain advanced as specified, that the projected pattern came from that chain, that two frozen networks produced the published scores on the committed frame, and that the row sits in the session tree; a second proof covers the whole 712-row chain log. | One session, one rig, one performer. The proof establishes that the recorded computation happened on committed bytes; the physical meaning of the pose class is confounded with time on this take. | [github.com/poliebotics/zeebeam](https://github.com/poliebotics/zeebeam), manuscript at [paper/zeebeam.md](https://github.com/poliebotics/zeebeam/blob/main/paper/zeebeam.md) |
+| **One Look Is All You Get** (the one look, PASS) | The frozen coupling verifier proved inside ZeeBeam was scored exactly once on a sealed 288-row take it had never seen, under criteria fixed in advance: AUROC 0.999879 and 0.997782 on the two donor maps, 1 and 7 false accepts, 4 and 4 false rejects of 288, 144 of 144 reciprocal pairs ordered correctly in both directions, shuffled-emission controls at 0.4986 and 0.4960. The opening was authorised by one recorded owner sentence and the evaluation program refused to run twice. | Same rig, subject and room as the development take, recorded minutes after it. Nothing about another rig, room or subject, liveness or adversaries; the zero-knowledge proof covers the development take, not this one. | [data.truthbeam.com/results/one_look_20260906/v1/](https://data.truthbeam.com/results/one_look_20260906/v1/README.md) |
+| **Dark Lantern: Zero-Knowledge Light, Shuttered by Design** (programme record) | The curated public record of the privacy and zero-knowledge programme behind ZeeBeam: standalone proofs, diagnostics, notes, audit prompts and verdicts, published under the rule of positive, patent-supporting results disclosed as fully as the record allows. | A publication subset; its notices identify what was omitted and what cannot be rebuilt from the tree. | [github.com/poliebotics/dark-lantern](https://github.com/poliebotics/dark-lantern) |
+| **No Training Required** (train-free coupling statistic) | A statistic with no fitted parameters separates matched projector-camera frames from mismatched ones on the 975 held-out tail frames of the two public sessions, with pooled AUROC between 0.683 and 0.756 at each of the five grid sizes tested (4, 8, 16, 32 and 64), and holds under five recorded within-session shuffles and four hard-negative families registered before scoring. | Retrospective, on previously inspected frames of trained-on sessions; a threshold that transfers between sessions was not tested; no liveness or adversarial claim. | [results/train_free_coupling_20260906](https://github.com/poliebotics/dark-lantern/tree/main/results/train_free_coupling_20260906) |
+| **Sixteen Cells, One Threshold** (exact grid proof) | Two PLONK proofs certify, in exact integer arithmetic over committed 4 by 4 cell-sum grids of a real public capture, that the matched emission correlates above one eighth and a recorded mismatch below it. | Two public examples with a threshold chosen after inspection: a demonstration of the proof system, not of confidentiality or generalisation. | [proofs/train_free_grid_correlation_20260906](https://github.com/poliebotics/dark-lantern/tree/main/proofs/train_free_grid_correlation_20260906) |
+| **Two Proofs, One Commitment** (conditional micro-proofs) | Two PLONK proofs over one committed collection of 4 by 4 tensors establish a frozen discriminator margin and a fixed-noise residual inequality; both verify, and every recorded mutation and malformed artefact rejects. | Arithmetic feasibility of frozen conditional computation over shared hidden inputs, not a two-sided verifier; each aggregate passes while one of its two directions fails. | [proofs/conditional_micro](https://github.com/poliebotics/dark-lantern/tree/main/proofs/conditional_micro) |
+| **The pose proofs** | Two Groth16 proofs of a frozen eleven-class pose classifier's verdict over committed frame bytes, cropped and uncropped, with their receipts and public values. | Computational integrity over committed pixels; what the pose class means physically is confounded with time on the only take. | [proofs/pose_cropped](https://github.com/poliebotics/dark-lantern/tree/main/proofs/pose_cropped) and [proofs/pose_uncropped](https://github.com/poliebotics/dark-lantern/tree/main/proofs/pose_uncropped) |
+| **Following the Light** (image-translation results) | Eight pix2pixHD runs on the two public sessions, scored on their 975 held-out tail frames. Six static-condition discriminators separate matched from mismatched pairs with AUROC between 0.692 and 0.965 over 400 recorded targets. Two temporal generators, given the recorded emission against a recorded alternative under the intended fixed context (the previous emission and the previous real capture reused), produced outputs closer to the real capture with the recorded emission on 972 of 973 and 973 of 973 frames. | Exploratory evidence consistent with current-emission correspondence, as the package states: the record does not bind the two generation runs to identical checkpoint bytes, history inputs or runtime versions; held-out frames of trained-on sessions; no unseen-session or liveness claim. | [data.truthbeam.com/results/p2pv2v_20260906/v1/](https://data.truthbeam.com/results/p2pv2v_20260906/v1/RESULTS.md) |
+| **pix2pixHD checkpoints, January 2025** | The full earlier training run on Truth Beam emission-to-recording pairs: 75 generator and 75 discriminator checkpoints, the training logs and the epoch gallery, published for inspection with a model card. | A model card without performance claims; the training corpus was not recovered. | [data.truthbeam.com/models/truth_beam_pix2pixhd_2048_1024/v1/](https://data.truthbeam.com/models/truth_beam_pix2pixhd_2048_1024/v1/_control/README.md) |
+
+Patent position: the matter above is the subject of Irish patent applications filed on 25 August 2026 and
+6 September 2026, in addition to the filings listed on the [PolieBotics repository](https://github.com/poliebotics/PolieBotics).
+They are unpublished applications, not grants. Publication of the results permits inspection and independent
+verification; it grants no licence under any of them.
 
 <a id="historical-truthbeam"></a>
 
@@ -84,13 +111,13 @@ custody and reproduced both historical CIDs.
 
 | Record | Link |
 |---|---|
-| Reconstruction and recovery account | [read](recovery/index.html) |
+| Reconstruction and recovery account | [read](https://data.truthbeam.com/release/recovery/index.html) |
 | Byte-exact frame | [download](https://data.truthbeam.com/pinata/RECOVERED_truth_beam_poliepals_trailer/000511_bc48b046016adb2ed149471ab0f683f5a9d8dbff9cd544ba2048231c1a4007b2.npy) |
 | Recovered UnixFS block 32 | [download](https://data.truthbeam.com/pinata/RECOVERED_truth_beam_poliepals_trailer/lost_block_32.bin) |
-| Recovery receipt | [open](recovery/RECOVERY_RECEIPT.html) |
+| Recovery receipt | [open](recovery/RECOVERY_RECEIPT.md) |
 | Reconstruction code | [source](recovery/reconstruct_emission.py) |
-| Recorder provenance | [open](recovery/recorder-source/SOURCE_PROVENANCE.html) |
-| Recorder used in April 2023 | [redacted source](recovery/recorder-source/truth_beam_2023_REDACTED.py) |
+| Recorder provenance | [open](https://data.truthbeam.com/release/recovery/recorder-source/SOURCE_PROVENANCE.html) |
+| Recorder used in April 2023 | [redacted source](https://data.truthbeam.com/release/recovery/recorder-source/truth_beam_2023_REDACTED.py) |
 
 The public recorder copy replaces the signing key with an environment-variable
 lookup. Recording, BLAKE3-XOF, projection, capture, chain-log and Rootstock
@@ -184,6 +211,7 @@ Start with the manifest. It says exactly what you are downloading.
 
 | Version | Date | Change |
 |---|---|---|
+| 2.1 | 2026-09-07 | Added the September 2026 results and proofs shelf: ZeeBeam, the one look, Dark Lantern, the image-translation results, the January 2025 checkpoints, and the patent position. Links that resolved only on the site now resolve in the repository too. |
 | 2.0 | 2026-08-03 | Simplified the index and recorded all seven December 2024 captures, including the anchored session. |
 | 1.4 | 2026-08-03 | Corrected the release hierarchy and retained complete historical records. |
 | 1.3 | 2026-08-02 | Added the six-file December 2024 release and resumable recipes. |

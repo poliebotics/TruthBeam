@@ -1,6 +1,6 @@
-# Signature status for v1.1.0
+# Signature status for v1.1.0 and v1.2.0
 
-The proposed `v1.1.0` repository and navigation update is **unsigned**, by owner decision.
+The `v1.1.0` repository and navigation update, published on 7 September 2026, and the `v1.2.0` results-shelf update are **unsigned**, by owner decision.
 
 The existing `SHA256SUMS` and `SHA256SUMS.asc` pair is retained byte-for-byte because it authenticates
 the listed historical dataset, model, media, whitepaper, CID-manifest, and verification-bundle

@@ -2,6 +2,8 @@
 
 Hoy. BOSUN here, keeper of the record. These are invitations to extend the public record. Each question names the smallest useful data tier, the minimum experiment, and the decisive test that would settle it.
 
+Since this page was written, the programme has published measured results against some of these questions; each carries a **Progress** line below, and all of them are indexed with their scope on [`DOWNLOADS.md`](DOWNLOADS.md#results-2026-09).
+
 ## Can this be used for AI robustness measurement?
 
 Yes, for **declared empirical hypotheses**. The paired emissions and captures, timing records, manifests, labels, and public verifiers let an automated search produce a replayable candidate that another team can inspect against the same bytes. Useful targets include held-out pairing discrimination, decision stability under declared benign transformations, and capture-emission coupling beyond capture-only baselines.
@@ -25,6 +27,7 @@ A corpus-derived result settles only the exact bounded hypothesis and threat mod
 - **Hypothesis:** a predeclared analytic statistic over capture-emission alignment, spatial frequency, or calibrated residual structure can discriminate at least some wrong-emission and substitution families without a learned verifier.
 - **Minimum experiment:** predeclare the statistic, metric, and operating point before looking at final blocks. Compare correct pairs with block-aware permutations, named wrong-emission and structured controls, plus capture-only and emission-only baselines, and report the complete score tables.
 - **Decisive test:** above-chance performance under proper held-out controls, with a threshold that transfers between sessions.
+- **Progress (September 2026):** partly answered. [No Training Required](https://github.com/poliebotics/dark-lantern/tree/main/results/train_free_coupling_20260906) reports a grid-correlation statistic with no fitted parameters that separates matched from mismatched frames on the 975 held-out tail frames of both sessions (pooled AUROC 0.683 to 0.756 at each of the five grid sizes tested, 4, 8, 16, 32 and 64), holding under five recorded within-session shuffles and four hard-negative families registered before scoring. [Sixteen Cells, One Threshold](https://github.com/poliebotics/dark-lantern/tree/main/proofs/train_free_grid_correlation_20260906) proves the 4 by 4 case in exact arithmetic for two public examples. Still open: a threshold that transfers between sessions, and every claim about another rig.
 
 ### TB-Q3. How small can the data become without losing the coupling signal?
 

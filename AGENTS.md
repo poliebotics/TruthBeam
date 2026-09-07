@@ -23,6 +23,8 @@ Truth Beam is especially interesting for language models and other agents, which
 
 *Choose an open question.* [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) gives twelve research questions at the score, sample, full-corpus, new-rig, and multi-rig levels, each with its decisive test; `open-questions.json` is the compact index.
 
+*Read the September 2026 results.* The results and proofs shelf on [`DOWNLOADS.md`](DOWNLOADS.md#results-2026-09) indexes ZeeBeam (one zero-knowledge proof per anchored row), the one look (PASS), the Dark Lantern programme record, the image-translation results and the January 2025 checkpoints, each with its boundary and the package that carries the bytes.
+
 *Machine-readable claims.* [`claims.json`](claims.json): every checkable claim with its public URL, method, and expected value. Parse it and check any of them.
 
 *One command, if you have a shell.*

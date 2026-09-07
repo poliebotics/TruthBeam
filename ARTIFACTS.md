@@ -19,7 +19,7 @@ R2 does not serve browsable directory listings, so this is the index. Every arti
 
 | Artifact | Direct link | Size | Integrity |
 |---|---|---|---|
-| Verify bundle (verifier + forger + recording code + scripts) | [`release/truthbeam_verify.tar.gz`](truthbeam_verify.tar.gz) | 3.2 MB (3.1 MiB) | SHA-256 `79a00359b53cda35c35bd23600f7f7ca5bf2ec7e31360fdcffecccb4f6d7ec10`; see [REPRODUCE.md](REPRODUCE.md) |
+| Verify bundle (verifier + forger + recording code + scripts) | [`release/truthbeam_verify.tar.gz`](https://data.truthbeam.com/release/truthbeam_verify.tar.gz) | 3.2 MB (3.1 MiB) | SHA-256 `79a00359b53cda35c35bd23600f7f7ca5bf2ec7e31360fdcffecccb4f6d7ec10`; see [REPRODUCE.md](REPRODUCE.md) |
 | Eval scores (Path A recompute input) | `models/repro/stage_0_eval/` (fetched automatically by `verify_all.sh` / `download.sh scores`) | ~2 MB (8 merged files; full set 4.3 MB) | regenerable from the weights (Path A.5) |
 | Verifier weights (`model_final.pt`, 39.8 M params) | [`models/verifier/model_final.pt`](https://data.truthbeam.com/models/verifier/model_final.pt) | 478 MB (455 MiB) | in the models IPFS unit (CID below) |
 | F-A v1 forger checkpoints (4 steps) | [5k](https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00005000.pt) · [25k](https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00025000.pt) · [70k](https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00070000.pt) · [100k](https://data.truthbeam.com/models/fa_v1_forger/f_a_v1_step_00100000.pt) | 1.89 GiB | public weights, in the models unit |

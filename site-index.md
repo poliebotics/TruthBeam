@@ -26,10 +26,11 @@ bash verify_all.sh
 
 The measured release is one rig, two sessions, one performer, and one trained non-adaptive forger. That scope travels with the number. The platform and its wider embodiments are described in the public Reality Kernel patent specifications.
 
-## Four useful doors
+## Five useful doors
 
 - **Evidence:** [Truth Beam source, data, whitepaper, and checks](README.md)
 - **The record, 2023 to 2026:** [downloads, immutable archives, and the byte-exact 2023 emission recovery](DOWNLOADS.md)
+- **Results and proofs, September 2026:** [ZeeBeam, the one look, Dark Lantern and the image-translation results, each with its scope](DOWNLOADS.md#results-2026-09)
 - **Patent-pending platform:** [PolieBotics and the Reality Kernel](https://poliebotics.com)
 - **Mathematics and imagination:** [Narthex and PoliePals](https://poliepals.com/narthex/)
 

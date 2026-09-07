@@ -1,5 +1,5 @@
 {
-  "schema": "truthbeam-open-questions/0.4",
+  "schema": "truthbeam-open-questions/0.5",
   "status": "research invitations, not established claims",
   "participation_boundary": {
     "independent_work": "Verification of the published data, bounded analysis, and comparable measurements from a compatible independently operated rig are welcome.",
@@ -10,7 +10,8 @@
     "human_agenda": "OPEN_QUESTIONS.md",
     "downloads": "START_WITH_DATA.md",
     "contributing": "CONTRIBUTING.md",
-    "permission": "RESEARCH_PERMISSION.md"
+    "permission": "RESEARCH_PERMISSION.md",
+    "results": "DOWNLOADS.md#results-2026-09"
   },
   "questions": [
     {
@@ -31,7 +32,17 @@
       "scope": "Analytic same-rig diagnostic, not a universal verifier.",
       "requires_new_capture": false,
       "evidence_anchor": "how-it-works.md",
-      "decisive_test": "above-chance performance under proper held-out controls, with a threshold that transfers between sessions."
+      "decisive_test": "above-chance performance under proper held-out controls, with a threshold that transfers between sessions.",
+      "progress": {
+        "date": "2026-09-06",
+        "status": "partly answered",
+        "result": "No Training Required: a grid-correlation statistic with no fitted parameters separates matched from mismatched frames on the 975 held-out tail frames of both sessions, pooled AUROC 0.683 to 0.756 at each of the five grid sizes tested (4, 8, 16, 32 and 64), under five recorded within-session shuffles and four registered hard-negative families; Sixteen Cells, One Threshold proves the 4 by 4 case in exact arithmetic for two public examples.",
+        "open": "a threshold that transfers between sessions; any claim about another rig",
+        "urls": [
+          "https://github.com/poliebotics/dark-lantern/tree/main/results/train_free_coupling_20260906",
+          "https://github.com/poliebotics/dark-lantern/tree/main/proofs/train_free_grid_correlation_20260906"
+        ]
+      }
     },
     {
       "id": "TB-Q3",
