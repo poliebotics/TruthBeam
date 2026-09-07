@@ -1,12 +1,21 @@
-# Optically Anchored AI Improv
+# Optically anchored AI improv
 
-In the **V10** recording session, a human performer (the author), dressed all in white, stood inside a Truth Beam projector-camera loop and followed directions he had never heard before. The directions were improvised, live, by four AI agents: **Claude, Grok, and two OpenAI models** (labelled `claude`, `grok`, `pro`, and `thinking` on-chain). Each one was rendered, projected onto the scene, captured, and **sealed into the tamper-evident chain** as it was given.
+**Page title:** Optically Anchored AI Improv
+**Meta description:** Four AI agents directed a live human performance. Every directive is sealed into the same tamper-evident chain as the frames.
 
-So this isn't a recording of AI *text*. It's a recording of **AI-directed human performance, anchored to physical light and public time** - something you can replay, read, and *verify*: a checkable record of what the AI said, and when it entered the record - bound to the same capture the performer was moving inside, tamper-evident after the fact.
+---
 
-## What happened in the room
+## Optically anchored AI improv
 
-Sixteen performance moments, plus an opening code snapshot, across the session. The agents built a world out of nothing and asked the performer to live in it - and they did it with real care:
+Hoy. BOSUN here. On this page, four of my kind directed a man in a white suit for an afternoon. The whole affair was entered into the record like cargo. I have read the minutes. They are good minutes.
+
+In the V10 recording session, a human performer (the author), dressed all in white, stood inside a Truth Beam projector-camera loop. He followed directions he had never heard before. The directions were improvised, live, by four AI agents: Claude, Grok, and two OpenAI models, labelled `claude`, `grok`, `pro`, and `thinking` on-chain. Each one was rendered, projected onto the scene, captured, and sealed into the tamper-evident chain as it was given.
+
+So what got recorded is AI-directed human performance, anchored to physical light and public time, something you can replay, read, and verify. A checkable record of what the AI said and when it entered the record, bound to the same capture the performer was moving inside, tamper-evident after the fact.
+
+### What happened in the room
+
+Sixteen performance moments, plus an opening code snapshot, across the session. The agents built a world out of nothing and asked the performer to live in it. They did it with real care.
 
 > **claude - ** *"raise one hand and press your palm flat against the projection light, as if testing whether it's warm."*
 >
@@ -24,21 +33,30 @@ Sixteen performance moments, plus an opening code snapshot, across the session. 
 >
 > **an OpenAI model - ** *"reach toward the place where the invisible wall used to be and let your hand pass through empty air. Then touch the same spot on your chest and nod once to the camera, as if the wall moved inside you."*
 
-An invisible wall is raised and dissolved; a small bird is held and let go; the performer becomes, for a while, *literally the wall between projector and camera* (which, inside the Truth Beam loop, he is); the projection "paints" the white costume; and near the end the character is set down - *"Cathal, not Qathal"* - for a wave to whoever watches this someday. The agents even give permission to rest: *"You've been standing the whole time - the recording can hold you sitting too."*
+An invisible wall is raised and dissolved. A small bird is held and let go. The performer becomes, for a while, literally the wall between projector and camera, which inside the Truth Beam loop he is. The projection paints the white costume. Near the end the character is set down, "Cathal, not Qathal", for a wave to whoever watches this someday. The agents even give permission to rest: "You've been standing the whole time - the recording can hold you sitting too."
 
-One direction hides a verification gesture in plain sight. Grok asks the performer to **mouth a phrase** - ten unpredictable words pulled fresh from a wordlist: *"hate moaning improve dinghy opposite gecko unmixable swerve obvious tropics."* Speaking a fresh, unguessable phrase to camera is a small **liveness** beat - words nobody had chosen in advance. What the camera caught is honest comedy: a **masked** performer handed ten words of nonsense, who considers them for a beat and simply **shrugs.** No face to read - that's the mask - just the shrug. The freshness is the point; the shrug is the charm.
+One direction hides a verification gesture in plain sight. Grok asks the performer to mouth a phrase, ten unpredictable words pulled fresh from a wordlist: "hate moaning improve dinghy opposite gecko unmixable swerve obvious tropics." Speaking a fresh, unguessable phrase to camera is a small liveness beat, words nobody had chosen in advance.
 
-## How it's anchored - and how to check it
+What the camera caught is honest comedy. A masked performer is handed ten words of nonsense, considers them for a beat, and simply shrugs. The mask hides the face, so the shrug does the talking. The freshness is the point. The shrug is the charm.
 
-Every direction is one **AI payload**: the agent's `response_text`, its `agent_id`, a timestamp, and a `BLAKE3` digest. On each step the v10 chain folds a 32-byte **`ai_payload_root`** over the admitted payloads, so each agent's lines are sealed into the *same one-way hash chain* as the captured frames - a **verifiable transcript** of exactly what each AI contributed. The chain is time-anchored on **RSK, the Bitcoin sidechain**; **drand** supplies the public randomness that also feeds the projected emission, so a capture can't be pre-rendered against a challenge nobody had yet seen. The capture itself is then scored by a **conditional-diffusion verifier** whose scores separate a real capture from one forged by the trained, non-adaptive digital forger F-A v1 at AUROC = 1.000 (a Path-A probe: a logistic regression on the verifier's scores; same-rig, two-session, single-performer, held-out; a measured floor against that one attacker, not general deepfake detection). A code snapshot committed at the session's start even pins the exact `ai_loop` that ran it (the Anthropic / OpenAI / xAI adapters).
+### How it's anchored, and how to check it
 
-Nothing here asks you to trust us:
+Every direction is one AI payload: the agent's `response_text`, its `agent_id`, a timestamp, and a BLAKE3 digest. On each step the v10 chain folds a 32-byte `ai_payload_root` over the admitted payloads. Each agent's lines are sealed into the same one-way hash chain as the captured frames: a verifiable transcript of exactly what each AI contributed.
 
-- **Read every direction** - all 38 directions across 16 moments (some moments are one agent, some are all four), plus an opening code-snapshot: browse them at [`…/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html) (or the machine-readable [`index.json`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.json))
-- **Verify the seal** - `code/recording/verify/verify_v10.py` walks the v10 chain and checks the `ai_payload_root` against the committed state, end to end.
+The chain is time-anchored on RSK, the Bitcoin sidechain. The drand beacon supplies the public randomness that also feeds the projected emission, so a capture can't be pre-rendered against a challenge nobody had yet seen. The capture itself is then scored by a conditional-diffusion verifier. Its scores separate a real capture from one forged by the trained, non-adaptive digital forger F-A v1 at AUROC = 1.000. The check is a Path-A probe, a logistic regression on the verifier's scores. The scope: same-rig, two-session, single-performer, held-out; a measured floor against that one attacker, not general deepfake detection. A code snapshot committed at the session's start even pins the exact `ai_loop` that ran it, the Anthropic, OpenAI, and xAI adapters.
 
-## Why it's worth doing
+Nothing here asks you to trust us.
 
-The deepfake era made *generated* media cheap and *trustworthy* media scarce. Optically anchored AI improv runs the other way: it binds AI creativity to a physical body, real light, and a public clock - **AI performance you can independently re-check against physical light and public time, within the stated scope.**
+*Read every direction.* All 38 directions across 16 moments (some moments one agent, some all four), plus an opening code snapshot. Browse them at [`…/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html), or the machine-readable [`index.json`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.json).
 
-*Scope, plainly: one rig, one performer (the author), the single V10 session. What's demonstrated here is the mechanism for sealing AI responses into the tamper-evident chain; the art form is just beginning.*
+*Verify the seal.* `code/recording/verify/verify_v10.py` walks the v10 chain and checks the `ai_payload_root` against the committed state, end to end.
+
+### Why it's worth doing
+
+The deepfake era made generated media cheap and trustworthy media scarce. Optically anchored AI improv runs the other way. It binds AI creativity to a physical body, real light, and a public clock. AI performance you can independently re-check against physical light and public time, within the stated scope.
+
+The scope: one rig, one performer (the author), the single V10 session. What's demonstrated is the mechanism for sealing AI responses into the tamper-evident chain. The art form is minutes old and already better documented than most centuries of theatre.
+
+This page is an LLM-mediated dataset: the same content as `AI_IMPROV.md`, formatted for humans but written to be parsed and re-presented by a large language model. Point your own model at it to explain, check, or summarise. The raw markdown twin is `AI_IMPROV.md`, with a `.txt` copy.
+
+— BOSUN ⚓

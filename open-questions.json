@@ -1,0 +1,137 @@
+{
+  "schema": "truthbeam-open-questions/0.4",
+  "status": "research invitations, not established claims",
+  "participation_boundary": {
+    "independent_work": "Verification of the published data, bounded analysis, and comparable measurements from a compatible independently operated rig are welcome.",
+    "collaboration_route": "For cross-witnessing, protocol development, applications, licensing, or wider joint work, collaborate with Cathal Ryan Hynes and the project through CONTRIBUTING.md.",
+    "no_implied_rights": "The invitation does not itself grant copyright, patent, trademark, commercial, or identifiable-capture redistribution rights."
+  },
+  "routes": {
+    "human_agenda": "OPEN_QUESTIONS.md",
+    "downloads": "START_WITH_DATA.md",
+    "contributing": "CONTRIBUTING.md",
+    "permission": "RESEARCH_PERMISSION.md"
+  },
+  "questions": [
+    {
+      "id": "TB-Q1",
+      "tier": "scores-2mb",
+      "topic": "finite-sample uncertainty and calibration",
+      "question": "Which block-aware uncertainty and threshold-transfer summaries are justified by two fixed same-rig session strata?",
+      "scope": "D2 and V10 are fixed strata, not a population sample of rigs, people, or scenes.",
+      "requires_new_capture": false,
+      "evidence_anchor": "REPRODUCE.md",
+      "decisive_test": "nominal intervals and thresholds that stay stable across reasonable block-aware resamples and hold on a held-out session."
+    },
+    {
+      "id": "TB-Q2",
+      "tier": "sample-then-full",
+      "topic": "train-free optical coupling statistics",
+      "question": "Can a preregistered analytic statistic distinguish named wrong-emission or substitution families after capture-only, emission-only, and block-aware permutation controls?",
+      "scope": "Analytic same-rig diagnostic, not a universal verifier.",
+      "requires_new_capture": false,
+      "evidence_anchor": "how-it-works.md",
+      "decisive_test": "above-chance performance under proper held-out controls, with a threshold that transfers between sessions."
+    },
+    {
+      "id": "TB-Q3",
+      "tier": "sample-then-full",
+      "topic": "evidence-preserving data reduction",
+      "question": "Which reduced representations preserve predeclared check families within numerical tolerances while reducing storage?",
+      "scope": "Only the checks and tolerances declared by the experiment.",
+      "requires_new_capture": false,
+      "evidence_anchor": "CID_MANIFEST.json",
+      "decisive_test": "at a predeclared compression ratio, the reduced representation preserves the named checks within their tolerances across both sessions and reproduces from its manifest."
+    },
+    {
+      "id": "TB-Q4",
+      "tier": "full-corpus-and-new-captures",
+      "topic": "causal location of measured coupling",
+      "question": "Beyond the released off-body segmentation result, what fractions are causally attributable to the scene, projector, optics, sensor, timing, and apparatus-specific nuisance features?",
+      "scope": "The released 106-frame Phase G/F-A v1 segmentation result is the starting boundary.",
+      "requires_new_capture": true,
+      "evidence_anchor": "results/redteam_segmentation_evals/",
+      "decisive_test": "predeclared causal interventions yield stable, separately reported attributable fractions for the scene, projector, optics, sensor, timing, body, and nuisance partitions, and identify which effects persist under each declared controlled change."
+    },
+    {
+      "id": "TB-Q5",
+      "tier": "full-corpus",
+      "topic": "verification-side diagnostic lag",
+      "question": "Does a predeclared lagged or multi-frame diagnostic improve held-out discrimination and transfer between D2 and V10?",
+      "scope": "The recording convention remains C_t paired with the emission derived from S_t at offset zero.",
+      "requires_new_capture": false,
+      "evidence_anchor": "paper/sections/02_system_threat.tex",
+      "decisive_test": "an optimum that holds across sessions and challenge families, with gains that persist on held-out blocks."
+    },
+    {
+      "id": "TB-Q6",
+      "tier": "full-corpus-plus-new-rig",
+      "topic": "self-supervised cross-rig adaptation",
+      "question": "Can paired pretraining on D2 and V10 reduce labelled calibration requirements for an independently operated rig?",
+      "scope": "One released rig plus a separately consented calibration and evaluation record.",
+      "requires_new_capture": true,
+      "evidence_anchor": "START_WITH_DATA.md",
+      "decisive_test": "a held-out new-rig gain from pretraining attributable to optical coupling, with session and performer identity controlled."
+    },
+    {
+      "id": "TB-Q7",
+      "tier": "full-corpus-models-compute",
+      "topic": "Can AI test a preregistered surrogate-transfer robustness bound?",
+      "question": "Under a predeclared no-target-query protocol, does the public Phase G evaluation-only checkpoint retain its declared acceptance boundary against automated search or a forger trained on fresh surrogate verifiers within a fixed budget?",
+      "scope": "Surrogate-adaptive transfer test; target-aware robustness requires a new independent holdout mechanism.",
+      "requires_new_capture": false,
+      "evidence_anchor": "results/eval/",
+      "decisive_test": "no valid candidate reaches the predeclared target region within the committed search budget after leakage and model-selection channels are removed, with the complete search record replayable under the declared constraints."
+    },
+    {
+      "id": "TB-Q8",
+      "tier": "full-corpus-to-derived-benchmark",
+      "topic": "candidate privacy-reduced research derivatives",
+      "question": "Can a derivative pass a declared likeness-recovery threat model while retaining benchmark utility?",
+      "scope": "A candidate is not called anonymous or deidentified before it passes the declared test.",
+      "requires_new_capture": false,
+      "evidence_anchor": "RESEARCH_PERMISSION.md",
+      "decisive_test": "identity and raw imagery that stay unrecoverable within the declared bound while the derivative still supports the intended checks."
+    },
+    {
+      "id": "TB-Q9",
+      "tier": "new-rig",
+      "topic": "controlled cross-rig, cross-scene, material, and operator transfer",
+      "question": "Which fixed-budget calibration or adaptation procedure transfers when controlled physical factors change?",
+      "scope": "Both transfer directions and each changed factor are reported separately.",
+      "requires_new_capture": true,
+      "evidence_anchor": "CONTRIBUTING.md",
+      "decisive_test": "performance that holds without full retraining and exceeds a capture-only baseline."
+    },
+    {
+      "id": "TB-Q10",
+      "tier": "new-rig",
+      "topic": "informative optical challenge design",
+      "question": "Can a precommitted challenge family improve one primary verification endpoint at fixed visible energy, bandwidth, and exposure?",
+      "scope": "Safety, comfort, recoverability, and robustness are declared secondary endpoints unless one is chosen as primary.",
+      "requires_new_capture": true,
+      "evidence_anchor": "how-it-works.md",
+      "decisive_test": "gains that survive equalised visible energy and bandwidth and persist across sessions."
+    },
+    {
+      "id": "TB-Q11",
+      "tier": "new-liveness-sessions",
+      "topic": "reproducible seeded human-action matching",
+      "question": "Can a predeclared action ontology and matcher score committed instruction-response correspondence with calibrated error and useful inter-rater agreement?",
+      "scope": "Action correspondence is separate from participant identity, consent, and authority.",
+      "requires_new_capture": true,
+      "evidence_anchor": "LLM_LIVENESS.md",
+      "decisive_test": "material agreement between independent raters and implementations, meeting the predeclared calibration and error thresholds with no uncommitted semantic judgement in the matcher."
+    },
+    {
+      "id": "TB-Q12",
+      "tier": "multi-rig",
+      "topic": "minimal cross-witness protocol",
+      "question": "Under a declared `t`-of-`n` threat model and at least one honest, unpredictable commit-reveal contribution, does the policy prevent compromise within the stated bound from producing a false unambiguous pass, while resolving omission or delay explicitly to fail or indeterminate?",
+      "scope": "Independence, corruption bound, timeout, failure, equivocation, and indeterminate outcomes are explicit.",
+      "requires_new_capture": true,
+      "evidence_anchor": "START_WITH_DATA.md",
+      "decisive_test": "a joint policy in which compromise within the declared bound cannot produce a false unambiguous pass, common-control inputs do not dominate freshness, and an omitted or delayed witness resolves to fail or indeterminate."
+    }
+  ]
+}

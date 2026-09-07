@@ -7,9 +7,14 @@ Background
 ----------
 The "Truth Beam PoliePals Trailer" pin (IPFS root QmejyJWognSYn7UhygsHuQzkDK5vY4i
 zU9SsCL785NsHCN) is the *original TruthBeam recording* made for the 2023 trailer.
-One ~256 KB IPFS block of one emission frame went unretrievable from Pinata
-("no providers found") — block index 32 of frame 000511
+One 262,144-byte IPFS block of one emission frame became unavailable from Pinata
+("no providers found"), block index 32 of frame 000511
 (file bytes 8388608..8650751; CID QmRyXZyDbVaE6V7vKBL873DwhA8Xb5VSX7ujcoM1kp3Hpx).
+
+The byte-exact original resurfaced on a retained backup on 2026-07-27 and
+reproduces both pre-recorded CIDs. See RECOVERY_RECEIPT.md. This script is kept
+because it documents and reproduces the earlier approximation without requiring
+the recovered bytes.
 
 Each emission is a *deterministic* function of its chain hash (the filename hash =
 the chain's emission seed `Ep`). The 2023 generator (from the TruthBeam slide of
@@ -30,11 +35,12 @@ bit-reproducible across different hardware/library builds (cuFFT/Eigen sum in
 different orders), and float32 rounding makes the inverse non-unique. So this
 reconstruction matches the original to ~float32 precision (max error ~2e-5 on a
 0..255 scale; ~60-75% of values bit-identical) but does NOT reproduce the exact
-original bytes — i.e. it will not match the original IPFS CID. The exact bytes
-exist only in the original Pinata storage (lost) or the original 2023 capture.
-This is itself the argument for committing to a canonical/quantised representation
-(or hashing the seed, not the raw float bytes) — which the 2026 protocol's
-integer/fixed-point tile generator does.
+original bytes, so its CID is deliberately distinct. Comparison with the later
+byte-exact recovery measures 76.2085% of the block values as bit-identical and a
+maximum absolute error of 1.52587890625e-05. This is itself the argument for
+committing to a canonical/quantised representation (or hashing the seed, not the
+raw float bytes), which the 2026 protocol's integer/fixed-point tile generator
+does.
 
 Two reconstruction paths are provided:
   1. emission_from_hash(seed)        — full frame from the hash (the XOF demo).

@@ -1,0 +1,62 @@
+name: Experiment report
+description: Report a reproduction, extension, or new measurement against the public Truth Beam record.
+title: "[experiment] "
+labels:
+  - experiment
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing the public record. Report the measurement with its declared scope. Do not upload identifiable captures or personal data to this public issue.
+  - type: input
+    id: release
+    attributes:
+      label: Release or commit
+      description: Repository tag or full commit identifier.
+    validations:
+      required: true
+  - type: dropdown
+    id: data
+    attributes:
+      label: Data used
+      options:
+        - Published score artifacts
+        - D2 sample
+        - V10 sample
+        - Full D2 session
+        - Full V10 session
+        - Both full sessions
+        - Independently captured data
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question and scope
+      description: State the hypothesis, apparatus/session scope, and what the result does not establish.
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: Method and commands
+      description: Include code, environment, data split, exact commands, and changes from the reference route.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Observed result
+      description: Include actual values, uncertainty, limitations, and non-identifiable artifact hashes or links.
+    validations:
+      required: true
+  - type: checkboxes
+    id: public_safety
+    attributes:
+      label: Public-data check
+      options:
+        - label: I have not attached raw identifiable captures, personal data, private keys, or unpublished challenge material.
+          required: true
+        - label: I have identified material modifications and have not implied cross-rig generalisation from same-rig evidence.
+          required: true

@@ -11,6 +11,10 @@ __pycache__/
 *.ckpt
 *.npz
 data/raw/
+recovery/*.npy
+recovery/*.bin
+truthbeam_verify/recovery/*.npy
+truthbeam_verify/recovery/*.bin
 
 # --- credentials / secrets (defensive: the recording code writes wallet keys to ~/.tb/) ---
 .env

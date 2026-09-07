@@ -1,0 +1,52 @@
+{
+  "schema": "truthbeam-emission-recovery/1.0",
+  "status": "authenticated-local-recovery",
+  "authenticated_on": "2026-07-27",
+  "release_scope": "unsigned-v1.1.0-metadata-only-staging",
+  "session": "1682718815",
+  "historical_root": {
+    "cidv0": "QmejyJWognSYn7UhygsHuQzkDK5vY4izU9SsCL785NsHCN",
+    "car_status": "partial-until-rebuilt-and-root-verified"
+  },
+  "frame": {
+    "name": "000511_bc48b046016adb2ed149471ab0f683f5a9d8dbff9cd544ba2048231c1a4007b2.npy",
+    "bytes": 12583040,
+    "sha256": "6b7a6bc9f052d78dd161d20c22a19a6341f1447af6721a96f72425ce4bce9c1a",
+    "cidv0": "QmTy4beHLQP71oS1oMtqgNDg3TNU6wirKGfDsf2Rvq6tBr",
+    "shape": [1024, 1024, 3],
+    "dtype": "<f4",
+    "npy_header_bytes": 128,
+    "publication": "not-in-source-or-site-overlay"
+  },
+  "recovered_block": {
+    "unixfs_data_block_index": 32,
+    "file_offset_start": 8388608,
+    "file_offset_end_exclusive": 8650752,
+    "bytes": 262144,
+    "sha256": "f035c6ef0f25ca20d1a9bda8d88cce591be70abb9b209d7c6841f43293a59041",
+    "cidv0": "QmRyXZyDbVaE6V7vKBL873DwhA8Xb5VSX7ujcoM1kp3Hpx",
+    "publication": "not-in-source-or-site-overlay"
+  },
+  "comparison_to_published_reconstruction": {
+    "reconstruction_sha256": "7a50b55c1dcb8ec4cbea7e41be5b59ab0edec8098ba8324aa7cbd5e7eca08d21",
+    "prefix_byte_identical": true,
+    "suffix_byte_identical": true,
+    "differing_bytes_total": 15658,
+    "differing_bytes_outside_recovered_block": 0,
+    "block_float32_values": 65536,
+    "block_float32_values_bit_identical": 49944,
+    "block_float32_fraction_bit_identical": 0.7620849609375,
+    "maximum_absolute_error": 0.0000152587890625
+  },
+  "public_history_anchor": {
+    "git_commit": "d294b0d53f29f31e309e3f1fa8fc4083a3f16029",
+    "fact": "The frame and block target CIDs were recorded before the 2026-07-27 recovery."
+  },
+  "preservation": {
+    "published_reconstruction_retained": true,
+    "raw_recovery_bytes_in_git": false,
+    "raw_recovery_bytes_in_site_overlay": false,
+    "historical_signed_manifests_modified": false,
+    "historical_signatures_modified": false
+  }
+}

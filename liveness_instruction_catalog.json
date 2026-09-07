@@ -1,0 +1,109 @@
+{
+  "catalog_id": "truthbeam-safe-human-actions-v1",
+  "description": "Consented, reversible, low-risk actions for TB-LLM-LIVE/0.1 research sessions.",
+  "wordlist": [
+    "amber",
+    "anchor",
+    "beacon",
+    "birch",
+    "copper",
+    "coral",
+    "delta",
+    "fern",
+    "harbour",
+    "indigo",
+    "lantern",
+    "maple",
+    "orbit",
+    "pebble",
+    "quartz",
+    "ripple",
+    "saffron",
+    "thistle",
+    "violet",
+    "willow"
+  ],
+  "actions": [
+    {
+      "id": "raise_hand",
+      "template": "Raise your {side} hand and hold it still for {seconds} seconds.",
+      "parameters": {
+        "side": ["left", "right"],
+        "seconds": [2, 3, 4]
+      },
+      "response": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": ["selected hand rises", "hold duration is within the declared tolerance"],
+        "default_action_correspondence": "not_scored"
+      }
+    },
+    {
+      "id": "touch_shoulder",
+      "template": "Touch your {side} shoulder with the opposite hand, then lower your hand.",
+      "parameters": {
+        "side": ["left", "right"]
+      },
+      "response": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": ["opposite hand contacts selected shoulder", "hand is then lowered"],
+        "default_action_correspondence": "not_scored"
+      }
+    },
+    {
+      "id": "show_fingers",
+      "template": "Hold up {count} fingers on your {side} hand for {seconds} seconds.",
+      "parameters": {
+        "count": [1, 2, 3, 4, 5],
+        "side": ["left", "right"],
+        "seconds": [2, 3, 4]
+      },
+      "response": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": ["selected hand is visible", "declared finger count is shown", "hold duration is within tolerance"],
+        "default_action_correspondence": "not_scored"
+      }
+    },
+    {
+      "id": "turn_head",
+      "template": "Turn your head {direction}, return to centre, then nod once.",
+      "parameters": {
+        "direction": ["left", "right"]
+      },
+      "response": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": ["head turns in the selected direction", "head returns to centre", "one nod follows"],
+        "default_action_correspondence": "not_scored"
+      }
+    },
+    {
+      "id": "trace_shape",
+      "template": "Trace a {shape} in the air with your {side} index finger.",
+      "parameters": {
+        "shape": ["circle", "triangle", "square", "figure eight"],
+        "side": ["left", "right"]
+      },
+      "response": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": ["selected index finger is tracked", "trajectory matches the selected shape within declared tolerance"],
+        "default_action_correspondence": "not_scored"
+      }
+    },
+    {
+      "id": "speak_words",
+      "template": "Say these words in order: {words}.",
+      "word_count": 3,
+      "response": {
+        "channels": ["audio", "declared_transcript"],
+        "predicate_type": "declared_external_speech_matcher",
+        "observations": ["all selected words are present", "word order matches"],
+        "optical_only_supported": false,
+        "default_action_correspondence": "not_scored"
+      }
+    }
+  ]
+}

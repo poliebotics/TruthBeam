@@ -7,16 +7,18 @@
 #    ./download.sh                 # menu + sizes
 #    ./download.sh scores          # ~2 MB    Path A inputs (recompute the AUROC)
 #    ./download.sh models          # ~2.5 GB  verifier + F-A v1 forger weights
-#    ./download.sh sample [d2|v10] # ~180 MB  a TASTE: one session metadata +
+#    ./download.sh sample [d2|v10] # ~180 MiB  a TASTE: one session metadata +
 #                                  #          8 preview/emission pairs + 2 raw frames
 #    ./download.sh video           # ~640 MB  the hand-made 2023 video (+ 64s intro)
 #    ./download.sh session d2|v10  # 232/146 GiB  a full session
-#    ./download.sh all             # everything (huge)
+#    ./download.sh starter         # ~3.4 GB  scores + models + D2 sample + videos
+#    ./download.sh all             # safe alias for starter; full sessions stay explicit
 #
 #  Everything lands under ./tb_download/.  Re-runnable (curl -C - resumes).
 # ======================================================================
 set -euo pipefail
 G="${TB_GATEWAY:-https://data.truthbeam.com}"
+LIST_GATEWAY="${TB_LIST_GATEWAY:-https://data.poliebotics.com/downloads}"
 OUT="${TB_OUT:-./tb_download}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUMS="$HERE/SHA256SUMS"
@@ -29,7 +31,34 @@ get() {
   if [ -n "${SHA[$p]:-}" ] && command -v sha256sum >/dev/null 2>&1; then
     if [ "$(sha256sum "$OUT/$p" | awk '{print $1}')" = "${SHA[$p]}" ]; then echo "  ✓ $p"; CHECKED=$((CHECKED+1))
     else echo "  ✗ HASH MISMATCH: $p"; FAILS=$((FAILS+1)); fi
-  else echo "    $p"; fi
+  else echo "    $p  (not listed in SHA256SUMS; downloaded, not SHA-256-verified)"; fi
+}
+
+# Verify every downloaded file present in one session tree against the published per-object MD5
+# transfer list. MD5 here detects transfer damage; the chain, manifests, and content addresses carry
+# the protocol's cryptographic commitments.
+fetch_session_md5() {
+  local s="$1"
+  local dir="$OUT/sessions/$s"
+  mkdir -p "$dir"
+  curl -fsSL -o "$dir/${s}_md5sums.txt" "$LIST_GATEWAY/${s}_md5sums.txt"
+}
+verify_session_md5() {
+  local s="$1"
+  local dir="$OUT/sessions/$s"
+  local list="$dir/${s}_md5sums.txt"
+  [ -f "$list" ] || return 0
+  if ! command -v md5sum >/dev/null 2>&1; then
+    echo "sample transfer list retained at $list (install md5sum to check it)"
+    return 0
+  fi
+  (
+    cd "$dir"
+    while read -r h p; do
+      if [ -f "$p" ]; then printf '%s  %s\n' "$h" "$p"; fi
+    done < "${s}_md5sums.txt" | md5sum -c -
+  )
+  echo "transfer integrity: downloaded session-$s files match the published MD5 list"
 }
 
 menu() {
@@ -38,17 +67,19 @@ TruthBeam download helper — you don't need the whole 378 GiB to look.
 
   scores    ~2 MB     Path A inputs — recompute the headline AUROC yourself
   models    ~2.5 GB   verifier (478 MB / 455 MiB) + F-A v1 forger checkpoints (484 MiB each)
-  sample    ~180 MB   a taste of one session: metadata + 8 preview/emission
+  sample    ~180 MiB   a taste of one session: metadata + 8 preview/emission
                       pairs + 2 raw frames — enough to SEE the data
                       (then: python3 code/recording/verify/verify_frames.py 5 d2)
   video     ~640 MB   the hand-made 2023 PolieBotics video (+ the 64 s intro)
   session   232/146   a full ground-truth session (d2 / v10)
-  all       378 GiB   the complete two-session corpus
+  starter   ~3.4 GB   scores + models + D2 sample + videos; no full sessions
+  all       ~3.4 GB   safe alias for starter; full sessions stay explicit
   verify              re-check everything already downloaded against SHA256SUMS
 
 Usage:  ./download.sh <tier> [d2|v10]      (output -> $OUT/)
-Every download is AUTO-VERIFIED (SHA-256) against SHA256SUMS as it lands.
-Tip: 'sample' is the fun one. 'scores' + the repo's verify_all.sh = full proof.
+Files listed in SHA256SUMS are AUTO-VERIFIED (SHA-256) as they land.
+Sample/session files are also checked against the published per-object MD5 transfer list.
+Tip: 'sample' is the fun one. 'scores' + the repo's verify_all.sh runs the released verification suite.
 EOF
 }
 
@@ -65,6 +96,7 @@ models() {
 sample() {
   local s="${1:-d2}"
   echo "[sample] a taste of session $s (metadata + 8 preview/emission pairs + 2 raws)..."
+  fetch_session_md5 "$s"
   for f in manifest.json manifest.pretty.json chain_log.csv anchor_txs.csv capture_log.csv \
            verification_bundle.json verify_report.json README_BUNDLE.md CLAIMS.md; do
     get "sessions/$s/$f"; done
@@ -76,6 +108,7 @@ sample() {
   for i in 000000 002500; do get "sessions/$s/Recordings/frame_$i.raw"; done
   echo "  -> open the .png previews/tiles, read chain_log.csv, then run the repo's"
   echo "     code/recording/verify/temporal_analysis.py on $OUT/sessions/$s"
+  verify_session_md5 "$s"
 }
 video() {
   echo "[video] hand-made 2023 video + 64 s intro (~640 MB)..."
@@ -85,6 +118,7 @@ session() {
   local s="${1:-}"; [ "$s" = d2 ] || [ "$s" = v10 ] || { echo "usage: ./download.sh session d2|v10"; exit 1; }
   echo "[session $s] full corpus — this is large (d2=232 GiB, v10=146 GiB)."
   echo "Mirroring sessions/$s/ ... (Ctrl-C to stop; re-run to resume)"
+  fetch_session_md5 "$s"
   # uses the published per-file URL list if present, else the gateway directory walk
   if [ -f "downloads/${s}_files.txt" ]; then
     ( cd "$OUT" && wget -x -nH -c -i "$OLDPWD/downloads/${s}_files.txt" )
@@ -92,6 +126,7 @@ session() {
     echo "Per-file list downloads/${s}_files.txt not found next to this script."
     echo "Get it from the PolieBotics umbrella repo (DOWNLOADS.md) and: wget -x -nH -c -i ${s}_files.txt"
   fi
+  verify_session_md5 "$s"
 }
 
 case "${1:-menu}" in
@@ -100,14 +135,19 @@ case "${1:-menu}" in
   sample) sample "${2:-d2}" ;;
   video) video ;;
   session) session "${2:-}" ;;
-  all) scores; models; sample d2; video; echo "For the full 378 GiB corpus: ./download.sh session d2 && ./download.sh session v10" ;;
+  starter|all) scores; models; sample d2; video
+          echo "Starter bundle complete. Full sessions require explicit commands:"
+          echo "  ./download.sh session d2"
+          echo "  ./download.sh session v10" ;;
   verify) command -v sha256sum >/dev/null 2>&1 || { echo "need sha256sum"; exit 1; }
           [ -f "$SUMS" ] || { echo "no SHA256SUMS next to this script"; exit 1; }
-          ( cd "$OUT" && awk 'NF==2' "$SUMS" | while read -r h p; do [ -f "$p" ] && printf '%s  %s\n' "$h" "$p"; done | sha256sum -c - ) ;;
+          ( cd "$OUT" && awk 'NF==2' "$SUMS" | while read -r h p; do [ -f "$p" ] && printf '%s  %s\n' "$h" "$p"; done | sha256sum -c - )
+          verify_session_md5 d2
+          verify_session_md5 v10 ;;
   *) menu ;;
 esac
 if [ "${CHECKED:-0}" -gt 0 ] || [ "${FAILS:-0}" -gt 0 ]; then
   if [ "${FAILS:-0}" -eq 0 ]; then echo "integrity: $CHECKED file(s) verified against SHA256SUMS ✓"
-  else echo "integrity: $FAILS MISMATCH(es) — DO NOT trust these bytes"; exit 1; fi
+  else echo "integrity: $FAILS MISMATCH(es) — reject these bytes"; exit 1; fi
 fi
 echo "done -> $OUT/"

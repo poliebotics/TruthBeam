@@ -1,0 +1,109 @@
+{
+  "protocol": "TB-LLM-LIVE/0.1",
+  "status": "research-profile",
+  "purpose": "Bind a fresh machine-derived instruction and a human physical response into a Truth Beam capture record.",
+  "public_description": "An auditable bridge from an unpredictable digital challenge to provenance-bound human action.",
+  "domain_separation_tag": "truthbeam-llm-liveness-v1",
+  "catalog": {
+    "path": "liveness_instruction_catalog.json",
+    "canonicalisation": "UTF-8 JSON with sorted keys and separators(',', ':')",
+    "digest": "SHA-256"
+  },
+  "derivation": {
+    "xof": "BLAKE3-XOF",
+    "freshness_value_bytes": 32,
+    "framing": "Each field is encoded as uint32be(byte_length) followed by the field bytes.",
+    "input_order": [
+      "domain_separation_tag",
+      "freshness_value",
+      "UTF8(session_id)",
+      "catalog_sha256_raw_32_bytes"
+    ],
+    "session_id_policy": "non-empty UTF-8 string",
+    "choice_mapping": "32-bit little-endian words with rejection sampling",
+    "consumption_order": [
+      "select action from the catalogue actions array in array order",
+      "for the selected action, select each parameter in ascending Unicode code-point order of parameter name",
+      "if word_count is present, select words sequentially without replacement from the catalogue wordlist, removing each selected word before the next draw"
+    ]
+  },
+  "published_test_vector": {
+    "inputs": {
+      "freshness_value_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "session_id": "demo-001"
+    },
+    "expected_output": {
+      "protocol": "TB-LLM-LIVE/0.1",
+      "compiler": {
+        "id": "truthbeam-liveness-instruction",
+        "version": "0.1.0"
+      },
+      "domain_separation_tag": "truthbeam-llm-liveness-v1",
+      "session_id": "demo-001",
+      "freshness_value_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "catalog_id": "truthbeam-safe-human-actions-v1",
+      "catalog_sha256": "bd564bc184f248e4a47f23f3df4381126eea89b19fc37ab50ef2b0b4c69b9b55",
+      "action_id": "raise_hand",
+      "parameters": {"seconds": 3, "side": "left"},
+      "response_spec": {
+        "channels": ["optical_video"],
+        "predicate_type": "declared_external_action_matcher",
+        "observations": [
+          "selected hand rises",
+          "hold duration is within the declared tolerance"
+        ],
+        "default_action_correspondence": "not_scored"
+      },
+      "instruction": "Raise your left hand and hold it still for 3 seconds."
+    }
+  },
+  "committed_before_capture": [
+    "protocol identifier",
+    "run identifier",
+    "freshness-source reference",
+    "catalogue digest",
+    "derivation-tool version",
+    "response window",
+    "response channels",
+    "participant policy"
+  ],
+  "verification_steps": [
+    "verify freshness publication and precommitment",
+    "rederive instruction",
+    "verify request commitment and rendering order",
+    "verify Truth Beam chain and temporal anchors",
+    "evaluate the declared response predicate when a separately implemented matcher is available; otherwise record not_scored",
+    "report evidence-linked outcome"
+  ],
+  "outcomes": {
+    "episode": ["pass", "incomplete", "invalid"],
+    "freshness": ["pass", "reduced_assurance", "fail"],
+    "derivation_recomputed": ["pass", "fail"],
+    "request_binding": ["pass", "fail"],
+    "capture_chain": ["pass", "fail"],
+    "temporal_anchor": ["pass", "fail"],
+    "response_timing": ["pass", "fail"],
+    "action_correspondence": ["pass", "fail", "not_scored"],
+    "participant_identity": ["verified", "asserted", "not_requested"],
+    "provider_identity": ["attested", "declared", "unavailable"]
+  },
+  "action_correspondence_policy": {
+    "default": "not_scored",
+    "pass_or_fail_requires": "A declared, versioned response matcher, its inputs, thresholds, and output committed with the session.",
+    "episode_rule": "An episode with action_correspondence=not_scored is incomplete for action-liveness even when chain and timing checks pass."
+  },
+  "failure_policy": {
+    "missed_render_window": "incomplete",
+    "missed_response_window": "incomplete",
+    "channel_dropout": "incomplete",
+    "no_declared_action_matcher": "incomplete",
+    "derivation_mismatch": "invalid"
+  },
+  "assurance_statement": "Supports freshness, request binding, timing, and capture provenance under declared assumptions. Protocol-consistent action additionally requires a passing declared matcher; identity and authority remain separate policy bindings.",
+  "human_readable_spec": "LLM_LIVENESS.md",
+  "reference_compiler": {
+    "path": "tools/derive_liveness_instruction.py",
+    "id": "truthbeam-liveness-instruction",
+    "version": "0.1.0"
+  }
+}

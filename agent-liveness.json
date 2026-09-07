@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0-draft",
+  "record_type": "truthbeam.agent_human_liveness_profile",
+  "name": "Truth Beam agent-to-human liveness",
+  "tagline": "A committed agent request, a timely physical response, and a recomputable record.",
+  "publication_status": "proposal",
+  "evidence_status": {
+    "v10_ai_improv": {
+      "status": "demonstrated_precursor",
+      "session": "v10",
+      "frames": 3743,
+      "model_directions": 38,
+      "code_snapshots": 1,
+      "committed_rows": 17,
+      "payloads_total": 39,
+      "payload_index": "https://data.truthbeam.com/sessions/v10/ai_payloads/index.json",
+      "verification": "ai_payload_root is checked by verify_v10.py"
+    },
+    "seeded_profile": {
+      "status": "proposed_public_profile",
+      "protocol": "TB-LLM-LIVE/0.1"
+    }
+  },
+  "filing_basis": {
+    "relationship": "description_support",
+    "application": "IE 2026/0234",
+    "title": "Physical Markov-Channel Apparatus for Verification, Perception, and Controllable Rendering",
+    "filed": "2026-05-16",
+    "status": "patent_pending",
+    "description_version": "v0.38",
+    "description_sha256": "f0a635b7a0e152060cd1cefcf7f6f5eba554af554c7e1c2d4774ec4402485326",
+    "sections": [
+      "8.10 Human-Coupled Operations",
+      "14.4 Challenge-commit-open protocols",
+      "27.6 Mutual N-party liveness",
+      "HC-Actuate, printed pages 440-442",
+      "Multi-contributor freshness, printed pages 442-443",
+      "27.7.1 Logged derivation of session parameters"
+    ]
+  },
+  "profile": {
+    "protocol": "llm_liveness_protocol.json",
+    "safe_action_catalog": "liveness_instruction_catalog.json",
+    "reference_compiler": "tools/derive_liveness_instruction.py",
+    "reference_compiler_id": "truthbeam-liveness-instruction/0.1.0",
+    "normative_object": "structured action_id, parameters, and response_spec",
+    "rendered_object": "committed instruction text and rendering metadata",
+    "action_matcher_status": "not_implemented_in_reference_release",
+    "action_correspondence_default": "not_scored"
+  },
+  "links": {
+    "human_page": "agent-liveness.md",
+    "v10_precursor": "AI_IMPROV.md",
+    "patent_page": "https://poliebotics.com/hc-actuate.html",
+    "source": "https://github.com/poliebotics/truthbeam"
+  }
+}

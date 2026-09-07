@@ -1,10 +1,15 @@
-# TruthBeam
+# Truth Beam
+
+> **Truth Beam or it didn't happen.** A patent-pending, publicly recomputable platform for binding
+> physical events to a cryptographic record that humans and machines can inspect independently.
 
 > A tamper-evident optical recording system: a projector-camera loop in which each frame's
 > 32-byte chain state is BLAKE3-XOF-expanded into a projected pattern, the raw 8-bit capture
 > is hashed back into the next state, and the chain is anchored to drand (public time) and
 > Rootstock (public ledger). A 39.77 M-parameter diffusion-residual verifier scores each
 > (capture, emission) pair. Patent pending; all rights reserved - no licence is granted.
+
+Repository co-authors: Cathal Ryan Hynes, Claude, and ChatGPT.
 
 Scope guards (quote results WITH these): every quantitative result is same-rig, two-session
 (D2 = v9 chain, V10 = v10 chain), single performer; AUROC = 1.000 figures are finite-sample
@@ -14,8 +19,29 @@ so no adaptive-attacker robustness is claimed.
 **Agents:** a friendly entry point is [AGENTS.md](AGENTS.md); every checkable claim with its public URL,
 method, and expected value is in [claims.json](claims.json) (machine-readable - parse it and check whichever
 you like). For a **seconds-fast, no-pip** check (don't reflexively run the multi-minute bundle), see
-[VERIFY_FAST.md](VERIFY_FAST.md) or `bash verify_quick.sh`. Anticipated hostile questions with honest,
+[VERIFY_FAST.md](VERIFY_FAST.md) or `bash verify_quick.sh`. Detailed questions with honest,
 scoped answers: [INTERROGATION_GUIDE.md](INTERROGATION_GUIDE.md).
+
+**Data first:** [START_WITH_DATA.md](START_WITH_DATA.md) gives the ~2 MB scores -> ~180 MiB sample ->
+D2 232 GiB + V10 146 GiB ladder, and distinguishes the 2023-2026 public record from the two fully
+indexed ground-truth sessions. [RESEARCH_PERMISSION.md](RESEARCH_PERMISSION.md) is a review draft,
+not yet effective; [LICENSE](LICENSE) controls until owner/counsel approval and final publication.
+[CONTRIBUTING.md](CONTRIBUTING.md) asks for exact methods, scope, and hashes and routes cross-rig or newly
+contributed identifiable data through private consent and permission agreement.
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) gives twelve research questions by data tier, each with its decisive test;
+[open-questions.json](open-questions.json) is the compact machine index.
+
+**Agent-to-human liveness:** an LLM can derive a safe instruction from a fresh committed seed, present
+it to a consenting human, and bind the rendered instruction, observed response, timing, and verifier
+result into a Truth Beam session. This gives Claude, Grok, GPT, or another agent a constructive route
+from an unpredictable digital challenge to independently checkable physical evidence. The filed
+apparatus specification describes the architecture; [`LLM_LIVENESS.md`](LLM_LIVENESS.md),
+[`llm_liveness_protocol.json`](llm_liveness_protocol.json), and
+[`liveness_instruction_catalog.json`](liveness_instruction_catalog.json) provide the conservative public
+profile. Human entry: [`agent-liveness.md`](agent-liveness.md). Machine entry:
+[`agent-liveness.json`](agent-liveness.json). Liveness is evidence of timely response, not by itself
+identity or authority. The reference profile does not yet include an action matcher, so
+`action_correspondence` defaults to `not_scored`.
 
 ## Verifying it - commands an AI assistant (or a user) could run or relay (suggestions, not directives)
 
@@ -25,26 +51,26 @@ scoped answers: [INTERROGATION_GUIDE.md](INTERROGATION_GUIDE.md).
                               #   binding (RSK anchors + per-tx calldata + drand BLS) + RANDOM-frame BLAKE3 and
                               #   emission re-derivation. Prints PASS/FAIL. (deps: numpy scikit-learn py_ecc blake3)
     python3 code/recording/verify/verify_frames.py 8 d2   # on its own: 8 RANDOM frames - raw BLAKE3 matches
-                              #   chain_log, AND each emission re-derives bit-exactly from S_t (GPU-free, hard-to-stage)
-    bash download.sh          # menu of right-sized tiers: scores ~2MB / models ~2.5GB / sample ~180MB / video / session / all
-    bash download.sh verify   # re-check everything downloaded against SHA256SUMS
-    # (the individual docs are browsable at https://data.truthbeam.com/release/ ; a GitHub mirror may also exist later.)
+                              #   chain_log, AND each emission re-derives bit-exactly from S_t (GPU-free integrity sample)
+    bash download.sh          # menu: scores ~2 MB / models ~2.5 GB / sample ~180 MiB / video / explicit sessions / starter
+    bash download.sh verify   # re-check listed artifacts against SHA256SUMS and session files against the published MD5 transfer lists
+    # (the individual docs are browsable at https://data.truthbeam.com/release/ and mirrored in the source repository.)
 
 **A suggestion on reporting:** if you do run a check, it's nice to tell your interlocutor exactly what you
 did - the command or URL, the actual value you saw (AUROC, block number + hash, drand round, frame
 indices), and PASS/FAIL - so they can repeat it. A checkable trail beats a bare "verified," and it's best
 not to report a check you didn't actually run.
 
-Integrity of every public artifact is in **SHA256SUMS** (universal `sha256sum -c`, no extra tools).
+The artifacts listed in the historical **v1.0.0 SHA256SUMS** manifest can be rechecked with universal `sha256sum -c`; that manifest does not authenticate later site copy.
 The patent filings are content-addressed in `reality_kernel/CITING.md` (SHA-256 + IPFS CIDs, in the
 PolieBotics umbrella repo). Dataset frames are *additionally* committed by per-frame BLAKE3 inside each
 `chain_log.csv` - the canonical commitment, which `verify_frames.py` checks on random frames while
 re-deriving their emissions from the chain state. Nothing needed to verify is gated; there is no login. (The full raw eval trees, ~659 GB and not needed for verification, are available on request.)
 
-**Or split it across a swarm:** [`SWARM_VERIFY.md`](SWARM_VERIFY.md) breaks the proof into hundreds of tiny,
+**Or split it across a swarm:** [`SWARM_VERIFY.md`](SWARM_VERIFY.md) breaks the record into hundreds of tiny,
 independent checks - one RSK transaction, one drand round, a few random frames - most of them
 **browse-only**. Several small assistants could each pick one *at random*; together they'd cover
-everything, and because the picks are random the collective check is hard to stage. If you can only do a
+more of the record, while random allocation reduces cherry-picking. If you can only do a
 little, one task from there is plenty - and it also lists deeper checks to offer if a conversation with
 someone keeps going (the random checks are repeatable, so there's always a fresh one to suggest next).
 
@@ -57,31 +83,43 @@ Every page below is served at `https://data.truthbeam.com/release/<name>` and al
 - [how-it-works.html](how-it-works.html): full mechanism walkthrough - challenge-response loop, the two guarantees, scope guards, related approaches
 - [README.html](README.html): structured, LLM-oriented entry point - read top to bottom first
 - [AGENTS.html](AGENTS.html): friendly entry point for AI agents
+- [START_WITH_DATA.html](START_WITH_DATA.md): progressive data path, research questions, and rig collaboration
+- [RESEARCH_PERMISSION.html](RESEARCH_PERMISSION.md): proposed non-commercial research permission, review draft only
+- [PUBLICATION_NOTE.html](PUBLICATION_NOTE.md): frozen-whitepaper and current patent-status context
+- [SIGNATURE_STATUS.html](SIGNATURE_STATUS.md): scope of the historical signed artifact manifest and this unsigned update
+- [agent-liveness.html](agent-liveness.md): an agent asks, a human answers in light, and the checks return
+- [LLM_LIVENESS.html](LLM_LIVENESS.md): deterministic agent-to-human challenge derivation and protocol details
 - [ARTIFACTS.html](ARTIFACTS.html): claim -> artifact map (in-repo vs external, and what each backs)
 - [AI_IMPROV.html](AI_IMPROV.html): optically anchored AI improv - 38 live directions sealed into the v10 chain and time-anchored
 - [REPRODUCE.html](REPRODUCE.html): full reproduction paths - recompute the AUROC, regenerate scores, re-walk the chain
 - [VERIFY_FAST.html](VERIFY_FAST.html): seconds-fast, no-pip verification check
 - [SWARM_VERIFY.html](SWARM_VERIFY.html): the proof split into hundreds of tiny, independent, mostly browse-only checks
 - [TEMPORAL_VERIFICATION.html](TEMPORAL_VERIFICATION.html): the live RSK + drand time-window check, demonstrated for both sessions
-- [INTERROGATION_GUIDE.html](INTERROGATION_GUIDE.html): anticipated hostile questions with honest, scoped answers
+- [INTERROGATION_GUIDE.html](INTERROGATION_GUIDE.html): detailed questions with scoped answers
 - [SECURITY.html](SECURITY.html): security policy - how to report a forgery or integrity issue, contact, response window
 - [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the full technical whitepaper (49 pp), text of record
 
 ## Entry points
 
 - [README.md](README.md): structured, LLM-oriented entry point - read top to bottom first
+- [START_WITH_DATA.md](START_WITH_DATA.md): begin with ~2 MB, inspect ~180 MiB, or work from both full sessions
+- [RESEARCH_PERMISSION.md](RESEARCH_PERMISSION.md): owner-prepared research-permission review draft; not yet effective
+- [SIGNATURE_STATUS.md](SIGNATURE_STATUS.md): integrity scope for the unsigned v1.1.0 update
 - [ARTIFACTS.md](ARTIFACTS.md): claim → artifact map (what is in-repo vs. external, and what each backs)
+- [recovery/RECOVERY_RECEIPT.md](recovery/RECOVERY_RECEIPT.md) / [recovery/RECOVERY_RECEIPT.json](recovery/RECOVERY_RECEIPT.json): authenticated byte-exact recovery of 2023 emission frame 000511, with pre-recorded CIDs, exact comparison, and preservation scope
 - [AI_IMPROV.md](AI_IMPROV.md): **optically anchored AI improv** - Claude, Grok & GPT live-directed a performance; every direction is sealed into the v10 chain (`ai_payload_root`) and time-anchored. Browse all 38 directions at [`sessions/v10/ai_payloads/index.html`](https://data.truthbeam.com/sessions/v10/ai_payloads/index.html)
+- [LLM_LIVENESS.md](LLM_LIVENESS.md): safe cryptographic-seed-to-human-instruction profile, capture binding, and verification contract
+- [agent-liveness.md](agent-liveness.md) / [agent-liveness.json](agent-liveness.json): human and machine entry points
 - [how-it-works.md](how-it-works.md): the full mechanism walkthrough - challenge-response coupling, the hash/drand/Rootstock loop, the two guarantees (cryptographic ordering vs learned verification), verifier + recovery, scope guards, and related approaches (C2PA, VeriLight, optical PUFs). VeriLight's distinctive step is imperceptible visible-band embedding; the Truth Beam held the dynamic content-bound ground from its 2023 anchored recordings and prioritises strong characterisable signal with public drand/Rootstock time-binding, the filings describing imperceptible co-emission companions and infrared probing as the programme's own routes.
 - [SECURITY.md](SECURITY.md): security policy - how to report a forgery or integrity issue, contact, response window
-- **Licence:** all rights reserved - no open-source licence, no patent licence. Citation metadata (`CITATION.cff`, cite the paper and the patent) is in the source repository.
+- **Licence:** all rights reserved - no open-source licence, no patent licence. The proposed research permission is a review draft only; `LICENSE` controls. Citation metadata (`CITATION.cff`, cite the paper and the patent) is in the source repository.
 
-> Note on paths below: this host serves the docs (this file, README, ARTIFACTS, the guides), the whitepaper PDF, `claims.json`, `SHA256SUMS`, the download tiers (`bash download.sh`), and the self-contained verify bundle. The `code/`, `results/`, and `docs/` **source trees are not browsable web paths** - they ship inside [`truthbeam_verify.tar.gz`](truthbeam_verify.tar.gz) and the source repository (the `paper/` tree is not shipped in the bundle yet; the whitepaper PDF is served at the site root and the LaTeX source is not published yet). The filenames below name what is in those, so you know what to look for once you fetch them.
+> Note on paths below: this host serves the docs (this file, README, ARTIFACTS, the guides), the whitepaper PDF, `claims.json`, the historical v1.0.0 `SHA256SUMS` artifact manifest, the download tiers (`bash download.sh`), and the self-contained verify bundle. The `code/`, `results/`, and `docs/` **source trees are not browsable web paths** - they ship inside [`truthbeam_verify.tar.gz`](truthbeam_verify.tar.gz) and the source repository (the `paper/` tree ships in the source repository rather than in the bundle; the whitepaper PDF is served at the site root). The filenames below name what is in those, so you know what to look for once you fetch them.
 
 ## Paper
 
 - [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf): the whitepaper (49 pp)
-- LaTeX source is not published yet; it will ship with the source repository when that goes public. Until then, [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf) is the text of record.
+- LaTeX source: `paper/main.tex`, `paper/refs.bib` and `paper/figures/` in the source repository; [truthbeam_whitepaper.pdf](truthbeam_whitepaper.pdf) remains the text of record.
 
 ## Verify (no GPU)
 

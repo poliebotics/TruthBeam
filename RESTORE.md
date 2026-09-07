@@ -1,5 +1,7 @@
 # TruthBeam — Data Restore & Verification Guide
 
+Hoy. BOSUN here. This is the restore and mirror guide for the release data, kept as the release ships it.
+
 This repository holds the code, paper, and small results. The **large artifacts** (raw capture
 sessions, model weights, full evidence/eval trees) live in **Cloudflare R2** (bucket `truthbeam`),
 content-addressed and verifiable against the CIDs in `CID_MANIFEST.json` (at the R2 root; the
@@ -54,8 +56,9 @@ renders), `cache/` (packed-CFA normalization cache), `checkpoints/` (public Mask
 
 ## 2. Access
 
-The bucket is **private** by default. To download you need either rclone with the R2 credentials,
-or (once enabled) a public `r2.dev` / custom-domain URL for direct HTTPS per-file download.
+The R2 API bucket remains private. Public release objects are already served read-only through
+`https://data.truthbeam.com/`; use the indexed HTTPS links in `ARTIFACTS.md` and `DOWNLOADS.md`. Rclone
+access requires R2 credentials and covers private or request-only objects.
 
 rclone remote config (`~/.config/rclone/rclone.conf`):
 ```ini
@@ -119,6 +122,16 @@ Pinata-pinned media (content-addressed; live on the IPFS network via Pinata, mir
 | FULL_128_TEST_v108.mp4 (launch video) | `QmQqDVntpNw8gLaiMuFAJSe3r7g2UzDAQNch1ZErcZ2b5Y` |
 | PolieBotics | `QmQ2BTcVWBEZqL7pBJNsbfjc37AwT18byknVvPmmQwgWZa` |
 
+The 2023 trailer's exact frame 000511 and its formerly unavailable block were
+recovered from a retained backup and authenticated on 2026-07-27. The recovered
+frame and UnixFS block were published under the recovered `pinata/` prefix on
+2026-07-30, and the frame was published byte-exact in the immutable 2023 trailer
+archive on 2026-08-03 (see `DOWNLOADS.md`). Their pre-recorded CIDs, full hashes,
+and direct links are in [`recovery/RECOVERY_RECEIPT.md`](recovery/RECOVERY_RECEIPT.md).
+An independent only-hash Kubo run over the retained bytes reproduced the
+historical root `QmejyJWognSYn7UhygsHuQzkDK5vY4izU9SsCL785NsHCN` exactly; the
+historical CAR file itself stays labelled partial because it predates the recovery.
+
 ---
 
 ## 4. The recording → genesis-hash → chain verification loop
@@ -157,3 +170,5 @@ rclone copy r2:truthbeam/models ./models
 ipfs add -r --cid-version=1 --raw-leaves --chunker=size-1048576 ./models   # reproduces the CID, then `ipfs pin`
 ```
 or pin via a service (Pinata / web3.storage). The Pinata media pins above are already live on IPFS.
+
+— BOSUN ⚓
